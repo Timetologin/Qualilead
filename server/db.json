@@ -1,0 +1,357 @@
+{
+  "users": [
+    {
+      "id": "ddc2fd9a-4070-4ee4-8518-59abc29c3900",
+      "email": "admin@qualilead.com",
+      "password": "$2a$10$q8qFZxDUWrUp67r.RD0nOuU3MFOr9A0C7u5jzg41DcL6DVewDRcVi",
+      "name": "System Admin",
+      "phone": "",
+      "company_name": "QualiLead",
+      "role": "admin",
+      "package_type": "enterprise",
+      "monthly_lead_limit": -1,
+      "leads_received_this_month": 0,
+      "categories_allowed": -1,
+      "dedicated_manager_id": null,
+      "is_vip": true,
+      "is_active": true,
+      "created_at": "2025-11-26T07:33:27.979Z",
+      "updated_at": "2025-11-26T08:09:03.884Z",
+      "last_login": "2025-11-26T08:09:03.884Z"
+    },
+    {
+      "id": "45cf18f7-323f-449c-929e-d343345095a0",
+      "email": "demo@example.com",
+      "password": "$2a$10$LSN2g2BJ2G5naswuLLUDQu8LClj0IWeFhlyeW7z7Fye9xGFBqJDBK",
+      "name": "Demo Client",
+      "phone": "050-123-4567",
+      "company_name": "Demo Beauty Salon",
+      "role": "client",
+      "package_type": "professional",
+      "monthly_lead_limit": 50,
+      "leads_received_this_month": 5,
+      "categories_allowed": 3,
+      "dedicated_manager_id": "ddc2fd9a-4070-4ee4-8518-59abc29c3900",
+      "is_vip": true,
+      "is_active": true,
+      "created_at": "2025-11-26T07:33:28.058Z",
+      "updated_at": "2025-11-26T08:32:30.680Z",
+      "last_login": "2025-11-26T08:32:30.680Z"
+    }
+  ],
+  "categories": [
+    {
+      "id": "d8ba0839-9117-4e60-bf72-a9280a908291",
+      "name_en": "Beauticians & Aesthetics",
+      "name_he": "קוסמטיקאיות ואסתטיקה",
+      "description_en": "Beauty services, skincare, cosmetics",
+      "description_he": "שירותי יופי, טיפוח עור, קוסמטיקה",
+      "icon": "Sparkles",
+      "is_active": true,
+      "created_at": "2025-11-26T07:33:27.882Z"
+    },
+    {
+      "id": "5deb3aa9-5ada-453d-b8c2-b28abed1a9cc",
+      "name_en": "Hair Salons & Barbers",
+      "name_he": "מספרות וספרים",
+      "description_en": "Haircuts, styling, grooming",
+      "description_he": "תספורות, עיצוב שיער, טיפוח",
+      "icon": "Scissors",
+      "is_active": true,
+      "created_at": "2025-11-26T07:33:27.883Z"
+    },
+    {
+      "id": "58ee689a-e96b-4329-8f4e-c2106ad23979",
+      "name_en": "AC Technicians",
+      "name_he": "טכנאי מזגנים",
+      "description_en": "Installation, repair, maintenance",
+      "description_he": "התקנה, תיקון, תחזוקה",
+      "icon": "Wind",
+      "is_active": true,
+      "created_at": "2025-11-26T07:33:27.883Z"
+    },
+    {
+      "id": "08247377-8e4f-48b6-a9b9-72a40a7ec79b",
+      "name_en": "Renovation Contractors",
+      "name_he": "קבלני שיפוצים",
+      "description_en": "Home improvement, remodeling",
+      "description_he": "שיפור בתים, שיפוץ",
+      "icon": "Hammer",
+      "is_active": true,
+      "created_at": "2025-11-26T07:33:27.883Z"
+    },
+    {
+      "id": "5a031cb0-ca86-4bd3-80d5-0feb3fd1c5aa",
+      "name_en": "Electricians",
+      "name_he": "חשמלאים",
+      "description_en": "Electrical services, repairs",
+      "description_he": "שירותי חשמל, תיקונים",
+      "icon": "Plug",
+      "is_active": true,
+      "created_at": "2025-11-26T07:33:27.883Z"
+    },
+    {
+      "id": "99f5dbd6-6284-4c7e-a3ec-144e3c8c5f49",
+      "name_en": "Plumbers",
+      "name_he": "אינסטלטורים",
+      "description_en": "Plumbing services, repairs",
+      "description_he": "שירותי אינסטלציה, תיקונים",
+      "icon": "Droplet",
+      "is_active": true,
+      "created_at": "2025-11-26T07:33:27.883Z"
+    },
+    {
+      "id": "24914088-7e0b-4b8c-abae-ff7a585765e2",
+      "name_en": "Small Businesses",
+      "name_he": "עסקים קטנים",
+      "description_en": "Various local services",
+      "description_he": "שירותים מקומיים מגוונים",
+      "icon": "Store",
+      "is_active": true,
+      "created_at": "2025-11-26T07:33:27.883Z"
+    },
+    {
+      "id": "9d16ab4f-78a8-41ea-b82b-17d09528f66a",
+      "name_en": "Local Services",
+      "name_he": "שירותים מקומיים",
+      "description_en": "Community-based businesses",
+      "description_he": "עסקים קהילתיים",
+      "icon": "Building",
+      "is_active": true,
+      "created_at": "2025-11-26T07:33:27.883Z"
+    }
+  ],
+  "leads": [
+    {
+      "id": "7441eafb-91ac-4780-a64a-2bc5edc4de74",
+      "customer_name": "שרה כהן",
+      "customer_phone": "050-111-2222",
+      "customer_email": "sarah@example.com",
+      "status": "new",
+      "priority": "high",
+      "category_id": "d8ba0839-9117-4e60-bf72-a9280a908291",
+      "service_area": "מרכז",
+      "notes": "",
+      "created_at": "2025-11-26T07:33:28.059Z",
+      "updated_at": "2025-11-26T07:33:28.059Z"
+    },
+    {
+      "id": "0e2dc796-aa86-464a-aa60-c159d09f1d93",
+      "customer_name": "דוד לוי",
+      "customer_phone": "052-333-4444",
+      "customer_email": "david@example.com",
+      "status": "new",
+      "priority": "normal",
+      "category_id": "5deb3aa9-5ada-453d-b8c2-b28abed1a9cc",
+      "service_area": "מרכז",
+      "notes": "",
+      "created_at": "2025-11-25T07:33:28.059Z",
+      "updated_at": "2025-11-26T07:33:28.059Z"
+    },
+    {
+      "id": "4b8c1d0f-06eb-4331-81a4-f46a0ff43b30",
+      "customer_name": "מיכל אברהם",
+      "customer_phone": "054-555-6666",
+      "customer_email": "michal@example.com",
+      "status": "returned",
+      "assigned_to": "45cf18f7-323f-449c-929e-d343345095a0",
+      "sent_at": "2025-11-26T07:33:28.059Z",
+      "priority": "normal",
+      "category_id": "58ee689a-e96b-4329-8f4e-c2106ad23979",
+      "service_area": "מרכז",
+      "notes": "",
+      "created_at": "2025-11-24T07:33:28.059Z",
+      "updated_at": "2025-11-26T08:32:59.513Z"
+    },
+    {
+      "id": "9a5bfe85-27df-4420-8c92-bafd2c79fb84",
+      "customer_name": "יוסי בן דוד",
+      "customer_phone": "053-777-8888",
+      "customer_email": "yossi@example.com",
+      "status": "sent",
+      "assigned_to": "45cf18f7-323f-449c-929e-d343345095a0",
+      "sent_at": "2025-11-25T07:33:28.059Z",
+      "priority": "hot",
+      "category_id": "08247377-8e4f-48b6-a9b9-72a40a7ec79b",
+      "service_area": "מרכז",
+      "notes": "",
+      "created_at": "2025-11-23T07:33:28.059Z",
+      "updated_at": "2025-11-26T07:33:28.059Z"
+    },
+    {
+      "id": "76cf9731-8eeb-4ef2-87ff-85bfcdc4f62b",
+      "customer_name": "רונית שמיר",
+      "customer_phone": "058-999-0000",
+      "customer_email": "ronit@example.com",
+      "status": "converted",
+      "assigned_to": "45cf18f7-323f-449c-929e-d343345095a0",
+      "sent_at": "2025-11-24T07:33:28.059Z",
+      "priority": "normal",
+      "category_id": "5a031cb0-ca86-4bd3-80d5-0feb3fd1c5aa",
+      "service_area": "מרכז",
+      "notes": "",
+      "created_at": "2025-11-22T07:33:28.059Z",
+      "updated_at": "2025-11-26T07:33:28.059Z"
+    },
+    {
+      "id": "39b666a8-05d4-44a6-97fc-526c207cf7d2",
+      "customer_name": "אבי גולן",
+      "customer_phone": "050-123-9876",
+      "customer_email": "avi@example.com",
+      "status": "new",
+      "priority": "low",
+      "category_id": "99f5dbd6-6284-4c7e-a3ec-144e3c8c5f49",
+      "service_area": "מרכז",
+      "notes": "",
+      "created_at": "2025-11-21T07:33:28.059Z",
+      "updated_at": "2025-11-26T07:33:28.059Z"
+    },
+    {
+      "id": "f505abf0-9489-4f00-b569-c7f922c41827",
+      "customer_name": "נועה ישראלי",
+      "customer_phone": "052-456-7890",
+      "customer_email": "noa@example.com",
+      "status": "returned",
+      "assigned_to": "45cf18f7-323f-449c-929e-d343345095a0",
+      "sent_at": "2025-11-23T07:33:28.059Z",
+      "priority": "normal",
+      "category_id": "24914088-7e0b-4b8c-abae-ff7a585765e2",
+      "service_area": "מרכז",
+      "notes": "",
+      "created_at": "2025-11-20T07:33:28.059Z",
+      "updated_at": "2025-11-26T07:33:28.059Z"
+    },
+    {
+      "id": "17b0aa34-cee3-4ad2-a0e8-056dcf51ae81",
+      "customer_name": "עומר כץ",
+      "customer_phone": "054-321-6543",
+      "customer_email": "omer@example.com",
+      "status": "new",
+      "priority": "high",
+      "category_id": "9d16ab4f-78a8-41ea-b82b-17d09528f66a",
+      "service_area": "מרכז",
+      "notes": "",
+      "created_at": "2025-11-19T07:33:28.059Z",
+      "updated_at": "2025-11-26T07:33:28.059Z"
+    },
+    {
+      "customer_name": "ניסיון ניסיון",
+      "customer_email": "nisayon@test.com",
+      "customer_phone": "0541234567",
+      "category_id": "5deb3aa9-5ada-453d-b8c2-b28abed1a9cc",
+      "service_area": "תל אביב, מרכז",
+      "notes": "אחלה ליד עם עדיפות גבוהה למכירה",
+      "priority": "high",
+      "id": "77d7776b-64ce-4261-a9b1-4963cba3507e",
+      "status": "new",
+      "created_at": "2025-11-26T08:11:49.106Z",
+      "updated_at": "2025-11-26T08:11:49.106Z"
+    },
+    {
+      "customer_name": "ניסיון ניסיון",
+      "customer_email": "nisayon@test.com",
+      "customer_phone": "0541234567",
+      "category_id": "d8ba0839-9117-4e60-bf72-a9280a908291",
+      "service_area": "תל אביב, מרכז",
+      "notes": "אחלה ליד עם עדיפות גבוהה למכירה",
+      "priority": "high",
+      "id": "a61da004-74ab-4b49-8c76-0096ff307df6",
+      "status": "sent",
+      "created_at": "2025-11-26T08:12:06.577Z",
+      "updated_at": "2025-11-26T08:31:28.029Z",
+      "assigned_to": "45cf18f7-323f-449c-929e-d343345095a0",
+      "sent_at": "2025-11-26T08:31:28.029Z",
+      "sent_via": "email"
+    }
+  ],
+  "lead_history": [
+    {
+      "lead_id": "77d7776b-64ce-4261-a9b1-4963cba3507e",
+      "action": "created",
+      "new_status": "new",
+      "performed_by": "ddc2fd9a-4070-4ee4-8518-59abc29c3900",
+      "notes": "Lead created",
+      "id": "5b5b9660-88ab-446c-abff-4ff5ca162b53",
+      "created_at": "2025-11-26T08:11:49.108Z"
+    },
+    {
+      "lead_id": "a61da004-74ab-4b49-8c76-0096ff307df6",
+      "action": "created",
+      "new_status": "new",
+      "performed_by": "ddc2fd9a-4070-4ee4-8518-59abc29c3900",
+      "notes": "Lead created",
+      "id": "6ba47231-d3b7-4f2a-adc3-aa3859732fa6",
+      "created_at": "2025-11-26T08:12:06.578Z"
+    },
+    {
+      "lead_id": "a61da004-74ab-4b49-8c76-0096ff307df6",
+      "action": "assigned",
+      "old_status": "new",
+      "new_status": "sent",
+      "performed_by": "ddc2fd9a-4070-4ee4-8518-59abc29c3900",
+      "notes": "Assigned to Demo Client",
+      "id": "b5cbdbfa-4979-4390-86d4-3ac4bddbb6c7",
+      "created_at": "2025-11-26T08:31:28.032Z"
+    },
+    {
+      "lead_id": "4b8c1d0f-06eb-4331-81a4-f46a0ff43b30",
+      "action": "returned",
+      "old_status": "sent",
+      "new_status": "returned",
+      "performed_by": "45cf18f7-323f-449c-929e-d343345095a0",
+      "notes": "אין מענה לעולם!!!!",
+      "id": "43b8dd77-cc6f-4252-bd02-669e01f85086",
+      "created_at": "2025-11-26T08:32:59.515Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "896b4969-2472-4a43-91cb-f5ff571aa42a",
+      "user_id": "45cf18f7-323f-449c-929e-d343345095a0",
+      "title": "Welcome to QualiLead!",
+      "message": "Your account has been created. You can now start receiving leads.",
+      "type": "info",
+      "is_read": true,
+      "created_at": "2025-11-26T07:33:28.059Z"
+    },
+    {
+      "user_id": "45cf18f7-323f-449c-929e-d343345095a0",
+      "title": "New Lead!",
+      "message": "You received a new lead: ניסיון ניסיון - 0541234567",
+      "type": "success",
+      "id": "669085bb-6184-42f6-9c7d-1a7e2a76a830",
+      "is_read": true,
+      "created_at": "2025-11-26T08:31:28.034Z"
+    },
+    {
+      "user_id": "ddc2fd9a-4070-4ee4-8518-59abc29c3900",
+      "title": "Lead Returned",
+      "message": "Lead \"מיכל אברהם\" was returned. Reason: אין מענה לעולם!!!!",
+      "type": "warning",
+      "id": "b38ff2bb-283b-4998-8033-52a87ff3d277",
+      "is_read": false,
+      "created_at": "2025-11-26T08:32:59.518Z"
+    }
+  ],
+  "user_categories": [
+    {
+      "id": "f16ec86e-9994-4417-8d3f-6d4a1294889e",
+      "user_id": "45cf18f7-323f-449c-929e-d343345095a0",
+      "category_id": "d8ba0839-9117-4e60-bf72-a9280a908291",
+      "created_at": "2025-11-26T08:31:17.571Z"
+    }
+  ],
+  "monthly_usage": [],
+  "delivery_log": [
+    {
+      "lead_id": "a61da004-74ab-4b49-8c76-0096ff307df6",
+      "user_id": "45cf18f7-323f-449c-929e-d343345095a0",
+      "delivery_type": "email",
+      "recipient": "demo@example.com",
+      "status": "sent",
+      "id": "dceb15ba-1a49-4407-a3f7-7fad970008f3",
+      "created_at": "2025-11-26T08:31:28.036Z"
+    }
+  ],
+  "settings": {}
+}
