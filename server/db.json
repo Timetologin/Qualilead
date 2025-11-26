@@ -16,8 +16,8 @@
       "is_vip": true,
       "is_active": true,
       "created_at": "2025-11-26T07:33:27.979Z",
-      "updated_at": "2025-11-26T08:09:03.884Z",
-      "last_login": "2025-11-26T08:09:03.884Z"
+      "updated_at": "2025-11-26T07:33:27.979Z",
+      "last_login": null
     },
     {
       "id": "45cf18f7-323f-449c-929e-d343345095a0",
@@ -29,14 +29,14 @@
       "role": "client",
       "package_type": "professional",
       "monthly_lead_limit": 50,
-      "leads_received_this_month": 5,
+      "leads_received_this_month": 4,
       "categories_allowed": 3,
       "dedicated_manager_id": "ddc2fd9a-4070-4ee4-8518-59abc29c3900",
       "is_vip": true,
       "is_active": true,
       "created_at": "2025-11-26T07:33:28.058Z",
-      "updated_at": "2025-11-26T08:32:30.680Z",
-      "last_login": "2025-11-26T08:32:30.680Z"
+      "updated_at": "2025-11-26T07:33:28.058Z",
+      "last_login": null
     }
   ],
   "categories": [
@@ -153,7 +153,7 @@
       "customer_name": "מיכל אברהם",
       "customer_phone": "054-555-6666",
       "customer_email": "michal@example.com",
-      "status": "returned",
+      "status": "sent",
       "assigned_to": "45cf18f7-323f-449c-929e-d343345095a0",
       "sent_at": "2025-11-26T07:33:28.059Z",
       "priority": "normal",
@@ -161,7 +161,7 @@
       "service_area": "מרכז",
       "notes": "",
       "created_at": "2025-11-24T07:33:28.059Z",
-      "updated_at": "2025-11-26T08:32:59.513Z"
+      "updated_at": "2025-11-26T07:33:28.059Z"
     },
     {
       "id": "9a5bfe85-27df-4420-8c92-bafd2c79fb84",
@@ -233,77 +233,9 @@
       "notes": "",
       "created_at": "2025-11-19T07:33:28.059Z",
       "updated_at": "2025-11-26T07:33:28.059Z"
-    },
-    {
-      "customer_name": "ניסיון ניסיון",
-      "customer_email": "nisayon@test.com",
-      "customer_phone": "0541234567",
-      "category_id": "5deb3aa9-5ada-453d-b8c2-b28abed1a9cc",
-      "service_area": "תל אביב, מרכז",
-      "notes": "אחלה ליד עם עדיפות גבוהה למכירה",
-      "priority": "high",
-      "id": "77d7776b-64ce-4261-a9b1-4963cba3507e",
-      "status": "new",
-      "created_at": "2025-11-26T08:11:49.106Z",
-      "updated_at": "2025-11-26T08:11:49.106Z"
-    },
-    {
-      "customer_name": "ניסיון ניסיון",
-      "customer_email": "nisayon@test.com",
-      "customer_phone": "0541234567",
-      "category_id": "d8ba0839-9117-4e60-bf72-a9280a908291",
-      "service_area": "תל אביב, מרכז",
-      "notes": "אחלה ליד עם עדיפות גבוהה למכירה",
-      "priority": "high",
-      "id": "a61da004-74ab-4b49-8c76-0096ff307df6",
-      "status": "sent",
-      "created_at": "2025-11-26T08:12:06.577Z",
-      "updated_at": "2025-11-26T08:31:28.029Z",
-      "assigned_to": "45cf18f7-323f-449c-929e-d343345095a0",
-      "sent_at": "2025-11-26T08:31:28.029Z",
-      "sent_via": "email"
     }
   ],
-  "lead_history": [
-    {
-      "lead_id": "77d7776b-64ce-4261-a9b1-4963cba3507e",
-      "action": "created",
-      "new_status": "new",
-      "performed_by": "ddc2fd9a-4070-4ee4-8518-59abc29c3900",
-      "notes": "Lead created",
-      "id": "5b5b9660-88ab-446c-abff-4ff5ca162b53",
-      "created_at": "2025-11-26T08:11:49.108Z"
-    },
-    {
-      "lead_id": "a61da004-74ab-4b49-8c76-0096ff307df6",
-      "action": "created",
-      "new_status": "new",
-      "performed_by": "ddc2fd9a-4070-4ee4-8518-59abc29c3900",
-      "notes": "Lead created",
-      "id": "6ba47231-d3b7-4f2a-adc3-aa3859732fa6",
-      "created_at": "2025-11-26T08:12:06.578Z"
-    },
-    {
-      "lead_id": "a61da004-74ab-4b49-8c76-0096ff307df6",
-      "action": "assigned",
-      "old_status": "new",
-      "new_status": "sent",
-      "performed_by": "ddc2fd9a-4070-4ee4-8518-59abc29c3900",
-      "notes": "Assigned to Demo Client",
-      "id": "b5cbdbfa-4979-4390-86d4-3ac4bddbb6c7",
-      "created_at": "2025-11-26T08:31:28.032Z"
-    },
-    {
-      "lead_id": "4b8c1d0f-06eb-4331-81a4-f46a0ff43b30",
-      "action": "returned",
-      "old_status": "sent",
-      "new_status": "returned",
-      "performed_by": "45cf18f7-323f-449c-929e-d343345095a0",
-      "notes": "אין מענה לעולם!!!!",
-      "id": "43b8dd77-cc6f-4252-bd02-669e01f85086",
-      "created_at": "2025-11-26T08:32:59.515Z"
-    }
-  ],
+  "lead_history": [],
   "notifications": [
     {
       "id": "896b4969-2472-4a43-91cb-f5ff571aa42a",
@@ -311,47 +243,31 @@
       "title": "Welcome to QualiLead!",
       "message": "Your account has been created. You can now start receiving leads.",
       "type": "info",
-      "is_read": true,
-      "created_at": "2025-11-26T07:33:28.059Z"
-    },
-    {
-      "user_id": "45cf18f7-323f-449c-929e-d343345095a0",
-      "title": "New Lead!",
-      "message": "You received a new lead: ניסיון ניסיון - 0541234567",
-      "type": "success",
-      "id": "669085bb-6184-42f6-9c7d-1a7e2a76a830",
-      "is_read": true,
-      "created_at": "2025-11-26T08:31:28.034Z"
-    },
-    {
-      "user_id": "ddc2fd9a-4070-4ee4-8518-59abc29c3900",
-      "title": "Lead Returned",
-      "message": "Lead \"מיכל אברהם\" was returned. Reason: אין מענה לעולם!!!!",
-      "type": "warning",
-      "id": "b38ff2bb-283b-4998-8033-52a87ff3d277",
       "is_read": false,
-      "created_at": "2025-11-26T08:32:59.518Z"
+      "created_at": "2025-11-26T07:33:28.059Z"
     }
   ],
   "user_categories": [
     {
-      "id": "f16ec86e-9994-4417-8d3f-6d4a1294889e",
+      "id": "29616661-70a7-479b-b460-ca27b131de20",
       "user_id": "45cf18f7-323f-449c-929e-d343345095a0",
       "category_id": "d8ba0839-9117-4e60-bf72-a9280a908291",
-      "created_at": "2025-11-26T08:31:17.571Z"
+      "created_at": "2025-11-26T07:33:28.058Z"
+    },
+    {
+      "id": "ba83b7ee-ea73-442f-87b8-44cf2f3211bb",
+      "user_id": "45cf18f7-323f-449c-929e-d343345095a0",
+      "category_id": "5deb3aa9-5ada-453d-b8c2-b28abed1a9cc",
+      "created_at": "2025-11-26T07:33:28.058Z"
+    },
+    {
+      "id": "a47c5c0a-bd12-427b-8d2a-aadc16d022e6",
+      "user_id": "45cf18f7-323f-449c-929e-d343345095a0",
+      "category_id": "58ee689a-e96b-4329-8f4e-c2106ad23979",
+      "created_at": "2025-11-26T07:33:28.058Z"
     }
   ],
   "monthly_usage": [],
-  "delivery_log": [
-    {
-      "lead_id": "a61da004-74ab-4b49-8c76-0096ff307df6",
-      "user_id": "45cf18f7-323f-449c-929e-d343345095a0",
-      "delivery_type": "email",
-      "recipient": "demo@example.com",
-      "status": "sent",
-      "id": "dceb15ba-1a49-4407-a3f7-7fad970008f3",
-      "created_at": "2025-11-26T08:31:28.036Z"
-    }
-  ],
+  "delivery_log": [],
   "settings": {}
 }
