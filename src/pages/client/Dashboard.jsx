@@ -67,7 +67,7 @@ const ClientDashboard = () => {
 
   const exportLeadsCSV = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/leads/export/csv', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/leads/export/csv`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('qualilead-token')}`
         }
