@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useScrollPosition } from '../hooks/useAnimations';
 import { LogIn, LayoutDashboard } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 const Navbar = () => {
   const { t, language, setLanguage, isRTL } = useLanguage();
@@ -44,6 +45,9 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
+              
+              {/* Theme Toggle */}
+              <ThemeToggle size="small" />
               
               <div className="lang-toggle">
                 <button
@@ -119,25 +123,30 @@ const Navbar = () => {
             </Link>
           )}
           
-          <div className="lang-toggle" style={{ marginTop: '1rem', justifyContent: 'center' }}>
-            <button
-              className={`lang-btn ${language === 'en' ? 'active' : ''}`}
-              onClick={() => {
-                setLanguage('en');
-                setMobileMenuOpen(false);
-              }}
-            >
-              EN
-            </button>
-            <button
-              className={`lang-btn ${language === 'he' ? 'active' : ''}`}
-              onClick={() => {
-                setLanguage('he');
-                setMobileMenuOpen(false);
-              }}
-            >
-              עב
-            </button>
+          {/* Theme & Language Controls */}
+          <div className="mobile-nav-controls">
+            <ThemeToggle size="medium" />
+            
+            <div className="lang-toggle">
+              <button
+                className={`lang-btn ${language === 'en' ? 'active' : ''}`}
+                onClick={() => {
+                  setLanguage('en');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                EN
+              </button>
+              <button
+                className={`lang-btn ${language === 'he' ? 'active' : ''}`}
+                onClick={() => {
+                  setLanguage('he');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                עב
+              </button>
+            </div>
           </div>
         </div>
       </div>
