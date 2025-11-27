@@ -64,7 +64,8 @@ router.post('/register-client', async (req, res) => {
       password, 
       name, 
       phone, 
-      company_name
+      company_name,
+      package_type = 'free' // Default to free
     } = req.body;
 
     // Validation
@@ -82,9 +83,46 @@ router.post('/register-client', async (req, res) => {
       return res.status(400).json({ error: 'Email already exists' });
     }
 
+    // Set limits based on package
+    let monthlyLimit = 5;
+    let categoriesAllowed = 1;
+    let isVip = false;
+    let dedicatedManager = false;
+
+    switch (package_type) {
+      case 'free':
+        monthlyLimit = 5;
+        categoriesAllowed = 1;
+        isVip = false;
+        dedicatedManager = false;
+        break;
+      case 'starter':
+        monthlyLimit = 20;
+        categoriesAllowed = 1;
+        isVip = false;
+        dedicatedManager = false;
+        break;
+      case 'professional':
+        monthlyLimit = 50;
+        categoriesAllowed = 3;
+        isVip = true;
+        dedicatedManager = true;
+        break;
+      case 'enterprise':
+        monthlyLimit = -1; // Unlimited
+        categoriesAllowed = -1; // All
+        isVip = true;
+        dedicatedManager = true;
+        break;
+      default:
+        // Default to free if unknown package
+        monthlyLimit = 5;
+        categoriesAllowed = 1;
+    }
+
     const hashedPassword = bcrypt.hashSync(password, 10);
 
-    // Create new client with starter package (default)
+    // Create new client
     const newUser = await dbHelpers.createUser({
       email: email.toLowerCase(),
       password: hashedPassword,
@@ -92,26 +130,48 @@ router.post('/register-client', async (req, res) => {
       phone: phone || '',
       company_name: company_name || '',
       role: 'client', // Always client for self-registration
-      package_type: 'starter', // Default package
-      monthly_lead_limit: 20,
+      package_type,
+      monthly_lead_limit: monthlyLimit,
       leads_received_this_month: 0,
-      categories_allowed: 1,
-      is_vip: false,
+      categories_allowed: categoriesAllowed,
+      is_vip: isVip,
       is_active: true,
       dedicated_manager_id: null
     });
 
-    // Send welcome notification
+    // Send welcome notification based on package
+    const welcomeMessages = {
+      free: {
+        title: 'ברוך הבא ל-QualiLead!',
+        message: 'החשבון החינמי שלך נוצר בהצלחה. אתה יכול לקבל עד 5 לידים בחודש. שדרג בכל עת!'
+      },
+      starter: {
+        title: 'ברוך הבא ל-QualiLead!',
+        message: 'חשבון ההתחלתי שלך נוצר בהצלחה. אתה יכול לקבל עד 20 לידים בחודש.'
+      },
+      professional: {
+        title: 'ברוך הבא ל-QualiLead!',
+        message: 'חשבון המקצועי שלך נוצר בהצלחה. אתה יכול לקבל עד 50 לידים בחודש עם מנהל ייעודי.'
+      },
+      enterprise: {
+        title: 'ברוך הבא ל-QualiLead!',
+        message: 'חשבון הארגוני שלך נוצר בהצלחה. יש לך גישה בלתי מוגבלת ללידים ותמיכת VIP.'
+      }
+    };
+
+    const welcomeMsg = welcomeMessages[package_type] || welcomeMessages.free;
+
     await dbHelpers.createNotification({
       user_id: newUser.id,
-      title: 'ברוך הבא ל-QualiLead!',
-      message: 'החשבון שלך נוצר בהצלחה. צוות שלנו יצור איתך קשר בקרוב.',
+      title: welcomeMsg.title,
+      message: welcomeMsg.message,
       type: 'success'
     });
 
     res.status(201).json({ 
       message: 'Registration successful',
-      userId: newUser.id
+      userId: newUser.id,
+      package: package_type
     });
   } catch (error) {
     console.error('Self-registration error:', error);
@@ -153,6 +213,16 @@ router.post('/register', authenticateToken, async (req, res) => {
     let dedicatedManagerId = null;
 
     switch (package_type) {
+      case 'free':
+        monthlyLimit = 5;
+        categoriesAllowed = 1;
+        isVip = false;
+        break;
+      case 'starter':
+        monthlyLimit = 20;
+        categoriesAllowed = 1;
+        isVip = false;
+        break;
       case 'professional':
         monthlyLimit = 50;
         categoriesAllowed = 3;
