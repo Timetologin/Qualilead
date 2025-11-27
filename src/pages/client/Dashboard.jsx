@@ -23,6 +23,7 @@ import {
   TrendingUp,
   Menu,
   X,
+  Home,
   ChevronRight,
   ChevronLeft,
   Eye,
@@ -505,6 +506,10 @@ const ClientDashboard = () => {
             <User size={20} />
             <span>{isRTL ? 'פרופיל' : 'Profile'}</span>
           </button>
+          <Link to="/" className="nav-item home-link" onClick={() => setSidebarOpen(false)}>
+  <Home size={20} />
+  <span>{isRTL ? 'חזרה לאתר' : 'Back to Site'}</span>
+</Link>
         </nav>
 
         <div className="sidebar-footer">

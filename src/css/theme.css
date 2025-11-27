@@ -946,6 +946,7 @@ body,
 [data-theme="light"] li {
   color: inherit;
 }
+
 /* ===================================
    CRITICAL FIXES - INLINE STYLE OVERRIDES
    =================================== */
@@ -969,139 +970,6 @@ body,
 [data-theme="light"] [style*="color: var(--silver)"],
 [data-theme="light"] [style*="var(--silver)"] {
   color: #64748b !important;
-}
-
-/* ===================
-   SETTINGS PAGE - COMPLETE FIX
-   =================== */
-
-/* Settings Page Main Background */
-[data-theme="light"] .settings-page {
-  background: #f8fafc !important;
-}
-
-/* Settings Container */
-[data-theme="light"] .settings-container {
-  background: transparent !important;
-}
-
-/* Settings Sidebar */
-[data-theme="light"] .settings-sidebar {
-  background: #ffffff !important;
-  border-color: #e2e8f0 !important;
-}
-
-[data-theme="light"] .settings-nav .nav-item {
-  color: #64748b !important;
-}
-
-[data-theme="light"] .settings-nav .nav-item:hover {
-  background: #f1f5f9 !important;
-  color: #0f172a !important;
-}
-
-[data-theme="light"] .settings-nav .nav-item.active {
-  background: rgba(184, 150, 12, 0.1) !important;
-  color: #b8960c !important;
-}
-
-/* Settings Section (main card) */
-[data-theme="light"] .settings-section {
-  background: #ffffff !important;
-  border-color: #e2e8f0 !important;
-}
-
-[data-theme="light"] .section-header {
-  border-color: #e2e8f0 !important;
-}
-
-[data-theme="light"] .section-header h2 {
-  color: #0f172a !important;
-}
-
-[data-theme="light"] .section-header p {
-  color: #64748b !important;
-}
-
-/* Toggle Items (Notifications, System settings) */
-[data-theme="light"] .toggle-item,
-[data-theme="light"] .toggle-item.standalone {
-  background: #f1f5f9 !important;
-  border: 1px solid #e2e8f0 !important;
-}
-
-[data-theme="light"] .toggle-item:hover {
-  background: #e2e8f0 !important;
-}
-
-[data-theme="light"] .toggle-label {
-  color: #0f172a !important;
-}
-
-[data-theme="light"] .toggle-desc {
-  color: #64748b !important;
-}
-
-[data-theme="light"] .toggle-switch {
-  background: #cbd5e1 !important;
-}
-
-[data-theme="light"] .toggle-switch::after {
-  background: #ffffff !important;
-}
-
-[data-theme="light"] .toggle-input:checked + .toggle-switch {
-  background: #b8960c !important;
-}
-
-[data-theme="light"] .toggle-input:checked + .toggle-switch::after {
-  background: #ffffff !important;
-}
-
-/* Security Cards */
-[data-theme="light"] .security-card {
-  background: #f1f5f9 !important;
-  border: 1px solid #e2e8f0 !important;
-}
-
-[data-theme="light"] .security-icon {
-  background: rgba(184, 150, 12, 0.1) !important;
-  color: #b8960c !important;
-}
-
-[data-theme="light"] .security-info h4 {
-  color: #0f172a !important;
-}
-
-[data-theme="light"] .security-info p {
-  color: #64748b !important;
-}
-
-/* Notification Groups */
-[data-theme="light"] .notification-group h3 {
-  color: #0f172a !important;
-}
-
-/* Form Labels */
-[data-theme="light"] .form-label {
-  color: #334155 !important;
-}
-
-[data-theme="light"] .input-icon {
-  color: #94a3b8 !important;
-}
-
-/* Settings Header */
-[data-theme="light"] .settings-header h1 {
-  color: #0f172a !important;
-}
-
-[data-theme="light"] .back-link {
-  color: #64748b !important;
-}
-
-[data-theme="light"] .back-link:hover {
-  color: #b8960c !important;
 }
 
 /* ===================
@@ -1204,4 +1072,412 @@ body,
 
 [data-theme="light"] .header-subtitle {
   color: #64748b !important;
+}
+
+/* ===================================
+   SETTINGS PAGE - FORCE OVERRIDE WITH HIGH SPECIFICITY
+   These rules override the inline <style> tag in SettingsPage.jsx
+   =================================== */
+
+/* Settings Page Background */
+[data-theme="light"] .settings-page,
+[data-theme="light"] div.settings-page {
+  background: #f8fafc !important;
+}
+
+/* Settings Container */
+[data-theme="light"] .settings-page .settings-container,
+[data-theme="light"] div.settings-page .settings-container {
+  background: transparent !important;
+}
+
+/* Settings Sidebar */
+[data-theme="light"] .settings-page .settings-sidebar,
+[data-theme="light"] div.settings-page aside.settings-sidebar {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .settings-page .settings-nav .nav-item,
+[data-theme="light"] .settings-page .settings-nav button.nav-item {
+  color: #64748b !important;
+  background: transparent !important;
+}
+
+[data-theme="light"] .settings-page .settings-nav .nav-item:hover,
+[data-theme="light"] .settings-page .settings-nav button.nav-item:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .settings-page .settings-nav .nav-item.active,
+[data-theme="light"] .settings-page .settings-nav button.nav-item.active {
+  background: rgba(184, 150, 12, 0.1) !important;
+  color: #b8960c !important;
+}
+
+/* Settings Section (main card) */
+[data-theme="light"] .settings-page .settings-section,
+[data-theme="light"] .settings-page div.settings-section,
+[data-theme="light"] .settings-page .settings-content .settings-section {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Section Header */
+[data-theme="light"] .settings-page .section-header,
+[data-theme="light"] .settings-page .settings-section .section-header {
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .settings-page .section-header h2,
+[data-theme="light"] .settings-page .settings-section h2 {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .settings-page .section-header p,
+[data-theme="light"] .settings-page .settings-section .section-header p {
+  color: #64748b !important;
+}
+
+/* Toggle Items - THE DARK BOXES */
+[data-theme="light"] .settings-page .toggle-item,
+[data-theme="light"] .settings-page label.toggle-item,
+[data-theme="light"] .settings-page .toggle-list .toggle-item,
+[data-theme="light"] .settings-page .toggle-list label.toggle-item,
+[data-theme="light"] .settings-page .notification-group .toggle-item,
+[data-theme="light"] .settings-page .form-group .toggle-item,
+[data-theme="light"] div.settings-page label.toggle-item {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .settings-page .toggle-item:hover,
+[data-theme="light"] .settings-page label.toggle-item:hover {
+  background: #e2e8f0 !important;
+}
+
+[data-theme="light"] .settings-page .toggle-item.standalone,
+[data-theme="light"] .settings-page label.toggle-item.standalone {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+/* Toggle Text */
+[data-theme="light"] .settings-page .toggle-label,
+[data-theme="light"] .settings-page .toggle-item .toggle-label,
+[data-theme="light"] .settings-page .toggle-info .toggle-label,
+[data-theme="light"] .settings-page span.toggle-label {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .settings-page .toggle-desc,
+[data-theme="light"] .settings-page .toggle-item .toggle-desc,
+[data-theme="light"] .settings-page .toggle-info .toggle-desc,
+[data-theme="light"] .settings-page span.toggle-desc {
+  color: #64748b !important;
+}
+
+/* Toggle Switch */
+[data-theme="light"] .settings-page .toggle-switch,
+[data-theme="light"] .settings-page span.toggle-switch {
+  background: #cbd5e1 !important;
+}
+
+[data-theme="light"] .settings-page .toggle-switch::after {
+  background: #ffffff !important;
+}
+
+[data-theme="light"] .settings-page .toggle-input:checked + .toggle-switch {
+  background: #b8960c !important;
+}
+
+[data-theme="light"] .settings-page .toggle-input:checked + .toggle-switch::after {
+  background: #ffffff !important;
+}
+
+/* Security Cards - THE DARK BOXES */
+[data-theme="light"] .settings-page .security-card,
+[data-theme="light"] .settings-page div.security-card,
+[data-theme="light"] .settings-page .settings-section .security-card {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .settings-page .security-card .security-icon,
+[data-theme="light"] .settings-page .security-icon {
+  background: rgba(184, 150, 12, 0.15) !important;
+  color: #b8960c !important;
+}
+
+[data-theme="light"] .settings-page .security-card .security-info h4,
+[data-theme="light"] .settings-page .security-card h4,
+[data-theme="light"] .settings-page .security-info h4 {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .settings-page .security-card .security-info p,
+[data-theme="light"] .settings-page .security-card p,
+[data-theme="light"] .settings-page .security-info p {
+  color: #64748b !important;
+}
+
+/* Security Card Buttons */
+[data-theme="light"] .settings-page .security-card .btn,
+[data-theme="light"] .settings-page .security-card .btn-secondary,
+[data-theme="light"] .settings-page .security-card button.btn {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #64748b !important;
+}
+
+[data-theme="light"] .settings-page .security-card .btn:hover,
+[data-theme="light"] .settings-page .security-card .btn-secondary:hover {
+  background: #f1f5f9 !important;
+  border-color: #b8960c !important;
+  color: #b8960c !important;
+}
+
+/* Notification Groups */
+[data-theme="light"] .settings-page .notification-group h3,
+[data-theme="light"] .settings-page .settings-section .notification-group h3 {
+  color: #0f172a !important;
+}
+
+/* Form Inputs in Settings */
+[data-theme="light"] .settings-page .form-input,
+[data-theme="light"] .settings-page input.form-input,
+[data-theme="light"] .settings-page .settings-section .form-input {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .settings-page .form-input:focus {
+  border-color: #b8960c !important;
+  box-shadow: 0 0 0 3px rgba(184, 150, 12, 0.1) !important;
+}
+
+/* Form Labels in Settings */
+[data-theme="light"] .settings-page .form-label,
+[data-theme="light"] .settings-page label.form-label {
+  color: #334155 !important;
+}
+
+/* Input Icons */
+[data-theme="light"] .settings-page .input-icon,
+[data-theme="light"] .settings-page .input-wrapper .input-icon {
+  color: #94a3b8 !important;
+}
+
+/* Settings Header */
+[data-theme="light"] .settings-page .settings-header h1,
+[data-theme="light"] .settings-page header.settings-header h1 {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .settings-page .back-link,
+[data-theme="light"] .settings-page a.back-link {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .settings-page .back-link:hover {
+  color: #b8960c !important;
+}
+
+/* Form Grid Headers */
+[data-theme="light"] .settings-page .form-grid h3,
+[data-theme="light"] .settings-page .form-group h3 {
+  color: #0f172a !important;
+}
+
+/* Any remaining dark backgrounds in settings */
+[data-theme="light"] .settings-page [style*="var(--slate)"],
+[data-theme="light"] .settings-page [style*="var(--charcoal)"],
+[data-theme="light"] .settings-page [style*="var(--navy)"] {
+  background: #f1f5f9 !important;
+}
+
+/* Slider Arrows */
+[data-theme="light"] .slider-arrow,
+[data-theme="light"] .slider-arrows button {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #64748b !important;
+}
+
+[data-theme="light"] .slider-arrow:hover,
+[data-theme="light"] .slider-arrows button:hover {
+  background: #b8960c !important;
+  border-color: #b8960c !important;
+  color: #ffffff !important;
+}
+
+/* Slider Dots */
+[data-theme="light"] .slider-dot {
+  background: #cbd5e1 !important;
+}
+
+[data-theme="light"] .slider-dot.active {
+  background: #b8960c !important;
+}
+
+/* ===================================
+   PRICING CARD FEATURED - LIGHT MODE FIX
+   =================================== */
+
+/* Featured pricing card - make it stand out with gold gradient border */
+[data-theme="light"] .pricing-card.featured {
+  background: linear-gradient(145deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%) !important;
+  border: 2px solid #b8960c !important;
+  box-shadow: 0 8px 30px rgba(184, 150, 12, 0.25) !important;
+}
+
+[data-theme="light"] .pricing-card.featured:hover {
+  box-shadow: 0 12px 40px rgba(184, 150, 12, 0.35) !important;
+}
+
+/* Featured card text colors */
+[data-theme="light"] .pricing-card.featured .pricing-name {
+  color: #78350f !important;
+}
+
+[data-theme="light"] .pricing-card.featured .pricing-description {
+  color: #92400e !important;
+}
+
+[data-theme="light"] .pricing-card.featured .pricing-amount {
+  color: #78350f !important;
+}
+
+[data-theme="light"] .pricing-card.featured .pricing-period {
+  color: #92400e !important;
+}
+
+[data-theme="light"] .pricing-card.featured .pricing-feature {
+  color: #78350f !important;
+}
+
+[data-theme="light"] .pricing-card.featured .pricing-feature span {
+  color: #78350f !important;
+}
+
+[data-theme="light"] .pricing-card.featured .pricing-feature svg {
+  color: #15803d !important;
+}
+
+/* Featured pricing icon */
+[data-theme="light"] .pricing-card.featured .pricing-icon {
+  background: rgba(120, 53, 15, 0.1) !important;
+  color: #b8960c !important;
+}
+
+/* Featured pricing badge */
+[data-theme="light"] .pricing-badge {
+  background: linear-gradient(135deg, #b8960c 0%, #d4af37 100%) !important;
+  color: #ffffff !important;
+}
+
+/* ===================================
+   DASHBOARD SIDEBAR - HOME BUTTON STYLING
+   =================================== */
+
+/* Style for home link button in sidebar */
+[data-theme="light"] .sidebar-home-link,
+[data-theme="light"] .nav-item.home-link {
+  color: #64748b !important;
+  border-top: 1px solid #e2e8f0 !important;
+  margin-top: auto !important;
+}
+
+[data-theme="light"] .sidebar-home-link:hover,
+[data-theme="light"] .nav-item.home-link:hover {
+  background: #f1f5f9 !important;
+  color: #b8960c !important;
+}
+
+/* ===================================
+   REGISTER PAGE - LIGHT MODE
+   =================================== */
+
+[data-theme="light"] .register-page {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+[data-theme="light"] .register-container {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .register-header h1 {
+  color: #0f172a;
+}
+
+[data-theme="light"] .register-header p {
+  color: #64748b;
+}
+
+[data-theme="light"] .register-logo span {
+  color: #0f172a;
+}
+
+[data-theme="light"] .register-error {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+[data-theme="light"] .register-footer p {
+  color: #64748b;
+}
+
+[data-theme="light"] .register-footer a {
+  color: #b8960c;
+}
+
+/* ===================================
+   LOGIN PAGE - LIGHT MODE  
+   =================================== */
+
+[data-theme="light"] .login-page {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+[data-theme="light"] .login-container {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .login-header h1 {
+  color: #0f172a;
+}
+
+[data-theme="light"] .login-header p {
+  color: #64748b;
+}
+
+[data-theme="light"] .login-logo span {
+  color: #0f172a;
+}
+
+[data-theme="light"] .login-register {
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .login-register p {
+  color: #64748b;
+}
+
+[data-theme="light"] .demo-credentials {
+  background: rgba(184, 150, 12, 0.1);
+}
+
+[data-theme="light"] .demo-credentials p {
+  color: #64748b;
+}
+
+[data-theme="light"] .demo-credentials strong {
+  color: #b8960c;
 }

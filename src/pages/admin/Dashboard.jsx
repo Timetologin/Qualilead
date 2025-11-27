@@ -29,6 +29,7 @@ import {
   X,
   ChevronRight,
   ChevronLeft,
+  Home,
   Menu,
   ChevronDown
 } from 'lucide-react';
@@ -718,6 +719,10 @@ const AdminDashboard = () => {
             <Settings size={20} />
             <span>{isRTL ? 'הגדרות' : 'Settings'}</span>
           </Link>
+          <Link to="/" className="nav-item home-link" onClick={() => setSidebarOpen(false)}>
+  <Home size={20} />
+  <span>{isRTL ? 'חזרה לאתר' : 'Back to Site'}</span>
+</Link>
         </nav>
 
         <div className="sidebar-footer">
