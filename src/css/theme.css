@@ -947,223 +947,261 @@ body,
   color: inherit;
 }
 /* ===================================
-   ADDITIONAL FIXES - ADD TO END OF FILE
+   CRITICAL FIXES - INLINE STYLE OVERRIDES
    =================================== */
 
-/* ===================
-   PUBLIC PAGES SECTIONS FIX
-   =================== */
-
-/* Categories Section - Force Light Background */
-[data-theme="light"] #categories,
-[data-theme="light"] .categories-section,
-[data-theme="light"] section.categories {
+/* Override inline style background: var(--navy) */
+[data-theme="light"] .section[style*="background"],
+[data-theme="light"] section[style*="background"],
+[data-theme="light"] section[style*="navy"],
+[data-theme="light"] section[style*="var(--navy)"] {
   background: #f8fafc !important;
 }
 
-/* FAQ Section - Force Light Background */
-[data-theme="light"] #faq,
-[data-theme="light"] .faq-section,
-[data-theme="light"] section.faq {
+/* Override any element with inline navy background */
+[data-theme="light"] [style*="navy"],
+[data-theme="light"] [style*="var(--navy)"],
+[data-theme="light"] [style*="background: var(--navy)"] {
   background: #f8fafc !important;
 }
 
-/* FAQ Questions Text Fix */
-[data-theme="light"] .faq-item button,
-[data-theme="light"] .faq-question,
-[data-theme="light"] .accordion-button,
-[data-theme="light"] .accordion-header,
-[data-theme="light"] .faq-item h3,
-[data-theme="light"] .faq-item h4,
-[data-theme="light"] .faq-item summary {
-  color: #0f172a !important;
-  background: #ffffff !important;
+/* Override silver text color from inline styles */
+[data-theme="light"] [style*="color: var(--silver)"],
+[data-theme="light"] [style*="var(--silver)"] {
+  color: #64748b !important;
 }
 
 /* ===================
-   DASHBOARD SETTINGS PAGE FIX
+   SETTINGS PAGE - COMPLETE FIX
    =================== */
 
-/* Settings Page Background */
-[data-theme="light"] .settings-page,
+/* Settings Page Main Background */
+[data-theme="light"] .settings-page {
+  background: #f8fafc !important;
+}
+
+/* Settings Container */
 [data-theme="light"] .settings-container {
-  background: #f8fafc !important;
+  background: transparent !important;
 }
 
-/* Settings Cards/Sections */
-[data-theme="light"] .settings-card,
-[data-theme="light"] .settings-section,
-[data-theme="light"] .settings-panel,
-[data-theme="light"] .setting-item,
-[data-theme="light"] .notification-item,
-[data-theme="light"] .security-item,
-[data-theme="light"] .system-item {
+/* Settings Sidebar */
+[data-theme="light"] .settings-sidebar {
   background: #ffffff !important;
   border-color: #e2e8f0 !important;
 }
 
-/* Settings Items with Toggle */
-[data-theme="light"] .setting-row,
-[data-theme="light"] .notification-row,
-[data-theme="light"] .toggle-row,
-[data-theme="light"] .switch-row {
-  background: #ffffff !important;
-  border-color: #e2e8f0 !important;
-}
-
-[data-theme="light"] .setting-row h4,
-[data-theme="light"] .setting-row h3,
-[data-theme="light"] .setting-row label,
-[data-theme="light"] .notification-row span,
-[data-theme="light"] .toggle-row span {
-  color: #0f172a !important;
-}
-
-[data-theme="light"] .setting-row p,
-[data-theme="light"] .setting-row .description,
-[data-theme="light"] .notification-row p {
+[data-theme="light"] .settings-nav .nav-item {
   color: #64748b !important;
 }
 
-/* Settings Sidebar/Tabs */
-[data-theme="light"] .settings-sidebar,
-[data-theme="light"] .settings-tabs,
-[data-theme="light"] .settings-nav {
-  background: #ffffff !important;
-  border-color: #e2e8f0 !important;
-}
-
-[data-theme="light"] .settings-tab,
-[data-theme="light"] .settings-nav-item {
-  color: #64748b !important;
-}
-
-[data-theme="light"] .settings-tab:hover,
-[data-theme="light"] .settings-nav-item:hover {
+[data-theme="light"] .settings-nav .nav-item:hover {
   background: #f1f5f9 !important;
   color: #0f172a !important;
 }
 
-[data-theme="light"] .settings-tab.active,
-[data-theme="light"] .settings-nav-item.active {
+[data-theme="light"] .settings-nav .nav-item.active {
   background: rgba(184, 150, 12, 0.1) !important;
   color: #b8960c !important;
 }
 
+/* Settings Section (main card) */
+[data-theme="light"] .settings-section {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .section-header {
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .section-header h2 {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .section-header p {
+  color: #64748b !important;
+}
+
+/* Toggle Items (Notifications, System settings) */
+[data-theme="light"] .toggle-item,
+[data-theme="light"] .toggle-item.standalone {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .toggle-item:hover {
+  background: #e2e8f0 !important;
+}
+
+[data-theme="light"] .toggle-label {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .toggle-desc {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .toggle-switch {
+  background: #cbd5e1 !important;
+}
+
+[data-theme="light"] .toggle-switch::after {
+  background: #ffffff !important;
+}
+
+[data-theme="light"] .toggle-input:checked + .toggle-switch {
+  background: #b8960c !important;
+}
+
+[data-theme="light"] .toggle-input:checked + .toggle-switch::after {
+  background: #ffffff !important;
+}
+
+/* Security Cards */
+[data-theme="light"] .security-card {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .security-icon {
+  background: rgba(184, 150, 12, 0.1) !important;
+  color: #b8960c !important;
+}
+
+[data-theme="light"] .security-info h4 {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .security-info p {
+  color: #64748b !important;
+}
+
+/* Notification Groups */
+[data-theme="light"] .notification-group h3 {
+  color: #0f172a !important;
+}
+
+/* Form Labels */
+[data-theme="light"] .form-label {
+  color: #334155 !important;
+}
+
+[data-theme="light"] .input-icon {
+  color: #94a3b8 !important;
+}
+
+/* Settings Header */
+[data-theme="light"] .settings-header h1 {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .back-link {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .back-link:hover {
+  color: #b8960c !important;
+}
+
 /* ===================
-   DASHBOARD LEADS PAGE - FILTER LABELS FIX
+   DASHBOARD - LEAD FILTERS FIX
    =================== */
 
-/* Filter Buttons/Labels */
+/* Filter Buttons */
 [data-theme="light"] .filter-btn,
 [data-theme="light"] .filter-button,
 [data-theme="light"] .status-filter,
 [data-theme="light"] .lead-filter,
 [data-theme="light"] .filter-tab,
-[data-theme="light"] .filter-pill {
+[data-theme="light"] .filter-pill,
+[data-theme="light"] .leads-filters button,
+[data-theme="light"] .filter-buttons button {
   background: #ffffff !important;
   border: 1px solid #e2e8f0 !important;
-  color: #64748b !important;
+  color: #0f172a !important;
 }
 
 [data-theme="light"] .filter-btn:hover,
 [data-theme="light"] .filter-button:hover,
 [data-theme="light"] .status-filter:hover,
 [data-theme="light"] .filter-tab:hover,
-[data-theme="light"] .filter-pill:hover {
+[data-theme="light"] .filter-pill:hover,
+[data-theme="light"] .leads-filters button:hover,
+[data-theme="light"] .filter-buttons button:hover {
   background: #f1f5f9 !important;
   border-color: #b8960c !important;
-  color: #0f172a !important;
+  color: #b8960c !important;
 }
 
 [data-theme="light"] .filter-btn.active,
 [data-theme="light"] .filter-button.active,
 [data-theme="light"] .status-filter.active,
 [data-theme="light"] .filter-tab.active,
-[data-theme="light"] .filter-pill.active {
+[data-theme="light"] .filter-pill.active,
+[data-theme="light"] .leads-filters button.active,
+[data-theme="light"] .filter-buttons button.active {
   background: #b8960c !important;
   border-color: #b8960c !important;
   color: #ffffff !important;
 }
 
-/* Status Badges in Filters */
-[data-theme="light"] .status-badge,
-[data-theme="light"] .badge {
-  border: 1px solid currentColor;
-}
-
 /* ===================
-   GENERAL DARK ELEMENT OVERRIDES
+   FAQ SECTION FIX
    =================== */
 
-/* Any remaining dark cards inside light theme */
-[data-theme="light"] .card,
-[data-theme="light"] .panel,
-[data-theme="light"] .box {
-  background: #ffffff !important;
-  border-color: #e2e8f0 !important;
-}
-
-[data-theme="light"] .card h1,
-[data-theme="light"] .card h2,
-[data-theme="light"] .card h3,
-[data-theme="light"] .card h4,
-[data-theme="light"] .panel h1,
-[data-theme="light"] .panel h2,
-[data-theme="light"] .panel h3,
-[data-theme="light"] .panel h4 {
+/* FAQ Question Text - Make visible */
+[data-theme="light"] .faq-question h4,
+[data-theme="light"] .faq-item h4,
+[data-theme="light"] .faq-question span,
+[data-theme="light"] .faq-container h4 {
   color: #0f172a !important;
 }
 
-[data-theme="light"] .card p,
-[data-theme="light"] .card span,
-[data-theme="light"] .panel p,
-[data-theme="light"] .panel span {
+[data-theme="light"] .faq-icon {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .faq-answer,
+[data-theme="light"] .faq-answer-content {
   color: #64748b !important;
 }
 
 /* ===================
-   SECTION BACKGROUNDS - CATCH ALL
+   CTA SECTION TEXT FIX
    =================== */
 
-/* Force all sections to light background */
-[data-theme="light"] main section,
-[data-theme="light"] .page-content section {
-  background: #f8fafc !important;
-}
-
-/* Sections with specific IDs */
-[data-theme="light"] #how-it-works,
-[data-theme="light"] #steps,
-[data-theme="light"] #testimonials,
-[data-theme="light"] #cta,
-[data-theme="light"] #contact {
-  background: #f8fafc !important;
-}
-
-/* Section titles and descriptions */
-[data-theme="light"] section h2,
-[data-theme="light"] section .section-title {
+[data-theme="light"] section[style*="textAlign"] h2,
+[data-theme="light"] section[style*="text-align"] h2 {
   color: #0f172a !important;
 }
 
-[data-theme="light"] section p,
-[data-theme="light"] section .section-description {
+[data-theme="light"] section[style*="textAlign"] p,
+[data-theme="light"] section[style*="text-align"] p {
   color: #64748b !important;
 }
 
 /* ===================
-   TOGGLE SWITCHES IN SETTINGS
+   GENERAL TEXT FIXES
    =================== */
 
-[data-theme="light"] .toggle-switch,
-[data-theme="light"] .switch {
-  background: #e2e8f0;
+/* Fix any remaining white text */
+[data-theme="light"] .section h2,
+[data-theme="light"] section h2 {
+  color: #0f172a !important;
 }
 
-[data-theme="light"] .toggle-switch.active,
-[data-theme="light"] .switch.active,
-[data-theme="light"] .toggle-switch:checked,
-[data-theme="light"] input[type="checkbox"]:checked + .toggle-switch {
-  background: #b8960c;
+[data-theme="light"] .section p,
+[data-theme="light"] section > .container > p {
+  color: #64748b !important;
+}
+
+/* Dashboard header text */
+[data-theme="light"] .dashboard-header h1,
+[data-theme="light"] .page-title {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .header-subtitle {
+  color: #64748b !important;
 }
