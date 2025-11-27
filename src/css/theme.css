@@ -89,7 +89,13 @@ body,
 .step-card,
 .service-card,
 .testimonial-card,
-.contact-card {
+.contact-card,
+.category-card,
+.steps-section,
+.categories-section,
+.testimonials-section,
+.faq-section,
+.cta-section {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -280,7 +286,224 @@ body,
   color: #b8960c;
 }
 
-/* Section Headers */
+/* ===================================
+   SECTIONS WITH DARK BACKGROUNDS - CRITICAL FIX
+   =================================== */
+
+/* All sections base */
+[data-theme="light"] section,
+[data-theme="light"] .section {
+  background: #f8fafc;
+}
+
+/* Steps Section - "איך זה עובד" */
+[data-theme="light"] .steps-section,
+[data-theme="light"] .steps,
+[data-theme="light"] .how-it-works,
+[data-theme="light"] [class*="steps"] {
+  background: #f8fafc !important;
+}
+
+[data-theme="light"] .steps-section .section-badge,
+[data-theme="light"] .how-it-works .section-badge {
+  background: rgba(184, 150, 12, 0.1);
+  color: #b8960c;
+}
+
+[data-theme="light"] .steps-section .section-title,
+[data-theme="light"] .how-it-works .section-title,
+[data-theme="light"] .steps-section h2,
+[data-theme="light"] .how-it-works h2 {
+  color: #0f172a;
+}
+
+[data-theme="light"] .steps-section .section-description,
+[data-theme="light"] .how-it-works .section-description,
+[data-theme="light"] .steps-section p,
+[data-theme="light"] .how-it-works p {
+  color: #64748b;
+}
+
+/* Categories Section - "קטגוריות לידים" */
+[data-theme="light"] .categories-section,
+[data-theme="light"] .categories,
+[data-theme="light"] .lead-categories,
+[data-theme="light"] [class*="categories"] {
+  background: #f8fafc !important;
+}
+
+[data-theme="light"] .categories-section .section-badge,
+[data-theme="light"] .categories .section-badge {
+  background: rgba(184, 150, 12, 0.1);
+  color: #b8960c;
+}
+
+[data-theme="light"] .categories-section .section-title,
+[data-theme="light"] .categories .section-title,
+[data-theme="light"] .categories-section h2,
+[data-theme="light"] .categories h2 {
+  color: #0f172a;
+}
+
+[data-theme="light"] .categories-section .section-description,
+[data-theme="light"] .categories .section-description,
+[data-theme="light"] .categories-section p,
+[data-theme="light"] .categories p {
+  color: #64748b;
+}
+
+[data-theme="light"] .category-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .category-card:hover {
+  border-color: #b8960c;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .category-icon {
+  background: rgba(184, 150, 12, 0.1);
+  color: #b8960c;
+}
+
+[data-theme="light"] .category-title,
+[data-theme="light"] .category-card h3,
+[data-theme="light"] .category-card h4 {
+  color: #0f172a;
+}
+
+[data-theme="light"] .category-description,
+[data-theme="light"] .category-card p {
+  color: #64748b;
+}
+
+/* Testimonials Section - "מה הלקוחות שלנו אומרים" */
+[data-theme="light"] .testimonials-section,
+[data-theme="light"] .testimonials,
+[data-theme="light"] [class*="testimonial"]:not(.testimonial-card) {
+  background: #f8fafc !important;
+}
+
+[data-theme="light"] .testimonials-section .section-badge,
+[data-theme="light"] .testimonials .section-badge {
+  background: rgba(184, 150, 12, 0.1);
+  color: #b8960c;
+}
+
+[data-theme="light"] .testimonials-section .section-title,
+[data-theme="light"] .testimonials .section-title,
+[data-theme="light"] .testimonials-section h2,
+[data-theme="light"] .testimonials h2 {
+  color: #0f172a;
+}
+
+[data-theme="light"] .testimonials-section .section-description,
+[data-theme="light"] .testimonials .section-description,
+[data-theme="light"] .testimonials-section > p,
+[data-theme="light"] .testimonials > p {
+  color: #64748b;
+}
+
+[data-theme="light"] .testimonial-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .testimonial-text {
+  color: #334155;
+}
+
+[data-theme="light"] .testimonial-name {
+  color: #0f172a;
+}
+
+[data-theme="light"] .testimonial-role {
+  color: #64748b;
+}
+
+[data-theme="light"] .testimonial-nav button,
+[data-theme="light"] .testimonial-arrows button {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
+[data-theme="light"] .testimonial-nav button:hover,
+[data-theme="light"] .testimonial-arrows button:hover {
+  background: #b8960c;
+  border-color: #b8960c;
+  color: #ffffff;
+}
+
+/* FAQ Section - "שאלות נפוצות" */
+[data-theme="light"] .faq-section,
+[data-theme="light"] .faq,
+[data-theme="light"] [class*="faq"] {
+  background: #f8fafc !important;
+}
+
+[data-theme="light"] .faq-section .section-badge,
+[data-theme="light"] .faq .section-badge {
+  background: rgba(184, 150, 12, 0.1);
+  color: #b8960c;
+}
+
+[data-theme="light"] .faq-section .section-title,
+[data-theme="light"] .faq .section-title,
+[data-theme="light"] .faq-section h2,
+[data-theme="light"] .faq h2 {
+  color: #0f172a;
+}
+
+[data-theme="light"] .faq-section .section-description,
+[data-theme="light"] .faq .section-description,
+[data-theme="light"] .faq-section > p,
+[data-theme="light"] .faq > p {
+  color: #64748b;
+}
+
+[data-theme="light"] .faq-item {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .faq-question {
+  color: #0f172a;
+}
+
+[data-theme="light"] .faq-question button,
+[data-theme="light"] .faq-toggle {
+  color: #64748b;
+  background: #f1f5f9;
+}
+
+[data-theme="light"] .faq-answer {
+  color: #64748b;
+}
+
+/* CTA Section - "מוכן להתחיל?" */
+[data-theme="light"] .cta-section,
+[data-theme="light"] .cta,
+[data-theme="light"] [class*="cta"]:not(.sticky-cta) {
+  background: #f8fafc !important;
+}
+
+[data-theme="light"] .cta-section h2,
+[data-theme="light"] .cta h2,
+[data-theme="light"] .cta-title {
+  color: #0f172a;
+}
+
+[data-theme="light"] .cta-section p,
+[data-theme="light"] .cta p,
+[data-theme="light"] .cta-description {
+  color: #64748b;
+}
+
+/* Section Headers - General */
 [data-theme="light"] .section-badge {
   background: rgba(184, 150, 12, 0.1);
   color: #b8960c;
@@ -371,26 +594,12 @@ body,
   color: #22c55e;
 }
 
-/* Testimonials */
-[data-theme="light"] .testimonial-card {
-  background: #ffffff;
-  border-color: #e2e8f0;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-}
-
-[data-theme="light"] .testimonial-text {
-  color: #334155;
-}
-
-[data-theme="light"] .testimonial-name {
-  color: #0f172a;
-}
-
-[data-theme="light"] .testimonial-role {
-  color: #64748b;
-}
-
 /* About Section */
+[data-theme="light"] .about-section,
+[data-theme="light"] .about {
+  background: #f8fafc;
+}
+
 [data-theme="light"] .about-card {
   background: #ffffff;
   border-color: #e2e8f0;
@@ -409,6 +618,11 @@ body,
 }
 
 /* Contact Section */
+[data-theme="light"] .contact-section,
+[data-theme="light"] .contact {
+  background: #f8fafc;
+}
+
 [data-theme="light"] .contact-card {
   background: #ffffff;
   border-color: #e2e8f0;
@@ -456,10 +670,12 @@ body,
   color: #334155;
 }
 
-/* Footer */
+/* ===================================
+   FOOTER - CRITICAL FIX
+   =================================== */
 [data-theme="light"] .footer {
-  background: #ffffff;
-  border-color: #e2e8f0;
+  background: #ffffff !important;
+  border-top: 1px solid #e2e8f0;
 }
 
 [data-theme="light"] .footer-logo span {
@@ -470,15 +686,18 @@ body,
   color: #64748b;
 }
 
-[data-theme="light"] .footer-title {
+[data-theme="light"] .footer-title,
+[data-theme="light"] .footer h4 {
   color: #0f172a;
 }
 
-[data-theme="light"] .footer-link {
+[data-theme="light"] .footer-link,
+[data-theme="light"] .footer a {
   color: #64748b;
 }
 
-[data-theme="light"] .footer-link:hover {
+[data-theme="light"] .footer-link:hover,
+[data-theme="light"] .footer a:hover {
   color: #b8960c;
 }
 
@@ -500,6 +719,12 @@ body,
   color: #ffffff;
 }
 
+/* Footer contact info */
+[data-theme="light"] .footer-contact,
+[data-theme="light"] .footer-info {
+  color: #64748b;
+}
+
 /* Sticky CTA */
 [data-theme="light"] .sticky-cta {
   background: rgba(255, 255, 255, 0.98);
@@ -508,6 +733,10 @@ body,
 }
 
 /* Comparison Table */
+[data-theme="light"] .comparison-section {
+  background: #f8fafc;
+}
+
 [data-theme="light"] .comparison-header {
   background: #f8fafc;
   border-color: #e2e8f0;
@@ -519,20 +748,6 @@ body,
 
 [data-theme="light"] .comparison-row:hover {
   background: #f8fafc;
-}
-
-/* FAQ Section */
-[data-theme="light"] .faq-item {
-  background: #ffffff;
-  border-color: #e2e8f0;
-}
-
-[data-theme="light"] .faq-question {
-  color: #0f172a;
-}
-
-[data-theme="light"] .faq-answer {
-  color: #64748b;
 }
 
 /* Login Page */
@@ -569,6 +784,10 @@ body,
 /* ===================================
    DASHBOARD - Light Theme Overrides
    =================================== */
+[data-theme="light"] .dashboard-container {
+  background: #f8fafc;
+}
+
 [data-theme="light"] .dashboard-sidebar {
   background: #ffffff;
   border-color: var(--border-primary);
@@ -656,6 +875,13 @@ body,
   border-top-color: #b8960c;
 }
 
+/* Dashboard Category Cards */
+[data-theme="light"] .categories-grid .category-card,
+[data-theme="light"] .admin-category-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
 /* ===================================
    Scrollbar
    =================================== */
@@ -686,4 +912,37 @@ body,
 
 [data-theme="light"] ::-webkit-scrollbar-thumb:hover {
   background: #b8960c;
+}
+
+/* ===================================
+   UNIVERSAL DARK BACKGROUND FIX
+   This catches any remaining dark sections
+   =================================== */
+[data-theme="light"] [style*="background"] {
+  background-color: inherit;
+}
+
+[data-theme="light"] .hero-bg,
+[data-theme="light"] .section-bg,
+[data-theme="light"] .dark-bg,
+[data-theme="light"] .bg-dark,
+[data-theme="light"] .bg-navy,
+[data-theme="light"] .bg-deep-blue {
+  background: #f8fafc !important;
+}
+
+/* Fix any remaining white text on light backgrounds */
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5,
+[data-theme="light"] h6 {
+  color: #0f172a;
+}
+
+[data-theme="light"] p,
+[data-theme="light"] span,
+[data-theme="light"] li {
+  color: inherit;
 }
