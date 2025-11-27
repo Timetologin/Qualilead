@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { Eye, EyeOff, LogIn, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, LogIn, AlertCircle, UserPlus } from 'lucide-react';
 
 const LoginPage = () => {
   const { t, isRTL } = useLanguage();
@@ -101,6 +101,15 @@ const LoginPage = () => {
             )}
           </button>
         </form>
+
+        {/* Register Link - NEW */}
+        <div className="login-register">
+          <p>{isRTL ? 'עדיין אין לך חשבון?' : "Don't have an account?"}</p>
+          <Link to="/register" className="btn btn-secondary" style={{ width: '100%' }}>
+            <UserPlus size={20} />
+            {isRTL ? 'הירשם עכשיו' : 'Sign Up Now'}
+          </Link>
+        </div>
 
         <div className="login-footer">
           <Link to="/">{isRTL ? 'חזרה לאתר' : 'Back to Website'}</Link>
@@ -212,6 +221,20 @@ const LoginPage = () => {
 
         .password-toggle:hover {
           color: var(--gold);
+        }
+
+        /* Register section - NEW */
+        .login-register {
+          margin-top: var(--space-xl);
+          padding-top: var(--space-lg);
+          border-top: 1px solid var(--slate);
+          text-align: center;
+        }
+
+        .login-register p {
+          color: var(--silver);
+          margin-bottom: var(--space-md);
+          font-size: 0.95rem;
         }
 
         .login-footer {

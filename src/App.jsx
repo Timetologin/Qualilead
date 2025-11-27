@@ -17,6 +17,7 @@ import ServicesPage from './pages/ServicesPage';
 import PackagesPage from './pages/PackagesPage';
 import ContactPage from './pages/ContactPage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
 // Dashboard pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -109,6 +110,9 @@ const AppRoutes = () => {
         
         {/* Login page - no layout */}
         <Route path="/login" element={<LoginPage />} />
+        
+        {/* Register page - no layout */}
+        <Route path="/register" element={<RegisterPage />} />
         
         {/* Dashboard redirect */}
         <Route 

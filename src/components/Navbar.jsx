@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useScrollPosition } from '../hooks/useAnimations';
-import { LogIn, LayoutDashboard } from 'lucide-react';
+import { LogIn, LayoutDashboard, UserPlus } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 
 const Navbar = () => {
@@ -70,10 +70,16 @@ const Navbar = () => {
                   {isRTL ? 'לוח בקרה' : 'Dashboard'}
                 </Link>
               ) : (
-                <Link to="/login" className="login-btn">
-                  <LogIn size={18} />
-                  {isRTL ? 'התחברות' : 'Login'}
-                </Link>
+                <div className="auth-buttons">
+                  <Link to="/login" className="login-btn secondary">
+                    <LogIn size={18} />
+                    {isRTL ? 'התחברות' : 'Login'}
+                  </Link>
+                  <Link to="/register" className="login-btn">
+                    <UserPlus size={18} />
+                    {isRTL ? 'הרשמה' : 'Sign Up'}
+                  </Link>
+                </div>
               )}
             </div>
 
@@ -113,14 +119,24 @@ const Navbar = () => {
               {isRTL ? 'לוח בקרה' : 'Dashboard'}
             </Link>
           ) : (
-            <Link 
-              to="/login" 
-              className="mobile-nav-link login-link"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <LogIn size={18} />
-              {isRTL ? 'התחברות' : 'Login'}
-            </Link>
+            <>
+              <Link 
+                to="/login" 
+                className="mobile-nav-link"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <LogIn size={18} />
+                {isRTL ? 'התחברות' : 'Login'}
+              </Link>
+              <Link 
+                to="/register" 
+                className="mobile-nav-link login-link"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <UserPlus size={18} />
+                {isRTL ? 'הרשמה' : 'Sign Up'}
+              </Link>
+            </>
           )}
           
           {/* Theme & Language Controls */}
@@ -150,6 +166,42 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      <style>{`
+        .auth-buttons {
+          display: flex;
+          align-items: center;
+          gap: var(--space-sm);
+        }
+
+        .login-btn.secondary {
+          background: transparent;
+          border: 1px solid var(--slate);
+          color: var(--silver);
+        }
+
+        .login-btn.secondary:hover {
+          background: var(--slate);
+          color: var(--white);
+        }
+
+        [data-theme="light"] .login-btn.secondary {
+          background: transparent;
+          border: 1px solid #e2e8f0;
+          color: #64748b;
+        }
+
+        [data-theme="light"] .login-btn.secondary:hover {
+          background: #f1f5f9;
+          color: #0f172a;
+        }
+
+        @media (max-width: 1024px) {
+          .auth-buttons {
+            display: none;
+          }
+        }
+      `}</style>
     </>
   );
 };

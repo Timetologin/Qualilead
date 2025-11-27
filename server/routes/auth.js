@@ -56,6 +56,69 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Self-registration for new clients (PUBLIC - no auth required)
+router.post('/register-client', async (req, res) => {
+  try {
+    const { 
+      email, 
+      password, 
+      name, 
+      phone, 
+      company_name
+    } = req.body;
+
+    // Validation
+    if (!email || !password || !name) {
+      return res.status(400).json({ error: 'Email, password, and name are required' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    // Check if email exists
+    const existingUser = dbHelpers.findUserByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email already exists' });
+    }
+
+    const hashedPassword = bcrypt.hashSync(password, 10);
+
+    // Create new client with starter package (default)
+    const newUser = await dbHelpers.createUser({
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      name,
+      phone: phone || '',
+      company_name: company_name || '',
+      role: 'client', // Always client for self-registration
+      package_type: 'starter', // Default package
+      monthly_lead_limit: 20,
+      leads_received_this_month: 0,
+      categories_allowed: 1,
+      is_vip: false,
+      is_active: true,
+      dedicated_manager_id: null
+    });
+
+    // Send welcome notification
+    await dbHelpers.createNotification({
+      user_id: newUser.id,
+      title: 'ברוך הבא ל-QualiLead!',
+      message: 'החשבון שלך נוצר בהצלחה. צוות שלנו יצור איתך קשר בקרוב.',
+      type: 'success'
+    });
+
+    res.status(201).json({ 
+      message: 'Registration successful',
+      userId: newUser.id
+    });
+  } catch (error) {
+    console.error('Self-registration error:', error);
+    res.status(500).json({ error: 'Registration failed' });
+  }
+});
+
 // Register (admin only creates clients)
 router.post('/register', authenticateToken, async (req, res) => {
   try {
