@@ -332,10 +332,14 @@ h4 { font-size: clamp(1.25rem, 2vw, 1.5rem); }
   top: 70px;
   left: 0;
   right: 0;
+  bottom: 0;
   background: rgba(10, 22, 40, 0.98);
   backdrop-filter: blur(20px);
   padding: var(--space-xl);
   border-top: 1px solid var(--slate);
+  z-index: 999;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mobile-nav.open {
