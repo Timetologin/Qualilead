@@ -3,25 +3,588 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import {
-  LayoutDashboard, Users, FileText, Tags, BarChart3, Bell,
-  Plus, Search, Filter, MoreVertical, ChevronRight, TrendingUp,
-  TrendingDown, Package, Zap, Clock, CheckCircle, XCircle,
-  RefreshCw, LogOut, Settings, Send, Eye, Edit, Trash2, UserPlus
+  LayoutDashboard,
+  FileText,
+  Users,
+  Tags,
+  BarChart3,
+  Settings,
+  LogOut,
+  Plus,
+  RefreshCw,
+  Send,
+  CheckCircle,
+  XCircle,
+  Zap,
+  TrendingUp,
+  UserPlus,
+  Edit,
+  Trash2,
+  Eye,
+  Mail,
+  Phone,
+  AlertCircle,
+  Check,
+  X,
+  ChevronRight,
+  ChevronLeft,
+  Menu,
+  ChevronDown
 } from 'lucide-react';
 import {
-  LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  Legend
 } from 'recharts';
-import ClientFormModal from '../../components/admin/ClientFormModal';
-import CategoryFormModal from '../../components/admin/CategoryFormModal';
 
+// Sub-components for different tabs
+const LeadsManagement = ({ api, isRTL }) => {
+  const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedLead, setSelectedLead] = useState(null);
+  const [clients, setClients] = useState([]);
+  const [selectedClient, setSelectedClient] = useState('');
+  const [sendVia, setSendVia] = useState('email');
+  const [message, setMessage] = useState({ type: '', text: '' });
+
+  useEffect(() => {
+    fetchLeads();
+    fetchClients();
+  }, [filter]);
+
+  const fetchLeads = async () => {
+    try {
+      setLoading(true);
+      const params = filter !== 'all' ? `?status=${filter}` : '';
+      const res = await api(`/leads${params}`);
+      setLeads(res.leads || []);
+    } catch (error) {
+      console.error('Fetch leads error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchClients = async () => {
+    try {
+      const res = await api('/users?role=client&limit=100');
+      setClients(res.users || []);
+    } catch (error) {
+      console.error('Fetch clients error:', error);
+    }
+  };
+
+  const handleAssign = (lead) => {
+    setSelectedLead(lead);
+    setShowAssignModal(true);
+  };
+
+  const submitAssignment = async () => {
+    if (!selectedClient) {
+      setMessage({ type: 'error', text: isRTL ? 'יש לבחור לקוח' : 'Please select a client' });
+      return;
+    }
+
+    try {
+      await api(`/leads/${selectedLead.id}/assign`, {
+        method: 'POST',
+        body: JSON.stringify({
+          user_id: selectedClient,
+          send_via: sendVia
+        })
+      });
+      setMessage({ type: 'success', text: isRTL ? 'הליד הוקצה בהצלחה!' : 'Lead assigned successfully!' });
+      setShowAssignModal(false);
+      fetchLeads();
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message });
+    }
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      new: '#3b82f6',
+      sent: '#22c55e',
+      converted: '#d4af37',
+      returned: '#f59e0b',
+      invalid: '#ef4444'
+    };
+    return colors[status] || '#888';
+  };
+
+  return (
+    <div className="leads-management">
+      {message.text && (
+        <div className={`message ${message.type}`}>
+          {message.type === 'error' ? <AlertCircle size={20} /> : <Check size={20} />}
+          {message.text}
+        </div>
+      )}
+
+      <div className="management-header">
+        <div className="filter-tabs">
+          {['all', 'new', 'sent', 'converted', 'returned'].map(status => (
+            <button
+              key={status}
+              className={`filter-tab ${filter === status ? 'active' : ''}`}
+              onClick={() => setFilter(status)}
+            >
+              {status === 'all' ? (isRTL ? 'הכל' : 'All') : status}
+            </button>
+          ))}
+        </div>
+        <Link to="/admin/leads/new" className="btn btn-primary">
+          <Plus size={18} />
+          <span className="btn-text">{isRTL ? 'ליד חדש' : 'New Lead'}</span>
+        </Link>
+      </div>
+
+      {loading ? (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+        </div>
+      ) : (
+        <>
+          {/* Desktop Table */}
+          <div className="table-container desktop-only">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>{isRTL ? 'שם' : 'Name'}</th>
+                  <th>{isRTL ? 'טלפון' : 'Phone'}</th>
+                  <th>{isRTL ? 'קטגוריה' : 'Category'}</th>
+                  <th>{isRTL ? 'סטטוס' : 'Status'}</th>
+                  <th>{isRTL ? 'תאריך' : 'Date'}</th>
+                  <th>{isRTL ? 'פעולות' : 'Actions'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leads.map(lead => (
+                  <tr key={lead.id}>
+                    <td>{lead.customer_name}</td>
+                    <td dir="ltr">{lead.customer_phone}</td>
+                    <td>{isRTL ? lead.category_name_he : lead.category_name_en}</td>
+                    <td>
+                      <span 
+                        className="status-badge"
+                        style={{ background: `${getStatusColor(lead.status)}20`, color: getStatusColor(lead.status) }}
+                      >
+                        {lead.status}
+                      </span>
+                    </td>
+                    <td>{new Date(lead.created_at).toLocaleDateString()}</td>
+                    <td>
+                      <div className="action-buttons">
+                        {lead.status === 'new' && (
+                          <button className="action-btn assign" onClick={() => handleAssign(lead)} title={isRTL ? 'הקצה' : 'Assign'}>
+                            <Send size={16} />
+                          </button>
+                        )}
+                        <Link to={`/admin/leads/${lead.id}/edit`} className="action-btn edit" title={isRTL ? 'ערוך' : 'Edit'}>
+                          <Edit size={16} />
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="mobile-cards mobile-only">
+            {leads.map(lead => (
+              <div key={lead.id} className="lead-card">
+                <div className="lead-card-header">
+                  <div className="lead-info">
+                    <h4>{lead.customer_name}</h4>
+                    <span className="lead-category">{isRTL ? lead.category_name_he : lead.category_name_en}</span>
+                  </div>
+                  <span 
+                    className="status-badge"
+                    style={{ background: `${getStatusColor(lead.status)}20`, color: getStatusColor(lead.status) }}
+                  >
+                    {lead.status}
+                  </span>
+                </div>
+                <div className="lead-card-body">
+                  <div className="lead-detail">
+                    <Phone size={14} />
+                    <span dir="ltr">{lead.customer_phone}</span>
+                  </div>
+                  <div className="lead-detail">
+                    <Mail size={14} />
+                    <span>{lead.customer_email || '-'}</span>
+                  </div>
+                </div>
+                <div className="lead-card-footer">
+                  <span className="lead-date">{new Date(lead.created_at).toLocaleDateString()}</span>
+                  <div className="action-buttons">
+                    {lead.status === 'new' && (
+                      <button className="action-btn assign" onClick={() => handleAssign(lead)}>
+                        <Send size={16} />
+                        <span>{isRTL ? 'הקצה' : 'Assign'}</span>
+                      </button>
+                    )}
+                    <Link to={`/admin/leads/${lead.id}/edit`} className="action-btn edit">
+                      <Edit size={16} />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Assign Modal */}
+      {showAssignModal && (
+        <div className="modal-overlay" onClick={() => setShowAssignModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{isRTL ? 'הקצה ליד ללקוח' : 'Assign Lead to Client'}</h3>
+              <button className="close-btn" onClick={() => setShowAssignModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="assign-lead-info">
+                <strong>{selectedLead?.customer_name}</strong>
+                <span className="category-tag">
+                  {isRTL ? selectedLead?.category_name_he : selectedLead?.category_name_en}
+                </span>
+              </div>
+
+              <div className="form-group">
+                <label>{isRTL ? 'בחר לקוח' : 'Select Client'}</label>
+                <select 
+                  value={selectedClient} 
+                  onChange={(e) => setSelectedClient(e.target.value)}
+                  className="form-select"
+                >
+                  <option value="">{isRTL ? 'בחר לקוח...' : 'Select client...'}</option>
+                  {clients.filter(c => c.is_active).map(client => (
+                    <option key={client.id} value={client.id}>
+                      {client.name} ({client.company_name || 'N/A'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>{isRTL ? 'שלח באמצעות' : 'Send Via'}</label>
+                <div className="radio-group">
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      value="email"
+                      checked={sendVia === 'email'}
+                      onChange={(e) => setSendVia(e.target.value)}
+                    />
+                    <Mail size={16} />
+                    Email
+                  </label>
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      value="sms"
+                      checked={sendVia === 'sms'}
+                      onChange={(e) => setSendVia(e.target.value)}
+                    />
+                    <Phone size={16} />
+                    SMS
+                  </label>
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      value="both"
+                      checked={sendVia === 'both'}
+                      onChange={(e) => setSendVia(e.target.value)}
+                    />
+                    <Send size={16} />
+                    {isRTL ? 'שניהם' : 'Both'}
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-secondary" onClick={() => setShowAssignModal(false)}>
+                {isRTL ? 'ביטול' : 'Cancel'}
+              </button>
+              <button className="btn btn-primary" onClick={submitAssignment}>
+                <Send size={18} />
+                {isRTL ? 'הקצה ושלח' : 'Assign & Send'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ClientsManagement = ({ api, isRTL, clients: initialClients }) => {
+  const [clients, setClients] = useState(initialClients || []);
+  const [showModal, setShowModal] = useState(false);
+  const [editingClient, setEditingClient] = useState(null);
+
+  const fetchClients = async () => {
+    try {
+      const res = await api('/users?role=client&limit=100');
+      setClients(res.users || []);
+    } catch (error) {
+      console.error('Fetch clients error:', error);
+    }
+  };
+
+  const handleEdit = (client) => {
+    setEditingClient(client);
+    setShowModal(true);
+  };
+
+  const handleAdd = () => {
+    setEditingClient(null);
+    setShowModal(true);
+  };
+
+  return (
+    <div className="clients-management">
+      <div className="management-header">
+        <h3>{isRTL ? 'ניהול לקוחות' : 'Client Management'}</h3>
+        <button className="btn btn-primary" onClick={handleAdd}>
+          <UserPlus size={18} />
+          <span className="btn-text">{isRTL ? 'לקוח חדש' : 'New Client'}</span>
+        </button>
+      </div>
+
+      {/* Desktop Table */}
+      <div className="table-container desktop-only">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>{isRTL ? 'שם' : 'Name'}</th>
+              <th>{isRTL ? 'חברה' : 'Company'}</th>
+              <th>{isRTL ? 'חבילה' : 'Package'}</th>
+              <th>{isRTL ? 'לידים החודש' : 'Leads This Month'}</th>
+              <th>{isRTL ? 'סטטוס' : 'Status'}</th>
+              <th>{isRTL ? 'פעולות' : 'Actions'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {clients.map(client => (
+              <tr key={client.id}>
+                <td>{client.name}</td>
+                <td>{client.company_name || '-'}</td>
+                <td>{client.package_type}</td>
+                <td>{client.leads_received_this_month} / {client.monthly_lead_limit === -1 ? '∞' : client.monthly_lead_limit}</td>
+                <td>
+                  <span className={`status-badge ${client.is_active ? 'active' : 'inactive'}`}>
+                    {client.is_active ? (isRTL ? 'פעיל' : 'Active') : (isRTL ? 'לא פעיל' : 'Inactive')}
+                  </span>
+                </td>
+                <td>
+                  <div className="action-buttons">
+                    <button className="action-btn edit" onClick={() => handleEdit(client)}>
+                      <Edit size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="mobile-cards mobile-only">
+        {clients.map(client => (
+          <div key={client.id} className="client-card">
+            <div className="client-card-header">
+              <div className="client-avatar">{client.name?.charAt(0) || 'C'}</div>
+              <div className="client-info">
+                <h4>{client.name}</h4>
+                <span className="client-company">{client.company_name || '-'}</span>
+              </div>
+              <span className={`status-badge ${client.is_active ? 'active' : 'inactive'}`}>
+                {client.is_active ? (isRTL ? 'פעיל' : 'Active') : (isRTL ? 'לא פעיל' : 'Inactive')}
+              </span>
+            </div>
+            <div className="client-card-body">
+              <div className="client-stat">
+                <span className="stat-label">{isRTL ? 'חבילה' : 'Package'}</span>
+                <span className="stat-value">{client.package_type}</span>
+              </div>
+              <div className="client-stat">
+                <span className="stat-label">{isRTL ? 'לידים החודש' : 'Leads'}</span>
+                <span className="stat-value">{client.leads_received_this_month} / {client.monthly_lead_limit === -1 ? '∞' : client.monthly_lead_limit}</span>
+              </div>
+            </div>
+            <div className="client-card-footer">
+              <button className="btn btn-secondary btn-sm" onClick={() => handleEdit(client)}>
+                <Edit size={14} />
+                {isRTL ? 'עריכה' : 'Edit'}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const CategoriesManagement = ({ api, isRTL }) => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await api('/categories');
+      setCategories(res.categories || res || []);
+    } catch (error) {
+      console.error('Fetch categories error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="categories-management">
+      <div className="management-header">
+        <h3>{isRTL ? 'קטגוריות שירות' : 'Service Categories'}</h3>
+        <button className="btn btn-primary">
+          <Plus size={18} />
+          <span className="btn-text">{isRTL ? 'קטגוריה חדשה' : 'New Category'}</span>
+        </button>
+      </div>
+
+      <div className="categories-grid">
+        {categories.map(cat => (
+          <div key={cat.id} className="category-card">
+            <div className="category-icon">
+              <Tags size={24} />
+            </div>
+            <div className="category-info">
+              <h4>{isRTL ? cat.name_he : cat.name_en}</h4>
+              <p>{isRTL ? cat.description_he : cat.description_en}</p>
+            </div>
+            <div className="category-status">
+              <span className={`status-dot ${cat.is_active ? 'active' : ''}`}></span>
+              {cat.is_active ? (isRTL ? 'פעיל' : 'Active') : (isRTL ? 'לא פעיל' : 'Inactive')}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const AnalyticsView = ({ api, isRTL, chartData, categoryData, statusData }) => {
+  const COLORS = ['#d4af37', '#3b82f6', '#22c55e', '#ef4444', '#8b5cf6', '#f59e0b'];
+
+  return (
+    <div className="analytics-view">
+      <div className="charts-grid">
+        <div className="chart-card full-width">
+          <h3>{isRTL ? 'לידים לאורך זמן' : 'Leads Over Time'}</h3>
+          <div className="chart-container">
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2a3f54" />
+                <XAxis dataKey="month" stroke="#b8c5d1" />
+                <YAxis stroke="#b8c5d1" />
+                <Tooltip 
+                  contentStyle={{ 
+                    background: '#1e2d3d', 
+                    border: '1px solid #2a3f54',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="count" 
+                  stroke="#d4af37" 
+                  fill="rgba(212, 175, 55, 0.2)"
+                  name={isRTL ? 'לידים' : 'Leads'}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="chart-card">
+          <h3>{isRTL ? 'לידים לפי קטגוריה' : 'Leads by Category'}</h3>
+          <div className="chart-container">
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie
+                  data={categoryData}
+                  dataKey="count"
+                  nameKey="category"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  label
+                >
+                  {categoryData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="chart-card">
+          <h3>{isRTL ? 'לידים לפי סטטוס' : 'Leads by Status'}</h3>
+          <div className="chart-container">
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={statusData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2a3f54" />
+                <XAxis dataKey="status" stroke="#b8c5d1" />
+                <YAxis stroke="#b8c5d1" />
+                <Tooltip 
+                  contentStyle={{ 
+                    background: '#1e2d3d', 
+                    border: '1px solid #2a3f54',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Bar dataKey="count" fill="#d4af37" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Main Dashboard Component
 const AdminDashboard = () => {
   const { user, logout, api, isAdmin } = useAuth();
   const { t, isRTL } = useLanguage();
   const navigate = useNavigate();
 
   const [stats, setStats] = useState(null);
-  const [leads, setLeads] = useState([]);
+  const [recentLeads, setRecentLeads] = useState([]);
   const [clients, setClients] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
@@ -29,6 +592,7 @@ const AdminDashboard = () => {
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!isAdmin) {
@@ -41,8 +605,7 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
-      const [statsRes, leadsRes, usersRes, chartRes, categoryRes, statusRes, activityRes] = await Promise.all([
+      const [statsRes, leadsRes, clientsRes, chartRes, categoryRes, statusRes, activityRes] = await Promise.all([
         api('/analytics/dashboard'),
         api('/leads?limit=10'),
         api('/users?role=client&limit=10'),
@@ -53,8 +616,8 @@ const AdminDashboard = () => {
       ]);
 
       setStats(statsRes);
-      setLeads(leadsRes.leads || []);
-      setClients(usersRes.users || []);
+      setRecentLeads(leadsRes.leads || []);
+      setClients(clientsRes.users || []);
       setChartData(chartRes);
       setCategoryData(categoryRes);
       setStatusData(statusRes);
@@ -66,14 +629,9 @@ const AdminDashboard = () => {
     }
   };
 
-  const COLORS = ['#d4af37', '#3b82f6', '#22c55e', '#ef4444', '#8b5cf6', '#f59e0b'];
-
-  const statusColors = {
-    new: '#3b82f6',
-    sent: '#22c55e',
-    converted: '#d4af37',
-    returned: '#f59e0b',
-    invalid: '#ef4444'
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSidebarOpen(false); // Close sidebar on mobile after selecting
   };
 
   if (loading) {
@@ -86,53 +644,73 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="admin-dashboard">
+    <div className={`admin-dashboard ${isRTL ? 'rtl' : 'ltr'}`}>
+      {/* Mobile Header */}
+      <header className="mobile-header">
+        <button className="menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+          <Menu size={24} />
+        </button>
+        <div className="mobile-logo">
+          <div className="logo-icon">QL</div>
+          <span>QualiLead</span>
+        </div>
+        <button className="icon-btn" onClick={fetchDashboardData}>
+          <RefreshCw size={20} />
+        </button>
+      </header>
+
+      {/* Sidebar Overlay */}
+      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>}
+
       {/* Sidebar */}
-      <aside className="dashboard-sidebar">
+      <aside className={`dashboard-sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <Link to="/" className="sidebar-logo">
             <div className="logo-icon">QL</div>
             <span>QualiLead</span>
           </Link>
+          <button className="close-sidebar" onClick={() => setSidebarOpen(false)}>
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="sidebar-nav">
           <button 
             className={`nav-item ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
+            onClick={() => handleTabChange('overview')}
           >
             <LayoutDashboard size={20} />
             <span>{isRTL ? 'סקירה כללית' : 'Overview'}</span>
           </button>
           <button 
             className={`nav-item ${activeTab === 'leads' ? 'active' : ''}`}
-            onClick={() => setActiveTab('leads')}
+            onClick={() => handleTabChange('leads')}
           >
             <FileText size={20} />
             <span>{isRTL ? 'לידים' : 'Leads'}</span>
           </button>
           <button 
             className={`nav-item ${activeTab === 'clients' ? 'active' : ''}`}
-            onClick={() => setActiveTab('clients')}
+            onClick={() => handleTabChange('clients')}
           >
             <Users size={20} />
             <span>{isRTL ? 'לקוחות' : 'Clients'}</span>
           </button>
           <button 
             className={`nav-item ${activeTab === 'categories' ? 'active' : ''}`}
-            onClick={() => setActiveTab('categories')}
+            onClick={() => handleTabChange('categories')}
           >
             <Tags size={20} />
             <span>{isRTL ? 'קטגוריות' : 'Categories'}</span>
           </button>
           <button 
             className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`}
-            onClick={() => setActiveTab('analytics')}
+            onClick={() => handleTabChange('analytics')}
           >
             <BarChart3 size={20} />
             <span>{isRTL ? 'אנליטיקס' : 'Analytics'}</span>
           </button>
-          <Link to="/admin/settings" className="nav-item">
+          <Link to="/admin/settings" className="nav-item" onClick={() => setSidebarOpen(false)}>
             <Settings size={20} />
             <span>{isRTL ? 'הגדרות' : 'Settings'}</span>
           </Link>
@@ -154,8 +732,8 @@ const AdminDashboard = () => {
 
       {/* Main Content */}
       <main className="dashboard-main">
-        {/* Header */}
-        <header className="dashboard-header">
+        {/* Desktop Header */}
+        <header className="dashboard-header desktop-only">
           <div className="header-left">
             <h1>
               {activeTab === 'overview' && (isRTL ? 'סקירה כללית' : 'Dashboard Overview')}
@@ -175,6 +753,22 @@ const AdminDashboard = () => {
             </Link>
           </div>
         </header>
+
+        {/* Mobile Tab Title */}
+        <div className="mobile-tab-title mobile-only">
+          <h1>
+            {activeTab === 'overview' && (isRTL ? 'סקירה כללית' : 'Overview')}
+            {activeTab === 'leads' && (isRTL ? 'לידים' : 'Leads')}
+            {activeTab === 'clients' && (isRTL ? 'לקוחות' : 'Clients')}
+            {activeTab === 'categories' && (isRTL ? 'קטגוריות' : 'Categories')}
+            {activeTab === 'analytics' && (isRTL ? 'אנליטיקס' : 'Analytics')}
+          </h1>
+          {activeTab === 'leads' && (
+            <Link to="/admin/leads/new" className="btn btn-primary btn-sm">
+              <Plus size={16} />
+            </Link>
+          )}
+        </div>
 
         {/* Content based on active tab */}
         <div className="dashboard-content">
@@ -202,134 +796,130 @@ const AdminDashboard = () => {
                 </div>
                 <div className="stat-card">
                   <div className="stat-icon gold">
-                    <Send size={24} />
+                    <Users size={24} />
                   </div>
                   <div className="stat-info">
-                    <span className="stat-value">{stats?.sent_this_month || 0}</span>
-                    <span className="stat-label">{isRTL ? 'נשלחו החודש' : 'Sent This Month'}</span>
+                    <span className="stat-value">{stats?.active_clients || 0}</span>
+                    <span className="stat-label">{isRTL ? 'לקוחות פעילים' : 'Active Clients'}</span>
                   </div>
                 </div>
                 <div className="stat-card">
                   <div className="stat-icon purple">
-                    <Users size={24} />
+                    <TrendingUp size={24} />
                   </div>
                   <div className="stat-info">
-                    <span className="stat-value">{stats?.total_clients || 0}</span>
-                    <span className="stat-label">{isRTL ? 'לקוחות פעילים' : 'Active Clients'}</span>
+                    <span className="stat-value">{stats?.conversion_rate || 0}%</span>
+                    <span className="stat-label">{isRTL ? 'אחוז המרה' : 'Conversion'}</span>
                   </div>
                 </div>
               </div>
 
               {/* Charts Row */}
               <div className="charts-row">
-                <div className="chart-card large">
-                  <h3>{isRTL ? 'לידים לאורך זמן' : 'Leads Over Time'}</h3>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={chartData}>
-                      <defs>
-                        <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#d4af37" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#d4af37" stopOpacity={0}/>
-                        </linearGradient>
-                        <linearGradient id="colorSent" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#2a3f54" />
-                      <XAxis dataKey="period" stroke="#b8c5d1" />
-                      <YAxis stroke="#b8c5d1" />
-                      <Tooltip 
-                        contentStyle={{ 
-                          background: '#1e2d3d', 
-                          border: '1px solid #2a3f54',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="total" 
-                        stroke="#d4af37" 
-                        fillOpacity={1} 
-                        fill="url(#colorTotal)" 
-                        name={isRTL ? 'סה"כ' : 'Total'}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="sent" 
-                        stroke="#22c55e" 
-                        fillOpacity={1} 
-                        fill="url(#colorSent)"
-                        name={isRTL ? 'נשלחו' : 'Sent'}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                <div className="chart-card main-chart">
+                  <div className="chart-header">
+                    <h3>{isRTL ? 'לידים לאורך זמן' : 'Leads Over Time'}</h3>
+                  </div>
+                  <div className="chart-container">
+                    <ResponsiveContainer width="100%" height={280}>
+                      <AreaChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#2a3f54" />
+                        <XAxis dataKey="month" stroke="#b8c5d1" />
+                        <YAxis stroke="#b8c5d1" />
+                        <Tooltip 
+                          contentStyle={{ 
+                            background: '#1e2d3d', 
+                            border: '1px solid #2a3f54',
+                            borderRadius: '8px'
+                          }}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="count" 
+                          stroke="#d4af37" 
+                          fill="rgba(212, 175, 55, 0.2)"
+                          name={isRTL ? 'לידים' : 'Leads'}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
 
-                <div className="chart-card">
-                  <h3>{isRTL ? 'לפי סטטוס' : 'By Status'}</h3>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={statusData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={100}
-                        paddingAngle={5}
-                        dataKey="count"
-                        nameKey="status"
-                      >
-                        {statusData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={statusColors[entry.status] || COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        contentStyle={{ 
-                          background: '#1e2d3d', 
-                          border: '1px solid #2a3f54',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
+                <div className="chart-card side-chart">
+                  <div className="chart-header">
+                    <h3>{isRTL ? 'לפי קטגוריה' : 'By Category'}</h3>
+                  </div>
+                  <div className="chart-container">
+                    <ResponsiveContainer width="100%" height={280}>
+                      <PieChart>
+                        <Pie
+                          data={categoryData}
+                          dataKey="count"
+                          nameKey="category"
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={70}
+                        >
+                          {categoryData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={['#d4af37', '#3b82f6', '#22c55e', '#ef4444', '#8b5cf6'][index % 5]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
 
-              {/* Recent Leads & Activity */}
+              {/* Tables Row */}
               <div className="tables-row">
                 <div className="table-card">
                   <div className="table-header">
                     <h3>{isRTL ? 'לידים אחרונים' : 'Recent Leads'}</h3>
-                    <Link to="/admin/leads" className="view-all">
-                      {isRTL ? 'הצג הכל' : 'View All'} <ChevronRight size={16} />
-                    </Link>
+                    <button className="view-all-btn" onClick={() => setActiveTab('leads')}>
+                      {isRTL ? 'הצג הכל' : 'View All'}
+                      {isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+                    </button>
                   </div>
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th>{isRTL ? 'שם' : 'Name'}</th>
-                        <th>{isRTL ? 'טלפון' : 'Phone'}</th>
-                        <th>{isRTL ? 'קטגוריה' : 'Category'}</th>
-                        <th>{isRTL ? 'סטטוס' : 'Status'}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {leads.slice(0, 5).map(lead => (
-                        <tr key={lead.id}>
-                          <td>{lead.customer_name}</td>
-                          <td>{lead.customer_phone}</td>
-                          <td>{isRTL ? lead.category_name_he : lead.category_name_en}</td>
-                          <td>
-                            <span className={`status-badge ${lead.status}`}>
-                              {lead.status}
-                            </span>
-                          </td>
+                  
+                  {/* Desktop Table */}
+                  <div className="desktop-only">
+                    <table className="data-table compact">
+                      <thead>
+                        <tr>
+                          <th>{isRTL ? 'שם' : 'Name'}</th>
+                          <th>{isRTL ? 'קטגוריה' : 'Category'}</th>
+                          <th>{isRTL ? 'סטטוס' : 'Status'}</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {recentLeads.slice(0, 5).map(lead => (
+                          <tr key={lead.id}>
+                            <td>{lead.customer_name}</td>
+                            <td>{isRTL ? lead.category_name_he : lead.category_name_en}</td>
+                            <td>
+                              <span className={`status-badge ${lead.status}`}>
+                                {lead.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile List */}
+                  <div className="mobile-only recent-list">
+                    {recentLeads.slice(0, 5).map(lead => (
+                      <div key={lead.id} className="recent-item">
+                        <div className="recent-info">
+                          <span className="recent-name">{lead.customer_name}</span>
+                          <span className="recent-category">{isRTL ? lead.category_name_he : lead.category_name_en}</span>
+                        </div>
+                        <span className={`status-badge ${lead.status}`}>{lead.status}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="table-card">
@@ -386,12 +976,76 @@ const AdminDashboard = () => {
       </main>
 
       <style>{`
+        /* ===================================
+           Admin Dashboard - Fully Responsive
+           =================================== */
+        
         .admin-dashboard {
           display: flex;
           min-height: 100vh;
           background: var(--deep-blue);
         }
 
+        .admin-dashboard.rtl {
+          direction: rtl;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 60px;
+          background: var(--charcoal);
+          border-bottom: 1px solid var(--slate);
+          padding: 0 var(--space-md);
+          align-items: center;
+          justify-content: space-between;
+          z-index: 200;
+        }
+
+        .mobile-header .menu-toggle {
+          padding: var(--space-sm);
+          color: var(--white);
+          background: none;
+          border: none;
+        }
+
+        .mobile-logo {
+          display: flex;
+          align-items: center;
+          gap: var(--space-sm);
+          font-weight: 700;
+          color: var(--white);
+        }
+
+        .mobile-logo .logo-icon {
+          width: 32px;
+          height: 32px;
+          background: var(--gold);
+          border-radius: var(--radius-sm);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.875rem;
+          color: var(--deep-blue);
+        }
+
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 250;
+        }
+
+        /* Sidebar */
         .dashboard-sidebar {
           width: 260px;
           background: var(--charcoal);
@@ -402,7 +1056,8 @@ const AdminDashboard = () => {
           top: 0;
           left: 0;
           height: 100vh;
-          z-index: 100;
+          z-index: 300;
+          transition: transform 0.3s ease;
         }
 
         .rtl .dashboard-sidebar {
@@ -412,9 +1067,20 @@ const AdminDashboard = () => {
           border-left: 1px solid var(--slate);
         }
 
+        .close-sidebar {
+          display: none;
+          padding: var(--space-sm);
+          color: var(--silver);
+          background: none;
+          border: none;
+        }
+
         .sidebar-header {
           padding: var(--space-lg);
           border-bottom: 1px solid var(--slate);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
         }
 
         .sidebar-logo {
@@ -431,12 +1097,25 @@ const AdminDashboard = () => {
           font-family: var(--font-hebrew);
         }
 
+        .logo-icon {
+          width: 40px;
+          height: 40px;
+          background: var(--gold);
+          border-radius: var(--radius-md);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 800;
+          color: var(--deep-blue);
+        }
+
         .sidebar-nav {
           flex: 1;
           padding: var(--space-lg);
           display: flex;
           flex-direction: column;
           gap: var(--space-xs);
+          overflow-y: auto;
         }
 
         .nav-item {
@@ -449,6 +1128,10 @@ const AdminDashboard = () => {
           transition: var(--transition-base);
           text-align: left;
           width: 100%;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 0.95rem;
         }
 
         .rtl .nav-item {
@@ -510,6 +1193,9 @@ const AdminDashboard = () => {
         .logout-btn {
           padding: var(--space-sm);
           color: var(--silver);
+          background: none;
+          border: none;
+          cursor: pointer;
           transition: var(--transition-base);
         }
 
@@ -517,10 +1203,12 @@ const AdminDashboard = () => {
           color: var(--error);
         }
 
+        /* Main Content */
         .dashboard-main {
           flex: 1;
           margin-left: 260px;
           padding: var(--space-xl);
+          min-height: 100vh;
         }
 
         .rtl .dashboard-main {
@@ -537,6 +1225,7 @@ const AdminDashboard = () => {
 
         .dashboard-header h1 {
           font-size: 1.75rem;
+          color: var(--white);
         }
 
         .header-right {
@@ -551,12 +1240,27 @@ const AdminDashboard = () => {
           background: var(--charcoal);
           border-radius: var(--radius-md);
           transition: var(--transition-base);
+          border: none;
+          cursor: pointer;
         }
 
         .icon-btn:hover {
           color: var(--gold);
         }
 
+        .mobile-tab-title {
+          display: none;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: var(--space-lg);
+        }
+
+        .mobile-tab-title h1 {
+          font-size: 1.5rem;
+          color: var(--white);
+        }
+
+        /* Stats Grid */
         .stats-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
@@ -581,6 +1285,7 @@ const AdminDashboard = () => {
           display: flex;
           align-items: center;
           justify-content: center;
+          flex-shrink: 0;
         }
 
         .stat-icon.blue { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
@@ -591,6 +1296,7 @@ const AdminDashboard = () => {
         .stat-info {
           display: flex;
           flex-direction: column;
+          min-width: 0;
         }
 
         .stat-value {
@@ -602,8 +1308,12 @@ const AdminDashboard = () => {
         .stat-label {
           font-size: 0.875rem;
           color: var(--silver);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
+        /* Charts */
         .charts-row {
           display: grid;
           grid-template-columns: 2fr 1fr;
@@ -618,11 +1328,18 @@ const AdminDashboard = () => {
           padding: var(--space-lg);
         }
 
-        .chart-card h3 {
+        .chart-card h3, .chart-header h3 {
+          color: var(--white);
+          font-size: 1rem;
           margin-bottom: var(--space-lg);
-          font-size: 1.1rem;
         }
 
+        .chart-container {
+          width: 100%;
+          min-height: 250px;
+        }
+
+        /* Tables */
         .tables-row {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -644,15 +1361,19 @@ const AdminDashboard = () => {
         }
 
         .table-header h3 {
-          font-size: 1.1rem;
+          color: var(--white);
+          font-size: 1rem;
         }
 
-        .view-all {
+        .view-all-btn {
           display: flex;
           align-items: center;
           gap: var(--space-xs);
           color: var(--gold);
           font-size: 0.875rem;
+          background: none;
+          border: none;
+          cursor: pointer;
         }
 
         .data-table {
@@ -675,20 +1396,25 @@ const AdminDashboard = () => {
         .data-table th {
           color: var(--silver);
           font-weight: 500;
-          font-size: 0.85rem;
+          font-size: 0.875rem;
         }
 
         .data-table td {
           color: var(--light-silver);
-          font-size: 0.9rem;
         }
 
+        .data-table.compact td {
+          padding: var(--space-sm) var(--space-md);
+        }
+
+        /* Status Badge */
         .status-badge {
-          padding: var(--space-xs) var(--space-sm);
+          display: inline-block;
+          padding: var(--space-xs) var(--space-md);
           border-radius: var(--radius-full);
           font-size: 0.75rem;
           font-weight: 600;
-          text-transform: uppercase;
+          text-transform: capitalize;
         }
 
         .status-badge.new { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
@@ -696,7 +1422,37 @@ const AdminDashboard = () => {
         .status-badge.converted { background: rgba(212, 175, 55, 0.2); color: #d4af37; }
         .status-badge.returned { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
         .status-badge.invalid { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .status-badge.active { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .status-badge.inactive { background: rgba(107, 114, 128, 0.2); color: #6b7280; }
 
+        /* Action Buttons */
+        .action-buttons {
+          display: flex;
+          gap: var(--space-sm);
+        }
+
+        .action-btn {
+          padding: var(--space-sm);
+          border-radius: var(--radius-sm);
+          color: var(--silver);
+          background: var(--slate);
+          border: none;
+          cursor: pointer;
+          transition: var(--transition-base);
+          display: flex;
+          align-items: center;
+          gap: var(--space-xs);
+        }
+
+        .action-btn:hover {
+          color: var(--white);
+        }
+
+        .action-btn.assign:hover { background: #3b82f6; }
+        .action-btn.edit:hover { background: #d4af37; }
+        .action-btn.delete:hover { background: #ef4444; }
+
+        /* Activity List */
         .activity-list {
           display: flex;
           flex-direction: column;
@@ -723,8 +1479,7 @@ const AdminDashboard = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: var(--slate);
-          color: var(--silver);
+          flex-shrink: 0;
         }
 
         .activity-icon.created { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
@@ -735,11 +1490,15 @@ const AdminDashboard = () => {
         .activity-info {
           display: flex;
           flex-direction: column;
+          min-width: 0;
         }
 
         .activity-text {
           font-size: 0.9rem;
           color: var(--light-silver);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .activity-time {
@@ -747,6 +1506,395 @@ const AdminDashboard = () => {
           color: var(--silver);
         }
 
+        /* Recent List (Mobile) */
+        .recent-list {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-sm);
+        }
+
+        .recent-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: var(--space-md);
+          background: var(--slate);
+          border-radius: var(--radius-md);
+        }
+
+        .recent-info {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .recent-name {
+          color: var(--white);
+          font-weight: 500;
+        }
+
+        .recent-category {
+          color: var(--silver);
+          font-size: 0.8rem;
+        }
+
+        /* Mobile Cards */
+        .mobile-cards {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-md);
+        }
+
+        .lead-card, .client-card {
+          background: var(--charcoal);
+          border: 1px solid var(--slate);
+          border-radius: var(--radius-lg);
+          overflow: hidden;
+        }
+
+        .lead-card-header, .client-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          padding: var(--space-md);
+          border-bottom: 1px solid var(--slate);
+        }
+
+        .lead-info h4, .client-info h4 {
+          color: var(--white);
+          font-size: 1rem;
+          margin-bottom: var(--space-xs);
+        }
+
+        .lead-category, .client-company {
+          color: var(--silver);
+          font-size: 0.85rem;
+        }
+
+        .lead-card-body, .client-card-body {
+          padding: var(--space-md);
+        }
+
+        .lead-detail {
+          display: flex;
+          align-items: center;
+          gap: var(--space-sm);
+          color: var(--silver);
+          font-size: 0.9rem;
+          margin-bottom: var(--space-sm);
+        }
+
+        .lead-card-footer, .client-card-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: var(--space-md);
+          border-top: 1px solid var(--slate);
+          background: rgba(0, 0, 0, 0.1);
+        }
+
+        .lead-date {
+          color: var(--silver);
+          font-size: 0.8rem;
+        }
+
+        .client-avatar {
+          width: 40px;
+          height: 40px;
+          background: var(--gold);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          color: var(--deep-blue);
+          margin-right: var(--space-sm);
+        }
+
+        .rtl .client-avatar {
+          margin-right: 0;
+          margin-left: var(--space-sm);
+        }
+
+        .client-stat {
+          display: flex;
+          justify-content: space-between;
+          padding: var(--space-sm) 0;
+          border-bottom: 1px solid var(--slate);
+        }
+
+        .client-stat:last-child {
+          border-bottom: none;
+        }
+
+        /* Management Header */
+        .management-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: var(--space-lg);
+          flex-wrap: wrap;
+          gap: var(--space-md);
+        }
+
+        .filter-tabs {
+          display: flex;
+          gap: var(--space-sm);
+          flex-wrap: wrap;
+        }
+
+        .filter-tab {
+          padding: var(--space-sm) var(--space-lg);
+          border-radius: var(--radius-full);
+          background: var(--charcoal);
+          color: var(--silver);
+          border: 1px solid var(--slate);
+          cursor: pointer;
+          transition: var(--transition-base);
+          text-transform: capitalize;
+          font-size: 0.875rem;
+        }
+
+        .filter-tab:hover {
+          border-color: var(--gold);
+        }
+
+        .filter-tab.active {
+          background: var(--gold);
+          color: var(--deep-blue);
+          border-color: var(--gold);
+        }
+
+        /* Categories Grid */
+        .categories-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: var(--space-lg);
+        }
+
+        .category-card {
+          background: var(--charcoal);
+          border: 1px solid var(--slate);
+          border-radius: var(--radius-lg);
+          padding: var(--space-xl);
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-md);
+        }
+
+        .category-icon {
+          width: 50px;
+          height: 50px;
+          background: rgba(212, 175, 55, 0.2);
+          border-radius: var(--radius-md);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--gold);
+        }
+
+        .category-info h4 {
+          color: var(--white);
+          margin-bottom: var(--space-xs);
+        }
+
+        .category-info p {
+          color: var(--silver);
+          font-size: 0.9rem;
+        }
+
+        .category-status {
+          display: flex;
+          align-items: center;
+          gap: var(--space-sm);
+          color: var(--silver);
+          font-size: 0.85rem;
+        }
+
+        .status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: var(--silver);
+        }
+
+        .status-dot.active {
+          background: #22c55e;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: var(--space-lg);
+        }
+
+        .charts-grid .full-width {
+          grid-column: 1 / -1;
+        }
+
+        /* Modal */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: var(--space-lg);
+        }
+
+        .modal {
+          background: var(--charcoal);
+          border: 1px solid var(--slate);
+          border-radius: var(--radius-xl);
+          width: 100%;
+          max-width: 500px;
+          max-height: 90vh;
+          overflow-y: auto;
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: var(--space-lg);
+          border-bottom: 1px solid var(--slate);
+        }
+
+        .modal-header h3 {
+          color: var(--white);
+        }
+
+        .close-btn {
+          padding: var(--space-sm);
+          color: var(--silver);
+          background: none;
+          border: none;
+          cursor: pointer;
+        }
+
+        .modal-body {
+          padding: var(--space-lg);
+        }
+
+        .modal-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: var(--space-md);
+          padding: var(--space-lg);
+          border-top: 1px solid var(--slate);
+        }
+
+        .assign-lead-info {
+          background: var(--slate);
+          padding: var(--space-md);
+          border-radius: var(--radius-md);
+          margin-bottom: var(--space-lg);
+          text-align: center;
+        }
+
+        .assign-lead-info strong {
+          color: var(--white);
+          display: block;
+          margin-bottom: var(--space-sm);
+        }
+
+        .category-tag {
+          display: inline-block;
+          padding: var(--space-xs) var(--space-md);
+          background: rgba(212, 175, 55, 0.2);
+          color: var(--gold);
+          border-radius: var(--radius-full);
+          font-size: 0.85rem;
+        }
+
+        .form-group {
+          margin-bottom: var(--space-lg);
+        }
+
+        .form-group label {
+          display: block;
+          color: var(--light-silver);
+          margin-bottom: var(--space-sm);
+          font-weight: 500;
+        }
+
+        .form-select {
+          width: 100%;
+          padding: var(--space-md);
+          background: var(--slate);
+          border: 1px solid var(--slate);
+          border-radius: var(--radius-md);
+          color: var(--white);
+          font-size: 1rem;
+        }
+
+        .form-select:focus {
+          outline: none;
+          border-color: var(--gold);
+        }
+
+        .radio-group {
+          display: flex;
+          gap: var(--space-lg);
+          flex-wrap: wrap;
+        }
+
+        .radio-label {
+          display: flex;
+          align-items: center;
+          gap: var(--space-sm);
+          color: var(--light-silver);
+          cursor: pointer;
+        }
+
+        .radio-label input {
+          accent-color: var(--gold);
+        }
+
+        /* Buttons */
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-sm);
+          padding: var(--space-md) var(--space-lg);
+          border-radius: var(--radius-md);
+          font-weight: 600;
+          cursor: pointer;
+          transition: var(--transition-base);
+          border: none;
+          font-size: 0.95rem;
+        }
+
+        .btn-primary {
+          background: var(--gold);
+          color: var(--deep-blue);
+        }
+
+        .btn-primary:hover {
+          background: var(--gold-light);
+        }
+
+        .btn-secondary {
+          background: var(--slate);
+          color: var(--light-silver);
+        }
+
+        .btn-secondary:hover {
+          background: var(--silver);
+          color: var(--deep-blue);
+        }
+
+        .btn-sm {
+          padding: var(--space-sm) var(--space-md);
+          font-size: 0.85rem;
+        }
+
+        /* Loading */
         .dashboard-loading {
           display: flex;
           flex-direction: column;
@@ -754,543 +1902,34 @@ const AdminDashboard = () => {
           justify-content: center;
           min-height: 100vh;
           gap: var(--space-lg);
+          color: var(--silver);
         }
 
-        .loading-spinner.large {
-          width: 50px;
-          height: 50px;
+        .loading-container {
+          display: flex;
+          justify-content: center;
+          padding: var(--space-3xl);
+        }
+
+        .loading-spinner {
+          width: 30px;
+          height: 30px;
           border: 3px solid var(--slate);
           border-top-color: var(--gold);
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
         }
 
-        @media (max-width: 1200px) {
-          .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-          
-          .charts-row {
-            grid-template-columns: 1fr;
-          }
-          
-          .tables-row {
-            grid-template-columns: 1fr;
-          }
+        .loading-spinner.large {
+          width: 50px;
+          height: 50px;
         }
 
-        @media (max-width: 768px) {
-          .dashboard-sidebar {
-            width: 60px;
-          }
-          
-          .sidebar-logo span,
-          .nav-item span,
-          .user-details {
-            display: none;
-          }
-          
-          .dashboard-main {
-            margin-left: 60px;
-          }
-          
-          .rtl .dashboard-main {
-            margin-right: 60px;
-          }
-          
-          .stats-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
-    </div>
-  );
-};
-
-// Sub-components
-const LeadsManagement = ({ api, isRTL }) => {
-  const navigate = useNavigate();
-  const [leads, setLeads] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState({ status: '', category: '' });
-  const [categories, setCategories] = useState([]);
-  const [clients, setClients] = useState([]);
-  
-  // Modals
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [showAssignModal, setShowAssignModal] = useState(false);
-  const [selectedLead, setSelectedLead] = useState(null);
-  
-  // Assign form
-  const [assignTo, setAssignTo] = useState('');
-  const [sendVia, setSendVia] = useState('email');
-  const [assigning, setAssigning] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
-
-  useEffect(() => {
-    fetchLeads();
-    fetchCategories();
-    fetchClients();
-  }, [filter]);
-
-  const fetchLeads = async () => {
-    try {
-      let query = '/leads?limit=50';
-      if (filter.status) query += `&status=${filter.status}`;
-      if (filter.category) query += `&category=${filter.category}`;
-      
-      const res = await api(query);
-      setLeads(res.leads || []);
-    } catch (error) {
-      console.error('Fetch leads error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const res = await api('/categories');
-      setCategories(res);
-    } catch (error) {
-      console.error('Fetch categories error:', error);
-    }
-  };
-
-  const fetchClients = async () => {
-    try {
-      const res = await api('/users?role=client&limit=100');
-      setClients(res.users || []);
-    } catch (error) {
-      console.error('Fetch clients error:', error);
-    }
-  };
-
-  const handleView = (lead) => {
-    setSelectedLead(lead);
-    setShowViewModal(true);
-  };
-
-  const handleEdit = (lead) => {
-    navigate(`/admin/leads/${lead.id}/edit`);
-  };
-
-  const handleAssignClick = (lead) => {
-    setSelectedLead(lead);
-    setAssignTo('');
-    setSendVia('email');
-    setMessage({ type: '', text: '' });
-    setShowAssignModal(true);
-  };
-
-  const handleAssign = async () => {
-    if (!assignTo) {
-      setMessage({ type: 'error', text: isRTL ? 'בחר לקוח' : 'Select a client' });
-      return;
-    }
-
-    setAssigning(true);
-    setMessage({ type: '', text: '' });
-
-    try {
-      await api(`/leads/${selectedLead.id}/assign`, {
-        method: 'POST',
-        body: JSON.stringify({
-          userId: assignTo,
-          sendVia: sendVia
-        })
-      });
-
-      setMessage({ type: 'success', text: isRTL ? 'הליד הוקצה בהצלחה!' : 'Lead assigned successfully!' });
-      
-      setTimeout(() => {
-        setShowAssignModal(false);
-        fetchLeads();
-      }, 1500);
-    } catch (error) {
-      setMessage({ type: 'error', text: error.message || (isRTL ? 'שגיאה בהקצאת הליד' : 'Error assigning lead') });
-    } finally {
-      setAssigning(false);
-    }
-  };
-
-  const handleDelete = async (lead) => {
-    if (!confirm(isRTL ? 'האם אתה בטוח שברצונך למחוק ליד זה?' : 'Are you sure you want to delete this lead?')) {
-      return;
-    }
-
-    try {
-      await api(`/leads/${lead.id}`, { method: 'DELETE' });
-      fetchLeads();
-    } catch (error) {
-      alert(error.message || 'Error deleting lead');
-    }
-  };
-
-  const getClientRemaining = (client) => {
-    if (client.monthly_lead_limit === -1) return '∞';
-    const remaining = client.monthly_lead_limit - (client.leads_received_this_month || 0);
-    return remaining > 0 ? remaining : 0;
-  };
-
-  return (
-    <div className="leads-management">
-      <div className="filters-bar">
-        <select 
-          value={filter.status} 
-          onChange={(e) => setFilter({ ...filter, status: e.target.value })}
-          className="form-select"
-        >
-          <option value="">{isRTL ? 'כל הסטטוסים' : 'All Statuses'}</option>
-          <option value="new">{isRTL ? 'חדש' : 'New'}</option>
-          <option value="sent">{isRTL ? 'נשלח' : 'Sent'}</option>
-          <option value="converted">{isRTL ? 'הומר' : 'Converted'}</option>
-          <option value="returned">{isRTL ? 'הוחזר' : 'Returned'}</option>
-        </select>
-        <select 
-          value={filter.category} 
-          onChange={(e) => setFilter({ ...filter, category: e.target.value })}
-          className="form-select"
-        >
-          <option value="">{isRTL ? 'כל הקטגוריות' : 'All Categories'}</option>
-          {categories.map(cat => (
-            <option key={cat.id} value={cat.id}>
-              {isRTL ? cat.name_he : cat.name_en}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="table-card">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>{isRTL ? 'שם לקוח' : 'Customer'}</th>
-              <th>{isRTL ? 'טלפון' : 'Phone'}</th>
-              <th>{isRTL ? 'קטגוריה' : 'Category'}</th>
-              <th>{isRTL ? 'סטטוס' : 'Status'}</th>
-              <th>{isRTL ? 'הוקצה ל' : 'Assigned To'}</th>
-              <th>{isRTL ? 'פעולות' : 'Actions'}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {leads.map(lead => (
-              <tr key={lead.id}>
-                <td>{lead.customer_name}</td>
-                <td>{lead.customer_phone}</td>
-                <td>{isRTL ? lead.category_name_he : lead.category_name_en}</td>
-                <td><span className={`status-badge ${lead.status}`}>{lead.status.toUpperCase()}</span></td>
-                <td>{lead.assigned_to_name || '-'}</td>
-                <td>
-                  <div className="action-buttons">
-                    {lead.status === 'new' && (
-                      <button 
-                        className="icon-btn small gold" 
-                        title={isRTL ? 'הקצה' : 'Assign'}
-                        onClick={() => handleAssignClick(lead)}
-                      >
-                        <Send size={16} />
-                      </button>
-                    )}
-                    <button 
-                      className="icon-btn small" 
-                      title={isRTL ? 'ערוך' : 'Edit'}
-                      onClick={() => handleEdit(lead)}
-                    >
-                      <Edit size={16} />
-                    </button>
-                    <button 
-                      className="icon-btn small" 
-                      title={isRTL ? 'צפה' : 'View'}
-                      onClick={() => handleView(lead)}
-                    >
-                      <Eye size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* View Lead Modal */}
-      {showViewModal && selectedLead && (
-        <div className="modal-overlay" onClick={() => setShowViewModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowViewModal(false)}>
-              <XCircle size={24} />
-            </button>
-            <h2>{isRTL ? 'פרטי ליד' : 'Lead Details'}</h2>
-            
-            <div className="lead-details">
-              <div className="detail-row">
-                <span className="detail-label">{isRTL ? 'שם:' : 'Name:'}</span>
-                <span className="detail-value">{selectedLead.customer_name}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">{isRTL ? 'טלפון:' : 'Phone:'}</span>
-                <span className="detail-value">
-                  <a href={`tel:${selectedLead.customer_phone}`}>{selectedLead.customer_phone}</a>
-                </span>
-              </div>
-              {selectedLead.customer_email && (
-                <div className="detail-row">
-                  <span className="detail-label">{isRTL ? 'אימייל:' : 'Email:'}</span>
-                  <span className="detail-value">
-                    <a href={`mailto:${selectedLead.customer_email}`}>{selectedLead.customer_email}</a>
-                  </span>
-                </div>
-              )}
-              <div className="detail-row">
-                <span className="detail-label">{isRTL ? 'קטגוריה:' : 'Category:'}</span>
-                <span className="detail-value">{isRTL ? selectedLead.category_name_he : selectedLead.category_name_en}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">{isRTL ? 'סטטוס:' : 'Status:'}</span>
-                <span className={`status-badge ${selectedLead.status}`}>{selectedLead.status.toUpperCase()}</span>
-              </div>
-              {selectedLead.service_area && (
-                <div className="detail-row">
-                  <span className="detail-label">{isRTL ? 'אזור:' : 'Area:'}</span>
-                  <span className="detail-value">{selectedLead.service_area}</span>
-                </div>
-              )}
-              {selectedLead.notes && (
-                <div className="detail-row">
-                  <span className="detail-label">{isRTL ? 'הערות:' : 'Notes:'}</span>
-                  <span className="detail-value">{selectedLead.notes}</span>
-                </div>
-              )}
-              {selectedLead.assigned_to_name && (
-                <div className="detail-row">
-                  <span className="detail-label">{isRTL ? 'הוקצה ל:' : 'Assigned To:'}</span>
-                  <span className="detail-value">{selectedLead.assigned_to_name}</span>
-                </div>
-              )}
-              <div className="detail-row">
-                <span className="detail-label">{isRTL ? 'נוצר:' : 'Created:'}</span>
-                <span className="detail-value">{new Date(selectedLead.created_at).toLocaleString()}</span>
-              </div>
-            </div>
-
-            <div className="modal-actions">
-              <button className="btn btn-secondary" onClick={() => setShowViewModal(false)}>
-                {isRTL ? 'סגור' : 'Close'}
-              </button>
-              <button className="btn btn-primary" onClick={() => { setShowViewModal(false); handleEdit(selectedLead); }}>
-                <Edit size={18} />
-                {isRTL ? 'ערוך' : 'Edit'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Assign Lead Modal */}
-      {showAssignModal && selectedLead && (
-        <div className="modal-overlay" onClick={() => setShowAssignModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowAssignModal(false)}>
-              <XCircle size={24} />
-            </button>
-            <h2>
-              <Send size={24} />
-              {isRTL ? 'הקצה ליד' : 'Assign Lead'}
-            </h2>
-
-            <div className="assign-lead-info">
-              <p><strong>{selectedLead.customer_name}</strong> - {selectedLead.customer_phone}</p>
-              <p className="category-tag">{isRTL ? selectedLead.category_name_he : selectedLead.category_name_en}</p>
-            </div>
-
-            {message.text && (
-              <div className={`message ${message.type}`}>
-                {message.type === 'error' ? <XCircle size={18} /> : <CheckCircle size={18} />}
-                {message.text}
-              </div>
-            )}
-
-            <div className="form-group">
-              <label className="form-label">{isRTL ? 'בחר לקוח' : 'Select Client'}</label>
-              <select
-                className="form-select"
-                value={assignTo}
-                onChange={(e) => setAssignTo(e.target.value)}
-              >
-                <option value="">{isRTL ? '-- בחר לקוח --' : '-- Select Client --'}</option>
-                {clients.filter(c => c.is_active).map(client => {
-                  const remaining = getClientRemaining(client);
-                  const isFull = remaining === 0;
-                  return (
-                    <option key={client.id} value={client.id} disabled={isFull}>
-                      {client.name} ({client.company_name || 'N/A'}) - {isRTL ? 'נותרו:' : 'Remaining:'} {remaining}
-                      {isFull ? (isRTL ? ' [מלא]' : ' [Full]') : ''}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">{isRTL ? 'שלח באמצעות' : 'Send Via'}</label>
-              <div className="radio-group">
-                <label className="radio-label">
-                  <input
-                    type="radio"
-                    name="sendVia"
-                    value="email"
-                    checked={sendVia === 'email'}
-                    onChange={(e) => setSendVia(e.target.value)}
-                  />
-                  {isRTL ? 'אימייל' : 'Email'}
-                </label>
-                <label className="radio-label">
-                  <input
-                    type="radio"
-                    name="sendVia"
-                    value="sms"
-                    checked={sendVia === 'sms'}
-                    onChange={(e) => setSendVia(e.target.value)}
-                  />
-                  SMS
-                </label>
-                <label className="radio-label">
-                  <input
-                    type="radio"
-                    name="sendVia"
-                    value="both"
-                    checked={sendVia === 'both'}
-                    onChange={(e) => setSendVia(e.target.value)}
-                  />
-                  {isRTL ? 'שניהם' : 'Both'}
-                </label>
-              </div>
-            </div>
-
-            <div className="modal-actions">
-              <button className="btn btn-secondary" onClick={() => setShowAssignModal(false)}>
-                {isRTL ? 'ביטול' : 'Cancel'}
-              </button>
-              <button className="btn btn-primary" onClick={handleAssign} disabled={assigning}>
-                {assigning ? (
-                  <span className="loading-spinner"></span>
-                ) : (
-                  <>
-                    <Send size={18} />
-                    {isRTL ? 'הקצה ושלח' : 'Assign & Send'}
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style>{`
-        .filters-bar {
-          display: flex;
-          gap: var(--space-md);
-          margin-bottom: var(--space-lg);
-        }
-        
-        .filters-bar .form-select {
-          min-width: 180px;
-        }
-        
-        .action-buttons {
-          display: flex;
-          gap: var(--space-xs);
-        }
-        
-        .icon-btn.small {
-          padding: var(--space-xs);
-        }
-        
-        .icon-btn.gold {
-          color: var(--gold);
+        @keyframes spin {
+          to { transform: rotate(360deg); }
         }
 
-        .icon-btn.gold:hover {
-          background: rgba(212, 175, 55, 0.2);
-        }
-
-        .lead-details {
-          background: var(--navy);
-          border-radius: var(--radius-lg);
-          padding: var(--space-lg);
-          margin: var(--space-lg) 0;
-        }
-
-        .detail-row {
-          display: flex;
-          padding: var(--space-sm) 0;
-          border-bottom: 1px solid var(--slate);
-        }
-
-        .detail-row:last-child {
-          border-bottom: none;
-        }
-
-        .detail-label {
-          width: 120px;
-          color: var(--silver);
-          font-weight: 500;
-        }
-
-        .detail-value {
-          flex: 1;
-          color: var(--white);
-        }
-
-        .detail-value a {
-          color: var(--gold);
-        }
-
-        .assign-lead-info {
-          background: var(--navy);
-          padding: var(--space-md);
-          border-radius: var(--radius-md);
-          margin-bottom: var(--space-lg);
-          text-align: center;
-        }
-
-        .assign-lead-info .category-tag {
-          display: inline-block;
-          margin-top: var(--space-sm);
-          padding: var(--space-xs) var(--space-md);
-          background: rgba(212, 175, 55, 0.2);
-          color: var(--gold);
-          border-radius: var(--radius-full);
-          font-size: 0.875rem;
-        }
-
-        .radio-group {
-          display: flex;
-          gap: var(--space-lg);
-        }
-
-        .radio-label {
-          display: flex;
-          align-items: center;
-          gap: var(--space-sm);
-          cursor: pointer;
-          color: var(--light-silver);
-        }
-
-        .radio-label input {
-          accent-color: var(--gold);
-        }
-
-        .modal-actions {
-          display: flex;
-          justify-content: flex-end;
-          gap: var(--space-md);
-          margin-top: var(--space-xl);
-          padding-top: var(--space-lg);
-          border-top: 1px solid var(--slate);
-        }
-
+        /* Message */
         .message {
           display: flex;
           align-items: center;
@@ -1312,310 +1951,197 @@ const LeadsManagement = ({ api, isRTL }) => {
           color: #22c55e;
         }
 
-        .loading-spinner {
-          display: inline-block;
-          width: 18px;
-          height: 18px;
-          border: 2px solid transparent;
-          border-top-color: currentColor;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
+        /* Utilities */
+        .desktop-only {
+          display: block;
         }
 
-        @keyframes spin {
-          to { transform: rotate(360deg); }
+        .mobile-only {
+          display: none;
+        }
+
+        .table-container {
+          overflow-x: auto;
+        }
+
+        /* ===================================
+           Responsive Breakpoints
+           =================================== */
+
+        @media (max-width: 1200px) {
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .charts-row {
+            grid-template-columns: 1fr;
+          }
+
+          .tables-row {
+            grid-template-columns: 1fr;
+          }
+
+          .charts-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 768px) {
+          /* Show mobile elements */
+          .mobile-header {
+            display: flex;
+          }
+
+          .sidebar-overlay {
+            display: block;
+          }
+
+          .mobile-only {
+            display: block;
+          }
+
+          .desktop-only {
+            display: none;
+          }
+
+          .mobile-tab-title {
+            display: flex;
+          }
+
+          /* Hide sidebar by default, show when open */
+          .dashboard-sidebar {
+            transform: translateX(-100%);
+          }
+
+          .rtl .dashboard-sidebar {
+            transform: translateX(100%);
+          }
+
+          .dashboard-sidebar.open {
+            transform: translateX(0);
+          }
+
+          .close-sidebar {
+            display: block;
+          }
+
+          /* Adjust main content */
+          .dashboard-main {
+            margin-left: 0;
+            margin-right: 0;
+            padding: var(--space-md);
+            padding-top: calc(60px + var(--space-md));
+          }
+
+          .rtl .dashboard-main {
+            margin-right: 0;
+          }
+
+          /* Stats grid 2 columns */
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+          }
+
+          .stat-card {
+            padding: var(--space-md);
+          }
+
+          .stat-icon {
+            width: 40px;
+            height: 40px;
+          }
+
+          .stat-value {
+            font-size: 1.25rem;
+          }
+
+          .stat-label {
+            font-size: 0.75rem;
+          }
+
+          /* Filter tabs scroll */
+          .filter-tabs {
+            overflow-x: auto;
+            padding-bottom: var(--space-sm);
+            flex-wrap: nowrap;
+          }
+
+          .filter-tab {
+            white-space: nowrap;
+            flex-shrink: 0;
+          }
+
+          /* Categories */
+          .categories-grid {
+            grid-template-columns: 1fr;
+          }
+
+          /* Charts */
+          .chart-container {
+            min-height: 200px;
+          }
+
+          /* Modal full width on mobile */
+          .modal {
+            max-width: 100%;
+            margin: var(--space-md);
+            max-height: calc(100vh - var(--space-xl));
+          }
+
+          /* Radio group stack on mobile */
+          .radio-group {
+            flex-direction: column;
+            gap: var(--space-md);
+          }
+
+          /* Button text hide on small screens */
+          .btn-text {
+            display: none;
+          }
+
+          .management-header {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .management-header .btn {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .management-header .btn .btn-text {
+            display: inline;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .stats-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .stat-card {
+            flex-direction: row;
+          }
+
+          .action-buttons {
+            flex-wrap: wrap;
+          }
+
+          .lead-card-footer .action-btn span {
+            display: none;
+          }
+
+          .modal-actions {
+            flex-direction: column;
+          }
+
+          .modal-actions .btn {
+            width: 100%;
+            justify-content: center;
+          }
         }
       `}</style>
-    </div>
-  );
-};
-
-const ClientsManagement = ({ api, isRTL, clients: initialClients }) => {
-  const [clients, setClients] = useState(initialClients || []);
-  const [showModal, setShowModal] = useState(false);
-  const [editingClient, setEditingClient] = useState(null);
-
-  const fetchClients = async () => {
-    try {
-      const res = await api('/users?role=client&limit=100');
-      setClients(res.users || []);
-    } catch (error) {
-      console.error('Fetch clients error:', error);
-    }
-  };
-
-  const handleEdit = (client) => {
-    setEditingClient(client);
-    setShowModal(true);
-  };
-
-  const handleAdd = () => {
-    setEditingClient(null);
-    setShowModal(true);
-  };
-
-  const handleSave = () => {
-    fetchClients();
-  };
-
-  return (
-    <div className="clients-management">
-      <div className="management-header">
-        <button className="btn btn-primary" onClick={handleAdd}>
-          <UserPlus size={18} />
-          {isRTL ? 'הוסף לקוח' : 'Add Client'}
-        </button>
-      </div>
-
-      <div className="table-card">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>{isRTL ? 'שם' : 'Name'}</th>
-              <th>{isRTL ? 'חברה' : 'Company'}</th>
-              <th>{isRTL ? 'חבילה' : 'Package'}</th>
-              <th>{isRTL ? 'לידים החודש' : 'Leads This Month'}</th>
-              <th>{isRTL ? 'סטטוס' : 'Status'}</th>
-              <th>{isRTL ? 'פעולות' : 'Actions'}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {clients.map(client => (
-              <tr key={client.id}>
-                <td>{client.name}</td>
-                <td>{client.company_name || '-'}</td>
-                <td>
-                  <span className={`package-badge ${client.package_type}`}>
-                    {client.package_type}
-                  </span>
-                </td>
-                <td>
-                  {client.leads_received_this_month || 0} / {client.monthly_lead_limit === -1 ? '∞' : client.monthly_lead_limit}
-                </td>
-                <td>
-                  <span className={`status-badge ${client.is_active ? 'sent' : 'invalid'}`}>
-                    {client.is_active ? (isRTL ? 'פעיל' : 'Active') : (isRTL ? 'לא פעיל' : 'Inactive')}
-                  </span>
-                </td>
-                <td>
-                  <div className="action-buttons">
-                    <button className="icon-btn small" title="Edit" onClick={() => handleEdit(client)}>
-                      <Edit size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {showModal && (
-        <ClientFormModal
-          client={editingClient}
-          onClose={() => setShowModal(false)}
-          onSave={handleSave}
-        />
-      )}
-
-      <style>{`
-        .management-header {
-          display: flex;
-          justify-content: flex-end;
-          margin-bottom: var(--space-lg);
-        }
-
-        .package-badge {
-          padding: var(--space-xs) var(--space-sm);
-          border-radius: var(--radius-full);
-          font-size: 0.75rem;
-          font-weight: 600;
-        }
-        
-        .package-badge.starter { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
-        .package-badge.professional { background: rgba(212, 175, 55, 0.2); color: #d4af37; }
-        .package-badge.enterprise { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
-        .package-badge.pay_per_lead { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
-      `}</style>
-    </div>
-  );
-};
-
-const CategoriesManagement = ({ api, isRTL }) => {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
-    try {
-      const res = await api('/categories/all');
-      setCategories(res);
-    } catch (error) {
-      console.error('Fetch categories error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEdit = (category) => {
-    setEditingCategory(category);
-    setShowModal(true);
-  };
-
-  const handleAdd = () => {
-    setEditingCategory(null);
-    setShowModal(true);
-  };
-
-  const handleSave = () => {
-    fetchCategories();
-  };
-
-  return (
-    <div className="categories-management">
-      <div className="management-header">
-        <button className="btn btn-primary" onClick={handleAdd}>
-          <Plus size={18} />
-          {isRTL ? 'הוסף קטגוריה' : 'Add Category'}
-        </button>
-      </div>
-
-      <div className="table-card">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>{isRTL ? 'שם (עברית)' : 'Name (Hebrew)'}</th>
-              <th>{isRTL ? 'שם (אנגלית)' : 'Name (English)'}</th>
-              <th>{isRTL ? 'סה"כ לידים' : 'Total Leads'}</th>
-              <th>{isRTL ? 'לקוחות' : 'Clients'}</th>
-              <th>{isRTL ? 'סטטוס' : 'Status'}</th>
-              <th>{isRTL ? 'פעולות' : 'Actions'}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {categories.map(cat => (
-              <tr key={cat.id}>
-                <td>{cat.name_he}</td>
-                <td>{cat.name_en}</td>
-                <td>{cat.lead_count || 0}</td>
-                <td>{cat.user_count || 0}</td>
-                <td>
-                  <span className={`status-badge ${cat.is_active ? 'sent' : 'invalid'}`}>
-                    {cat.is_active ? (isRTL ? 'פעיל' : 'Active') : (isRTL ? 'לא פעיל' : 'Inactive')}
-                  </span>
-                </td>
-                <td>
-                  <div className="action-buttons">
-                    <button className="icon-btn small" title="Edit" onClick={() => handleEdit(cat)}>
-                      <Edit size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {showModal && (
-        <CategoryFormModal
-          category={editingCategory}
-          onClose={() => setShowModal(false)}
-          onSave={handleSave}
-        />
-      )}
-    </div>
-  );
-};
-
-const AnalyticsView = ({ api, isRTL, chartData, categoryData, statusData }) => {
-  const COLORS = ['#d4af37', '#3b82f6', '#22c55e', '#ef4444', '#8b5cf6', '#f59e0b'];
-
-  return (
-    <div className="analytics-view">
-      <div className="charts-row">
-        <div className="chart-card large">
-          <h3>{isRTL ? 'לידים לאורך זמן' : 'Leads Over Time'}</h3>
-          <ResponsiveContainer width="100%" height={350}>
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="colorTotal2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#d4af37" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#d4af37" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a3f54" />
-              <XAxis dataKey="period" stroke="#b8c5d1" />
-              <YAxis stroke="#b8c5d1" />
-              <Tooltip 
-                contentStyle={{ 
-                  background: '#1e2d3d', 
-                  border: '1px solid #2a3f54',
-                  borderRadius: '8px'
-                }}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="total" 
-                stroke="#d4af37" 
-                fillOpacity={1} 
-                fill="url(#colorTotal2)" 
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      <div className="charts-row">
-        <div className="chart-card">
-          <h3>{isRTL ? 'לפי קטגוריה' : 'By Category'}</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={categoryData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a3f54" />
-              <XAxis type="number" stroke="#b8c5d1" />
-              <YAxis dataKey={isRTL ? "name_he" : "name_en"} type="category" stroke="#b8c5d1" width={120} />
-              <Tooltip 
-                contentStyle={{ 
-                  background: '#1e2d3d', 
-                  border: '1px solid #2a3f54',
-                  borderRadius: '8px'
-                }}
-              />
-              <Bar dataKey="count" fill="#d4af37" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="chart-card">
-          <h3>{isRTL ? 'לפי סטטוס' : 'By Status'}</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={statusData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={5}
-                dataKey="count"
-                nameKey="status"
-                label
-              >
-                {statusData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
     </div>
   );
 };

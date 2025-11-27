@@ -1,28 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import {
-  ArrowLeft, ArrowRight, Save, Send, User, Phone, Mail,
-  MapPin, FileText, Tag, AlertCircle, CheckCircle, Users
+  ArrowLeft,
+  ArrowRight,
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  FileText,
+  Tag,
+  Send,
+  Users,
+  AlertCircle,
+  Check,
+  MessageSquare,
+  Smartphone
 } from 'lucide-react';
 
 const LeadForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { api, isAdmin, user } = useAuth();
+  const { api } = useAuth();
   const { isRTL } = useLanguage();
-
-  const isEditing = !!id;
+  const isEditing = Boolean(id);
 
   const [formData, setFormData] = useState({
     customer_name: '',
-    customer_email: '',
     customer_phone: '',
+    customer_email: '',
+    customer_address: '',
     category_id: '',
-    service_area: '',
     notes: '',
-    priority: 'normal'
+    status: 'new'
   });
 
   const [categories, setCategories] = useState([]);
@@ -30,28 +41,22 @@ const LeadForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  // For assigning
   const [showAssign, setShowAssign] = useState(false);
-  const [assignTo, setAssignTo] = useState('');
+  const [selectedClient, setSelectedClient] = useState('');
   const [sendVia, setSendVia] = useState('email');
 
   useEffect(() => {
-    if (!isAdmin) {
-      navigate('/client/dashboard');
-      return;
-    }
     fetchCategories();
     fetchClients();
     if (isEditing) {
       fetchLead();
     }
-  }, [id, isAdmin]);
+  }, [id]);
 
   const fetchCategories = async () => {
     try {
       const res = await api('/categories');
-      setCategories(res);
+      setCategories(res.categories || res || []);
     } catch (err) {
       console.error('Fetch categories error:', err);
     }
@@ -72,12 +77,12 @@ const LeadForm = () => {
       const res = await api(`/leads/${id}`);
       setFormData({
         customer_name: res.customer_name || '',
-        customer_email: res.customer_email || '',
         customer_phone: res.customer_phone || '',
+        customer_email: res.customer_email || '',
+        customer_address: res.customer_address || '',
         category_id: res.category_id || '',
-        service_area: res.service_area || '',
         notes: res.notes || '',
-        priority: res.priority || 'normal'
+        status: res.status || 'new'
       });
     } catch (err) {
       setError(isRTL ? 'שגיאה בטעינת הליד' : 'Error loading lead');
@@ -89,51 +94,34 @@ const LeadForm = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    setError('');
-  };
-
-  const validateForm = () => {
-    if (!formData.customer_name.trim()) {
-      setError(isRTL ? 'שם הלקוח הוא שדה חובה' : 'Customer name is required');
-      return false;
-    }
-    if (!formData.customer_phone.trim()) {
-      setError(isRTL ? 'טלפון הוא שדה חובה' : 'Phone number is required');
-      return false;
-    }
-    if (!formData.category_id) {
-      setError(isRTL ? 'יש לבחור קטגוריה' : 'Please select a category');
-      return false;
-    }
-    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) return;
-
-    setLoading(true);
     setError('');
+    setSuccess('');
+
+    if (!formData.customer_name || !formData.customer_phone || !formData.category_id) {
+      setError(isRTL ? 'יש למלא את כל השדות הנדרשים' : 'Please fill all required fields');
+      return;
+    }
 
     try {
+      setLoading(true);
       if (isEditing) {
         await api(`/leads/${id}`, {
           method: 'PUT',
           body: JSON.stringify(formData)
         });
         setSuccess(isRTL ? 'הליד עודכן בהצלחה!' : 'Lead updated successfully!');
+        setTimeout(() => navigate('/admin/dashboard'), 1500);
       } else {
-        const res = await api('/leads', {
+        await api('/leads', {
           method: 'POST',
           body: JSON.stringify(formData)
         });
         setSuccess(isRTL ? 'הליד נוצר בהצלחה!' : 'Lead created successfully!');
-        
-        // Show assign option for new leads
-        if (res.leadId) {
-          setShowAssign(true);
-        }
+        setShowAssign(true);
       }
     } catch (err) {
       setError(err.message || (isRTL ? 'שגיאה בשמירת הליד' : 'Error saving lead'));
@@ -143,17 +131,17 @@ const LeadForm = () => {
   };
 
   const handleAssign = async () => {
-    if (!assignTo) {
+    if (!selectedClient) {
       setError(isRTL ? 'יש לבחור לקוח להקצאה' : 'Please select a client to assign');
       return;
     }
 
-    setLoading(true);
     try {
-      // Get the lead ID - for new leads we need to fetch it
+      setLoading(true);
+      // Get the latest lead
       const leadsRes = await api('/leads?status=new&limit=1');
       const leadId = leadsRes.leads?.[0]?.id;
-      
+
       if (!leadId) {
         throw new Error('Lead not found');
       }
@@ -161,7 +149,7 @@ const LeadForm = () => {
       await api(`/leads/${leadId}/assign`, {
         method: 'POST',
         body: JSON.stringify({
-          user_id: assignTo,
+          user_id: selectedClient,
           send_via: sendVia
         })
       });
@@ -178,11 +166,9 @@ const LeadForm = () => {
   const getClientInfo = (clientId) => {
     const client = clients.find(c => c.id === clientId);
     if (!client) return null;
-
     const remaining = client.monthly_lead_limit === -1 
       ? '∞' 
       : client.monthly_lead_limit - client.leads_received_this_month;
-    
     return {
       ...client,
       remaining,
@@ -190,10 +176,19 @@ const LeadForm = () => {
     };
   };
 
-  const selectedClient = assignTo ? getClientInfo(assignTo) : null;
+  const selectedClientInfo = selectedClient ? getClientInfo(selectedClient) : null;
+
+  if (loading && isEditing) {
+    return (
+      <div className="lead-form-loading">
+        <div className="loading-spinner large"></div>
+        <p>{isRTL ? 'טוען...' : 'Loading...'}</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="lead-form-page">
+    <div className={`lead-form-page ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="form-container">
         {/* Header */}
         <div className="form-header">
@@ -201,12 +196,7 @@ const LeadForm = () => {
             {isRTL ? <ArrowRight size={20} /> : <ArrowLeft size={20} />}
             {isRTL ? 'חזרה ללוח הבקרה' : 'Back to Dashboard'}
           </Link>
-          <h1>
-            {isEditing 
-              ? (isRTL ? 'עריכת ליד' : 'Edit Lead')
-              : (isRTL ? 'הוספת ליד חדש' : 'Add New Lead')
-            }
-          </h1>
+          <h1>{isEditing ? (isRTL ? 'עריכת ליד' : 'Edit Lead') : (isRTL ? 'הוספת ליד חדש' : 'Add New Lead')}</h1>
         </div>
 
         {/* Messages */}
@@ -216,180 +206,24 @@ const LeadForm = () => {
             {error}
           </div>
         )}
-
         {success && (
           <div className="message success">
-            <CheckCircle size={20} />
+            <Check size={20} />
             {success}
           </div>
         )}
 
-        {/* Main Form */}
-        {!showAssign ? (
-          <form onSubmit={handleSubmit}>
-            <div className="form-section">
-              <h3>
-                <User size={18} />
-                {isRTL ? 'פרטי הלקוח' : 'Customer Details'}
-              </h3>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">
-                    {isRTL ? 'שם הלקוח' : 'Customer Name'} *
-                  </label>
-                  <input
-                    type="text"
-                    name="customer_name"
-                    className="form-input"
-                    value={formData.customer_name}
-                    onChange={handleChange}
-                    placeholder={isRTL ? 'הכנס שם מלא' : 'Enter full name'}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    {isRTL ? 'טלפון' : 'Phone'} *
-                  </label>
-                  <input
-                    type="tel"
-                    name="customer_phone"
-                    className="form-input"
-                    value={formData.customer_phone}
-                    onChange={handleChange}
-                    placeholder={isRTL ? '050-000-0000' : '050-000-0000'}
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">
-                  {isRTL ? 'אימייל' : 'Email'}
-                </label>
-                <input
-                  type="email"
-                  name="customer_email"
-                  className="form-input"
-                  value={formData.customer_email}
-                  onChange={handleChange}
-                  placeholder={isRTL ? 'email@example.com' : 'email@example.com'}
-                />
-              </div>
-            </div>
-
-            <div className="form-section">
-              <h3>
-                <Tag size={18} />
-                {isRTL ? 'פרטי השירות' : 'Service Details'}
-              </h3>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">
-                    {isRTL ? 'קטגוריה' : 'Category'} *
-                  </label>
-                  <select
-                    name="category_id"
-                    className="form-select"
-                    value={formData.category_id}
-                    onChange={handleChange}
-                  >
-                    <option value="">{isRTL ? 'בחר קטגוריה' : 'Select category'}</option>
-                    {categories.map(cat => (
-                      <option key={cat.id} value={cat.id}>
-                        {isRTL ? cat.name_he : cat.name_en}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    {isRTL ? 'עדיפות' : 'Priority'}
-                  </label>
-                  <select
-                    name="priority"
-                    className="form-select"
-                    value={formData.priority}
-                    onChange={handleChange}
-                  >
-                    <option value="low">{isRTL ? 'נמוכה' : 'Low'}</option>
-                    <option value="normal">{isRTL ? 'רגילה' : 'Normal'}</option>
-                    <option value="high">{isRTL ? 'גבוהה' : 'High'}</option>
-                    <option value="hot">{isRTL ? 'חם!' : 'Hot!'}</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">
-                  {isRTL ? 'אזור שירות' : 'Service Area'}
-                </label>
-                <input
-                  type="text"
-                  name="service_area"
-                  className="form-input"
-                  value={formData.service_area}
-                  onChange={handleChange}
-                  placeholder={isRTL ? 'תל אביב, מרכז' : 'Tel Aviv, Center'}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">
-                  {isRTL ? 'הערות' : 'Notes'}
-                </label>
-                <textarea
-                  name="notes"
-                  className="form-textarea"
-                  value={formData.notes}
-                  onChange={handleChange}
-                  placeholder={isRTL ? 'פרטים נוספים על הליד...' : 'Additional details about the lead...'}
-                  rows={4}
-                />
-              </div>
-            </div>
-
-            <div className="form-actions">
-              <button 
-                type="button" 
-                className="btn btn-secondary"
-                onClick={() => navigate('/admin/dashboard')}
-              >
-                {isRTL ? 'ביטול' : 'Cancel'}
-              </button>
-              <button 
-                type="submit" 
-                className="btn btn-primary"
-                disabled={loading}
-              >
-                {loading ? (
-                  <span className="loading-spinner"></span>
-                ) : (
-                  <>
-                    <Save size={18} />
-                    {isEditing 
-                      ? (isRTL ? 'עדכן ליד' : 'Update Lead')
-                      : (isRTL ? 'שמור ליד' : 'Save Lead')
-                    }
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        ) : (
-          /* Assign Section */
+        {/* Assign Section (after save) */}
+        {showAssign ? (
           <div className="assign-section">
-            <h2>
+            <div className="assign-header">
               <Send size={24} />
-              {isRTL ? 'הקצה ושלח ליד' : 'Assign & Send Lead'}
-            </h2>
+              <h2>{isRTL ? 'הקצה ושלח ליד' : 'Assign & Send Lead'}</h2>
+            </div>
             <p className="assign-description">
               {isRTL 
                 ? 'הליד נשמר בהצלחה. כעת תוכל להקצות אותו ללקוח ולשלוח אותו מיד.'
-                : 'Lead saved successfully. Now you can assign it to a client and send it immediately.'
-              }
+                : 'Lead saved successfully. Now you can assign it to a client and send it immediately.'}
             </p>
 
             <div className="form-group">
@@ -399,8 +233,8 @@ const LeadForm = () => {
               </label>
               <select
                 className="form-select"
-                value={assignTo}
-                onChange={(e) => setAssignTo(e.target.value)}
+                value={selectedClient}
+                onChange={(e) => setSelectedClient(e.target.value)}
               >
                 <option value="">{isRTL ? 'בחר לקוח להקצאה' : 'Select client to assign'}</option>
                 {clients.filter(c => c.is_active).map(client => {
@@ -420,37 +254,26 @@ const LeadForm = () => {
               </select>
             </div>
 
-            {selectedClient && (
-              <div className={`client-preview ${!selectedClient.canReceive ? 'warning' : ''}`}>
-                <h4>{selectedClient.name}</h4>
-                <p>{selectedClient.company_name}</p>
+            {selectedClientInfo && (
+              <div className={`client-preview ${selectedClientInfo.canReceive ? '' : 'warning'}`}>
+                <h4>{selectedClientInfo.name}</h4>
+                <p>{selectedClientInfo.company_name}</p>
                 <div className="client-stats">
-                  <span>
-                    {isRTL ? 'חבילה:' : 'Package:'} {selectedClient.package_type}
-                  </span>
-                  <span>
-                    {isRTL ? 'לידים החודש:' : 'Leads this month:'} {selectedClient.leads_received_this_month}
-                  </span>
-                  <span>
-                    {isRTL ? 'נשארו:' : 'Remaining:'} {selectedClient.remaining}
-                  </span>
+                  <span>{isRTL ? 'חבילה:' : 'Package:'} {selectedClientInfo.package_type}</span>
+                  <span>{isRTL ? 'לידים החודש:' : 'Leads this month:'} {selectedClientInfo.leads_received_this_month}</span>
+                  <span>{isRTL ? 'נשארו:' : 'Remaining:'} {selectedClientInfo.remaining}</span>
                 </div>
-                {!selectedClient.canReceive && (
+                {!selectedClientInfo.canReceive && (
                   <div className="warning-message">
                     <AlertCircle size={16} />
-                    {isRTL 
-                      ? 'לקוח זה הגיע למגבלת הלידים החודשית'
-                      : 'This client has reached their monthly lead limit'
-                    }
+                    {isRTL ? 'לקוח זה הגיע למגבלת הלידים החודשית' : 'This client has reached their monthly lead limit'}
                   </div>
                 )}
               </div>
             )}
 
             <div className="form-group">
-              <label className="form-label">
-                {isRTL ? 'שלח באמצעות' : 'Send Via'}
-              </label>
+              <label className="form-label">{isRTL ? 'שלח באמצעות' : 'Send Via'}</label>
               <div className="send-options">
                 <label className={`send-option ${sendVia === 'email' ? 'selected' : ''}`}>
                   <input
@@ -461,7 +284,7 @@ const LeadForm = () => {
                     onChange={(e) => setSendVia(e.target.value)}
                   />
                   <Mail size={18} />
-                  <span>{isRTL ? 'אימייל' : 'Email'}</span>
+                  <span>Email</span>
                 </label>
                 <label className={`send-option ${sendVia === 'sms' ? 'selected' : ''}`}>
                   <input
@@ -471,7 +294,7 @@ const LeadForm = () => {
                     checked={sendVia === 'sms'}
                     onChange={(e) => setSendVia(e.target.value)}
                   />
-                  <Phone size={18} />
+                  <Smartphone size={18} />
                   <span>SMS</span>
                 </label>
                 <label className={`send-option ${sendVia === 'both' ? 'selected' : ''}`}>
@@ -489,21 +312,21 @@ const LeadForm = () => {
             </div>
 
             <div className="form-actions">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="btn btn-secondary"
                 onClick={() => navigate('/admin/dashboard')}
               >
                 {isRTL ? 'הקצה מאוחר יותר' : 'Assign Later'}
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="btn btn-primary"
                 onClick={handleAssign}
-                disabled={loading || !assignTo || !selectedClient?.canReceive}
+                disabled={loading || !selectedClient || !selectedClientInfo?.canReceive}
               >
                 {loading ? (
-                  <span className="loading-spinner"></span>
+                  <span className="loading-spinner small"></span>
                 ) : (
                   <>
                     <Send size={18} />
@@ -513,21 +336,208 @@ const LeadForm = () => {
               </button>
             </div>
           </div>
+        ) : (
+          /* Lead Form */
+          <form onSubmit={handleSubmit}>
+            {/* Customer Details Section */}
+            <div className="form-section">
+              <h3>
+                <User size={18} />
+                {isRTL ? 'פרטי הלקוח' : 'Customer Details'}
+              </h3>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label className="form-label">
+                    {isRTL ? 'שם הלקוח' : 'Customer Name'} *
+                  </label>
+                  <div className="input-wrapper">
+                    <User size={18} className="input-icon" />
+                    <input
+                      type="text"
+                      name="customer_name"
+                      className="form-input"
+                      value={formData.customer_name}
+                      onChange={handleChange}
+                      placeholder={isRTL ? 'הכנס שם מלא' : 'Enter full name'}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    {isRTL ? 'טלפון' : 'Phone'} *
+                  </label>
+                  <div className="input-wrapper">
+                    <Phone size={18} className="input-icon" />
+                    <input
+                      type="tel"
+                      name="customer_phone"
+                      className="form-input"
+                      value={formData.customer_phone}
+                      onChange={handleChange}
+                      placeholder="050-0000000"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    {isRTL ? 'אימייל' : 'Email'}
+                  </label>
+                  <div className="input-wrapper">
+                    <Mail size={18} className="input-icon" />
+                    <input
+                      type="email"
+                      name="customer_email"
+                      className="form-input"
+                      value={formData.customer_email}
+                      onChange={handleChange}
+                      placeholder="email@example.com"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    {isRTL ? 'כתובת' : 'Address'}
+                  </label>
+                  <div className="input-wrapper">
+                    <MapPin size={18} className="input-icon" />
+                    <input
+                      type="text"
+                      name="customer_address"
+                      className="form-input"
+                      value={formData.customer_address}
+                      onChange={handleChange}
+                      placeholder={isRTL ? 'עיר, רחוב' : 'City, Street'}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Lead Details Section */}
+            <div className="form-section">
+              <h3>
+                <FileText size={18} />
+                {isRTL ? 'פרטי הליד' : 'Lead Details'}
+              </h3>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label className="form-label">
+                    {isRTL ? 'קטגוריה' : 'Category'} *
+                  </label>
+                  <div className="input-wrapper">
+                    <Tag size={18} className="input-icon" />
+                    <select
+                      name="category_id"
+                      className="form-select"
+                      value={formData.category_id}
+                      onChange={handleChange}
+                    >
+                      <option value="">{isRTL ? 'בחר קטגוריה' : 'Select category'}</option>
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.id}>
+                          {isRTL ? cat.name_he : cat.name_en}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {isEditing && (
+                  <div className="form-group">
+                    <label className="form-label">
+                      {isRTL ? 'סטטוס' : 'Status'}
+                    </label>
+                    <select
+                      name="status"
+                      className="form-select"
+                      value={formData.status}
+                      onChange={handleChange}
+                    >
+                      <option value="new">{isRTL ? 'חדש' : 'New'}</option>
+                      <option value="sent">{isRTL ? 'נשלח' : 'Sent'}</option>
+                      <option value="converted">{isRTL ? 'הומר' : 'Converted'}</option>
+                      <option value="returned">{isRTL ? 'הוחזר' : 'Returned'}</option>
+                      <option value="invalid">{isRTL ? 'לא תקין' : 'Invalid'}</option>
+                    </select>
+                  </div>
+                )}
+
+                <div className="form-group full-width">
+                  <label className="form-label">
+                    {isRTL ? 'הערות' : 'Notes'}
+                  </label>
+                  <div className="input-wrapper">
+                    <MessageSquare size={18} className="input-icon textarea-icon" />
+                    <textarea
+                      name="notes"
+                      className="form-textarea"
+                      value={formData.notes}
+                      onChange={handleChange}
+                      rows={4}
+                      placeholder={isRTL ? 'הערות נוספות...' : 'Additional notes...'}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="form-actions">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => navigate('/admin/dashboard')}
+              >
+                {isRTL ? 'ביטול' : 'Cancel'}
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="loading-spinner small"></span>
+                ) : (
+                  <>
+                    <Check size={18} />
+                    {isEditing 
+                      ? (isRTL ? 'עדכן ליד' : 'Update Lead')
+                      : (isRTL ? 'צור ליד' : 'Create Lead')
+                    }
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
         )}
       </div>
 
       <style>{`
+        /* ===================================
+           Lead Form - Fully Responsive
+           =================================== */
+        
         .lead-form-page {
           min-height: 100vh;
           background: var(--deep-blue);
           padding: var(--space-xl);
         }
 
+        .lead-form-page.rtl {
+          direction: rtl;
+        }
+
         .form-container {
-          max-width: 700px;
+          max-width: 800px;
           margin: 0 auto;
         }
 
+        /* Header */
         .form-header {
           margin-bottom: var(--space-xl);
         }
@@ -535,9 +545,10 @@ const LeadForm = () => {
         .back-link {
           display: inline-flex;
           align-items: center;
-          gap: var(--space-xs);
+          gap: var(--space-sm);
           color: var(--silver);
-          margin-bottom: var(--space-md);
+          font-size: 0.9rem;
+          margin-bottom: var(--space-lg);
           transition: var(--transition-base);
         }
 
@@ -546,14 +557,16 @@ const LeadForm = () => {
         }
 
         .form-header h1 {
+          color: var(--white);
           font-size: 1.75rem;
         }
 
+        /* Messages */
         .message {
           display: flex;
           align-items: center;
           gap: var(--space-sm);
-          padding: var(--space-md) var(--space-lg);
+          padding: var(--space-md);
           border-radius: var(--radius-md);
           margin-bottom: var(--space-lg);
         }
@@ -570,53 +583,123 @@ const LeadForm = () => {
           color: #22c55e;
         }
 
+        /* Form Sections */
         .form-section {
           background: var(--charcoal);
           border: 1px solid var(--slate);
           border-radius: var(--radius-lg);
           padding: var(--space-xl);
-          margin-bottom: var(--space-lg);
+          margin-bottom: var(--space-xl);
         }
 
         .form-section h3 {
           display: flex;
           align-items: center;
           gap: var(--space-sm);
+          color: var(--white);
           font-size: 1.1rem;
           margin-bottom: var(--space-lg);
-          color: var(--gold);
+          padding-bottom: var(--space-md);
+          border-bottom: 1px solid var(--slate);
         }
 
-        .form-row {
+        .form-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: repeat(2, 1fr);
           gap: var(--space-lg);
         }
 
-        @media (max-width: 600px) {
-          .form-row {
-            grid-template-columns: 1fr;
-          }
+        .form-group {
+          display: flex;
+          flex-direction: column;
         }
 
-        .form-group {
-          margin-bottom: var(--space-lg);
+        .form-group.full-width {
+          grid-column: 1 / -1;
         }
 
         .form-label {
           display: flex;
           align-items: center;
-          gap: var(--space-xs);
-          margin-bottom: var(--space-sm);
-          color: var(--silver);
+          gap: var(--space-sm);
+          color: var(--light-silver);
           font-size: 0.9rem;
+          margin-bottom: var(--space-sm);
+          font-weight: 500;
         }
 
-        .form-actions {
-          display: flex;
-          justify-content: flex-end;
-          gap: var(--space-md);
-          margin-top: var(--space-xl);
+        .input-wrapper {
+          position: relative;
+        }
+
+        .input-icon {
+          position: absolute;
+          left: var(--space-md);
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--silver);
+          pointer-events: none;
+        }
+
+        .rtl .input-icon {
+          left: auto;
+          right: var(--space-md);
+        }
+
+        .textarea-icon {
+          top: var(--space-md);
+          transform: none;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+          width: 100%;
+          padding: var(--space-md);
+          padding-left: calc(var(--space-md) * 2 + 18px);
+          background: var(--slate);
+          border: 1px solid var(--slate);
+          border-radius: var(--radius-md);
+          color: var(--white);
+          font-size: 1rem;
+          transition: var(--transition-base);
+        }
+
+        .rtl .form-input,
+        .rtl .form-select,
+        .rtl .form-textarea {
+          padding-left: var(--space-md);
+          padding-right: calc(var(--space-md) * 2 + 18px);
+        }
+
+        .form-select {
+          cursor: pointer;
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b8c5d1' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right var(--space-md) center;
+        }
+
+        .rtl .form-select {
+          background-position: left var(--space-md) center;
+        }
+
+        .form-textarea {
+          resize: vertical;
+          min-height: 100px;
+          padding-top: var(--space-md);
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+          outline: none;
+          border-color: var(--gold);
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+          color: var(--silver);
         }
 
         /* Assign Section */
@@ -627,12 +710,20 @@ const LeadForm = () => {
           padding: var(--space-xl);
         }
 
-        .assign-section h2 {
+        .assign-header {
           display: flex;
           align-items: center;
-          gap: var(--space-sm);
-          font-size: 1.25rem;
+          gap: var(--space-md);
           margin-bottom: var(--space-md);
+        }
+
+        .assign-header svg {
+          color: var(--gold);
+        }
+
+        .assign-header h2 {
+          color: var(--white);
+          font-size: 1.25rem;
         }
 
         .assign-description {
@@ -641,18 +732,18 @@ const LeadForm = () => {
         }
 
         .client-preview {
-          background: var(--navy);
-          border: 1px solid var(--slate);
+          background: var(--slate);
           border-radius: var(--radius-md);
           padding: var(--space-lg);
           margin-bottom: var(--space-lg);
         }
 
         .client-preview.warning {
-          border-color: var(--error);
+          border: 1px solid var(--error);
         }
 
         .client-preview h4 {
+          color: var(--white);
           margin-bottom: var(--space-xs);
         }
 
@@ -664,37 +755,41 @@ const LeadForm = () => {
         .client-stats {
           display: flex;
           flex-wrap: wrap;
-          gap: var(--space-md);
-          font-size: 0.875rem;
-          color: var(--silver);
+          gap: var(--space-lg);
+          color: var(--light-silver);
+          font-size: 0.9rem;
         }
 
         .warning-message {
           display: flex;
           align-items: center;
           gap: var(--space-sm);
-          margin-top: var(--space-md);
           color: var(--error);
-          font-size: 0.875rem;
+          margin-top: var(--space-md);
+          font-size: 0.9rem;
         }
 
+        /* Send Options */
         .send-options {
           display: flex;
           gap: var(--space-md);
+          flex-wrap: wrap;
         }
 
         .send-option {
-          flex: 1;
           display: flex;
           align-items: center;
-          justify-content: center;
           gap: var(--space-sm);
-          padding: var(--space-md);
-          background: var(--navy);
+          padding: var(--space-md) var(--space-lg);
+          background: var(--slate);
           border: 2px solid var(--slate);
           border-radius: var(--radius-md);
+          color: var(--silver);
           cursor: pointer;
           transition: var(--transition-base);
+          flex: 1;
+          min-width: 120px;
+          justify-content: center;
         }
 
         .send-option input {
@@ -711,18 +806,141 @@ const LeadForm = () => {
           color: var(--gold);
         }
 
+        /* Form Actions */
+        .form-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: var(--space-md);
+          margin-top: var(--space-xl);
+          padding-top: var(--space-lg);
+          border-top: 1px solid var(--slate);
+        }
+
+        /* Buttons */
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--space-sm);
+          padding: var(--space-md) var(--space-xl);
+          border-radius: var(--radius-md);
+          font-weight: 600;
+          cursor: pointer;
+          transition: var(--transition-base);
+          border: none;
+          font-size: 1rem;
+          min-width: 140px;
+        }
+
+        .btn-primary {
+          background: var(--gold);
+          color: var(--deep-blue);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+          background: var(--gold-light);
+        }
+
+        .btn-primary:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .btn-secondary {
+          background: var(--slate);
+          color: var(--light-silver);
+        }
+
+        .btn-secondary:hover {
+          background: var(--silver);
+          color: var(--deep-blue);
+        }
+
+        /* Loading */
+        .lead-form-loading {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          gap: var(--space-lg);
+          color: var(--silver);
+        }
+
         .loading-spinner {
           display: inline-block;
-          width: 18px;
-          height: 18px;
-          border: 2px solid transparent;
-          border-top-color: currentColor;
+          border: 3px solid var(--slate);
+          border-top-color: var(--gold);
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
         }
 
+        .loading-spinner.large {
+          width: 50px;
+          height: 50px;
+        }
+
+        .loading-spinner.small {
+          width: 18px;
+          height: 18px;
+          border-width: 2px;
+        }
+
         @keyframes spin {
           to { transform: rotate(360deg); }
+        }
+
+        /* ===================================
+           Responsive Breakpoints
+           =================================== */
+
+        @media (max-width: 768px) {
+          .lead-form-page {
+            padding: var(--space-md);
+          }
+
+          .form-header h1 {
+            font-size: 1.5rem;
+          }
+
+          .form-section {
+            padding: var(--space-lg);
+          }
+
+          .form-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .send-options {
+            flex-direction: column;
+          }
+
+          .send-option {
+            min-width: auto;
+          }
+
+          .form-actions {
+            flex-direction: column-reverse;
+          }
+
+          .btn {
+            width: 100%;
+          }
+
+          .client-stats {
+            flex-direction: column;
+            gap: var(--space-sm);
+          }
+        }
+
+        @media (max-width: 480px) {
+          .form-section h3 {
+            font-size: 1rem;
+          }
+
+          .assign-header h2 {
+            font-size: 1.1rem;
+          }
         }
       `}</style>
     </div>

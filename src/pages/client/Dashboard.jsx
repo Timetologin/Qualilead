@@ -3,50 +3,360 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import {
-  LayoutDashboard, FileText, Download, Bell, User, LogOut,
-  ChevronRight, Phone, Mail, Clock, CheckCircle, XCircle,
-  AlertCircle, Star, Crown, MessageCircle, TrendingUp, Package
+  LayoutDashboard,
+  FileText,
+  Bell,
+  User,
+  LogOut,
+  Crown,
+  Package,
+  Download,
+  RefreshCw,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Phone,
+  Mail,
+  MapPin,
+  Calendar,
+  TrendingUp,
+  Menu,
+  X,
+  ChevronRight,
+  ChevronLeft,
+  Eye,
+  AlertCircle
 } from 'lucide-react';
 import {
-  LineChart, Line, AreaChart, Area, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
 } from 'recharts';
 
+// Leads View Component
+const LeadsView = ({ leads, isRTL, onReturn, onExport }) => {
+  const [filter, setFilter] = useState('all');
+
+  const filteredLeads = filter === 'all' 
+    ? leads 
+    : leads.filter(lead => lead.status === filter);
+
+  const getStatusColor = (status) => {
+    const colors = {
+      sent: '#3b82f6',
+      converted: '#22c55e',
+      returned: '#f59e0b',
+      invalid: '#ef4444'
+    };
+    return colors[status] || '#888';
+  };
+
+  return (
+    <div className="leads-view">
+      <div className="view-header">
+        <div className="filter-tabs">
+          {['all', 'sent', 'converted', 'returned'].map(status => (
+            <button
+              key={status}
+              className={`filter-tab ${filter === status ? 'active' : ''}`}
+              onClick={() => setFilter(status)}
+            >
+              {status === 'all' ? (isRTL ? 'הכל' : 'All') : status}
+              <span className="filter-count">
+                {status === 'all' ? leads.length : leads.filter(l => l.status === status).length}
+              </span>
+            </button>
+          ))}
+        </div>
+        <button className="btn btn-secondary" onClick={onExport}>
+          <Download size={18} />
+          <span className="btn-text">{isRTL ? 'ייצוא' : 'Export'}</span>
+        </button>
+      </div>
+
+      {/* Desktop Table */}
+      <div className="table-container desktop-only">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>{isRTL ? 'שם' : 'Name'}</th>
+              <th>{isRTL ? 'טלפון' : 'Phone'}</th>
+              <th>{isRTL ? 'אימייל' : 'Email'}</th>
+              <th>{isRTL ? 'קטגוריה' : 'Category'}</th>
+              <th>{isRTL ? 'סטטוס' : 'Status'}</th>
+              <th>{isRTL ? 'תאריך' : 'Date'}</th>
+              <th>{isRTL ? 'פעולות' : 'Actions'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredLeads.map(lead => (
+              <tr key={lead.id}>
+                <td>{lead.customer_name}</td>
+                <td dir="ltr">{lead.customer_phone}</td>
+                <td>{lead.customer_email || '-'}</td>
+                <td>{isRTL ? lead.category_name_he : lead.category_name_en}</td>
+                <td>
+                  <span 
+                    className="status-badge"
+                    style={{ background: `${getStatusColor(lead.status)}20`, color: getStatusColor(lead.status) }}
+                  >
+                    {lead.status}
+                  </span>
+                </td>
+                <td>{new Date(lead.received_at || lead.created_at).toLocaleDateString()}</td>
+                <td>
+                  <div className="action-buttons">
+                    {lead.status === 'sent' && (
+                      <button 
+                        className="action-btn return" 
+                        onClick={() => onReturn(lead.id)}
+                        title={isRTL ? 'בקש החזרה' : 'Request Return'}
+                      >
+                        <RefreshCw size={16} />
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="mobile-cards mobile-only">
+        {filteredLeads.length === 0 ? (
+          <div className="empty-state">
+            <FileText size={48} />
+            <p>{isRTL ? 'אין לידים להצגה' : 'No leads to display'}</p>
+          </div>
+        ) : (
+          filteredLeads.map(lead => (
+            <div key={lead.id} className="lead-card">
+              <div className="lead-card-header">
+                <div className="lead-info">
+                  <h4>{lead.customer_name}</h4>
+                  <span className="lead-category">{isRTL ? lead.category_name_he : lead.category_name_en}</span>
+                </div>
+                <span 
+                  className="status-badge"
+                  style={{ background: `${getStatusColor(lead.status)}20`, color: getStatusColor(lead.status) }}
+                >
+                  {lead.status}
+                </span>
+              </div>
+              <div className="lead-card-body">
+                <div className="lead-detail">
+                  <Phone size={14} />
+                  <a href={`tel:${lead.customer_phone}`} dir="ltr">{lead.customer_phone}</a>
+                </div>
+                {lead.customer_email && (
+                  <div className="lead-detail">
+                    <Mail size={14} />
+                    <a href={`mailto:${lead.customer_email}`}>{lead.customer_email}</a>
+                  </div>
+                )}
+                {lead.customer_address && (
+                  <div className="lead-detail">
+                    <MapPin size={14} />
+                    <span>{lead.customer_address}</span>
+                  </div>
+                )}
+              </div>
+              <div className="lead-card-footer">
+                <span className="lead-date">
+                  <Calendar size={14} />
+                  {new Date(lead.received_at || lead.created_at).toLocaleDateString()}
+                </span>
+                {lead.status === 'sent' && (
+                  <button className="btn btn-secondary btn-sm" onClick={() => onReturn(lead.id)}>
+                    <RefreshCw size={14} />
+                    {isRTL ? 'החזרה' : 'Return'}
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Notifications View Component
+const NotificationsView = ({ notifications, isRTL, onMarkRead, isVIP }) => {
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  return (
+    <div className="notifications-view">
+      <div className="view-header">
+        <div className="header-info">
+          <h3>{isRTL ? 'התראות' : 'Notifications'}</h3>
+          {unreadCount > 0 && (
+            <span className="unread-badge">{unreadCount} {isRTL ? 'חדשות' : 'new'}</span>
+          )}
+        </div>
+      </div>
+
+      <div className="notifications-list">
+        {notifications.length === 0 ? (
+          <div className="empty-state">
+            <Bell size={48} />
+            <p>{isRTL ? 'אין התראות' : 'No notifications'}</p>
+          </div>
+        ) : (
+          notifications.map(notification => (
+            <div 
+              key={notification.id} 
+              className={`notification-item ${notification.is_read ? 'read' : 'unread'}`}
+              onClick={() => !notification.is_read && onMarkRead(notification.id)}
+            >
+              <div className={`notification-icon ${notification.type}`}>
+                {notification.type === 'lead' && <FileText size={18} />}
+                {notification.type === 'system' && <Bell size={18} />}
+                {notification.type === 'vip' && <Crown size={18} />}
+              </div>
+              <div className="notification-content">
+                <p className="notification-title">{notification.title}</p>
+                <p className="notification-message">{notification.message}</p>
+                <span className="notification-time">
+                  {new Date(notification.created_at).toLocaleString()}
+                </span>
+              </div>
+              {!notification.is_read && <div className="unread-dot"></div>}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Profile View Component
+const ProfileView = ({ user, isRTL, isVIP, packageInfo }) => {
+  return (
+    <div className="profile-view">
+      <div className="profile-card">
+        <div className="profile-header">
+          <div className="profile-avatar">
+            {isVIP && <Crown size={16} className="vip-crown" />}
+            {user?.name?.charAt(0) || 'U'}
+          </div>
+          <div className="profile-info">
+            <h2>{user?.name}</h2>
+            <p>{user?.company_name || (isRTL ? 'לא צוין' : 'Not specified')}</p>
+            {isVIP && (
+              <span className="vip-badge">
+                <Crown size={14} />
+                VIP
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="profile-details">
+          <div className="detail-row">
+            <span className="detail-label">{isRTL ? 'אימייל' : 'Email'}</span>
+            <span className="detail-value">{user?.email}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">{isRTL ? 'טלפון' : 'Phone'}</span>
+            <span className="detail-value" dir="ltr">{user?.phone || '-'}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">{isRTL ? 'חבילה' : 'Package'}</span>
+            <span className="detail-value" style={{ color: packageInfo.color }}>{packageInfo.name}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">{isRTL ? 'מגבלת לידים' : 'Lead Limit'}</span>
+            <span className="detail-value">{packageInfo.limit}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">{isRTL ? 'סטטוס' : 'Status'}</span>
+            <span className="detail-value">
+              {user?.is_active ? (
+                <span className="status-active">
+                  <CheckCircle size={14} />
+                  {isRTL ? 'פעיל' : 'Active'}
+                </span>
+              ) : (
+                <span className="status-inactive">
+                  <XCircle size={14} />
+                  {isRTL ? 'לא פעיל' : 'Inactive'}
+                </span>
+              )}
+            </span>
+          </div>
+        </div>
+
+        {user?.categories && user.categories.length > 0 && (
+          <div className="profile-categories">
+            <h4>{isRTL ? 'קטגוריות' : 'Categories'}</h4>
+            <div className="categories-list">
+              {user.categories.map((cat, index) => (
+                <span key={index} className="category-tag">{cat}</span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Main Client Dashboard Component
 const ClientDashboard = () => {
-  const { user, logout, api, isClient, isVIP } = useAuth();
-  const { t, isRTL } = useLanguage();
+  const { user, logout, api } = useAuth();
+  const { isRTL } = useLanguage();
   const navigate = useNavigate();
 
-  const [stats, setStats] = useState(null);
   const [leads, setLeads] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [usageHistory, setUsageHistory] = useState([]);
+  const [monthlyUsage, setMonthlyUsage] = useState({ used: 0, limit: 0 });
+  const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const isVIP = user?.package_type === 'vip';
 
   useEffect(() => {
-    if (user?.role === 'admin') {
-      navigate('/admin/dashboard');
-      return;
-    }
     fetchDashboardData();
-  }, [user]);
+  }, []);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
-      const [statsRes, leadsRes, notifRes, usageRes] = await Promise.all([
-        api('/analytics/dashboard'),
-        api('/leads?limit=50'),
-        api('/notifications?limit=10'),
-        api('/analytics/usage-history')
+      const [leadsRes, notificationsRes, usageRes] = await Promise.all([
+        api('/leads/my'),
+        api('/notifications'),
+        api('/users/me/usage')
       ]);
 
-      setStats(statsRes);
       setLeads(leadsRes.leads || []);
-      setNotifications(notifRes.notifications || []);
-      setUsageHistory(usageRes);
+      setNotifications(notificationsRes.notifications || []);
+      setMonthlyUsage({
+        used: usageRes.leads_received_this_month || 0,
+        limit: usageRes.monthly_lead_limit || 0
+      });
+
+      // Generate chart data from leads
+      const last6Months = [];
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const monthName = date.toLocaleDateString(isRTL ? 'he' : 'en', { month: 'short' });
+        const monthLeads = (leadsRes.leads || []).filter(lead => {
+          const leadDate = new Date(lead.received_at || lead.created_at);
+          return leadDate.getMonth() === date.getMonth() && leadDate.getFullYear() === date.getFullYear();
+        });
+        last6Months.push({ month: monthName, count: monthLeads.length });
+      }
+      setChartData(last6Months);
     } catch (error) {
       console.error('Dashboard fetch error:', error);
     } finally {
@@ -54,66 +364,69 @@ const ClientDashboard = () => {
     }
   };
 
-  const markNotificationRead = async (id) => {
+  const requestReturn = async (leadId) => {
     try {
-      await api(`/notifications/${id}/read`, { method: 'PUT' });
-      setNotifications(prev => 
-        prev.map(n => n.id === id ? { ...n, is_read: 1 } : n)
-      );
-    } catch (error) {
-      console.error('Mark read error:', error);
-    }
-  };
-
-  const exportLeadsCSV = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/leads/export/csv`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('qualilead-token')}`
-        }
-      });
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'my-leads.csv';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } catch (error) {
-      console.error('Export error:', error);
-    }
-  };
-
-  const requestReturn = async (leadId, reason) => {
-    try {
-      await api(`/leads/${leadId}/return`, {
-        method: 'POST',
-        body: JSON.stringify({ reason })
-      });
+      await api(`/leads/${leadId}/return`, { method: 'POST' });
       fetchDashboardData();
     } catch (error) {
       console.error('Return request error:', error);
     }
   };
 
-  const COLORS = ['#d4af37', '#3b82f6', '#22c55e', '#ef4444'];
-
-  const getPackageInfo = () => {
-    switch (user?.package_type) {
-      case 'starter':
-        return { name: isRTL ? 'סטארטר' : 'Starter', limit: 20, color: '#3b82f6' };
-      case 'professional':
-        return { name: isRTL ? 'מקצועי' : 'Professional', limit: 50, color: '#d4af37' };
-      case 'enterprise':
-        return { name: isRTL ? 'ארגוני' : 'Enterprise', limit: '∞', color: '#8b5cf6' };
-      default:
-        return { name: isRTL ? 'משלם לפי ליד' : 'Pay Per Lead', limit: '-', color: '#22c55e' };
+  const markNotificationRead = async (notificationId) => {
+    try {
+      await api(`/notifications/${notificationId}/read`, { method: 'POST' });
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+      );
+    } catch (error) {
+      console.error('Mark read error:', error);
     }
   };
 
-  const packageInfo = getPackageInfo();
+  const exportLeadsCSV = () => {
+    const headers = ['Name', 'Phone', 'Email', 'Category', 'Status', 'Date'];
+    const rows = leads.map(lead => [
+      lead.customer_name,
+      lead.customer_phone,
+      lead.customer_email || '',
+      isRTL ? lead.category_name_he : lead.category_name_en,
+      lead.status,
+      new Date(lead.received_at || lead.created_at).toLocaleDateString()
+    ]);
+
+    const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `leads-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSidebarOpen(false);
+  };
+
+  const packageInfo = (() => {
+    switch (user?.package_type) {
+      case 'vip':
+        return { name: isRTL ? 'VIP פרימיום' : 'VIP Premium', limit: '∞', color: '#d4af37' };
+      case 'basic':
+        return { name: isRTL ? 'בסיסי' : 'Basic', limit: user?.monthly_lead_limit || 10, color: '#3b82f6' };
+      case 'pro':
+        return { name: isRTL ? 'מקצועי' : 'Professional', limit: user?.monthly_lead_limit || 50, color: '#8b5cf6' };
+      default:
+        return { name: isRTL ? 'משלם לפי ליד' : 'Pay Per Lead', limit: '-', color: '#22c55e' };
+    }
+  })();
+
+  const usagePercent = monthlyUsage.limit === -1 || monthlyUsage.limit === 0 
+    ? 0 
+    : Math.min((monthlyUsage.used / monthlyUsage.limit) * 100, 100);
+
+  const unreadNotifications = notifications.filter(n => !n.is_read).length;
 
   if (loading) {
     return (
@@ -125,44 +438,65 @@ const ClientDashboard = () => {
   }
 
   return (
-    <div className="client-dashboard">
+    <div className={`client-dashboard ${isRTL ? 'rtl' : 'ltr'}`}>
+      {/* Mobile Header */}
+      <header className="mobile-header">
+        <button className="menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+          <Menu size={24} />
+        </button>
+        <div className="mobile-logo">
+          <div className="logo-icon">QL</div>
+          <span>QualiLead</span>
+        </div>
+        <button className="icon-btn notification-btn" onClick={() => handleTabChange('notifications')}>
+          <Bell size={20} />
+          {unreadNotifications > 0 && <span className="notification-dot"></span>}
+        </button>
+      </header>
+
+      {/* Sidebar Overlay */}
+      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>}
+
       {/* Sidebar */}
-      <aside className="dashboard-sidebar">
+      <aside className={`dashboard-sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <Link to="/" className="sidebar-logo">
             <div className="logo-icon">QL</div>
             <span>QualiLead</span>
           </Link>
+          <button className="close-sidebar" onClick={() => setSidebarOpen(false)}>
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="sidebar-nav">
           <button 
             className={`nav-item ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
+            onClick={() => handleTabChange('overview')}
           >
             <LayoutDashboard size={20} />
             <span>{isRTL ? 'סקירה כללית' : 'Overview'}</span>
           </button>
           <button 
             className={`nav-item ${activeTab === 'leads' ? 'active' : ''}`}
-            onClick={() => setActiveTab('leads')}
+            onClick={() => handleTabChange('leads')}
           >
             <FileText size={20} />
             <span>{isRTL ? 'הלידים שלי' : 'My Leads'}</span>
           </button>
           <button 
             className={`nav-item ${activeTab === 'notifications' ? 'active' : ''}`}
-            onClick={() => setActiveTab('notifications')}
+            onClick={() => handleTabChange('notifications')}
           >
             <Bell size={20} />
             <span>{isRTL ? 'התראות' : 'Notifications'}</span>
-            {notifications.filter(n => !n.is_read).length > 0 && (
-              <span className="badge">{notifications.filter(n => !n.is_read).length}</span>
+            {unreadNotifications > 0 && (
+              <span className="nav-badge">{unreadNotifications}</span>
             )}
           </button>
           <button 
             className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
-            onClick={() => setActiveTab('profile')}
+            onClick={() => handleTabChange('profile')}
           >
             <User size={20} />
             <span>{isRTL ? 'פרופיל' : 'Profile'}</span>
@@ -190,8 +524,8 @@ const ClientDashboard = () => {
 
       {/* Main Content */}
       <main className="dashboard-main">
-        {/* Header */}
-        <header className="dashboard-header">
+        {/* Desktop Header */}
+        <header className="dashboard-header desktop-only">
           <div className="header-left">
             <h1>
               {isRTL ? `שלום, ${user?.name}` : `Hello, ${user?.name}`}
@@ -209,6 +543,16 @@ const ClientDashboard = () => {
           </div>
         </header>
 
+        {/* Mobile Tab Title */}
+        <div className="mobile-tab-title mobile-only">
+          <h1>
+            {activeTab === 'overview' && (isRTL ? 'סקירה כללית' : 'Overview')}
+            {activeTab === 'leads' && (isRTL ? 'הלידים שלי' : 'My Leads')}
+            {activeTab === 'notifications' && (isRTL ? 'התראות' : 'Notifications')}
+            {activeTab === 'profile' && (isRTL ? 'פרופיל' : 'Profile')}
+          </h1>
+        </div>
+
         {/* Content */}
         <div className="dashboard-content">
           {activeTab === 'overview' && (
@@ -220,101 +564,91 @@ const ClientDashboard = () => {
                     <h3>{isRTL ? 'שימוש החודש' : 'Monthly Usage'}</h3>
                     <p className="package-name" style={{ color: packageInfo.color }}>
                       <Package size={16} />
-                      {isRTL ? 'חבילת' : ''} {packageInfo.name}
+                      {packageInfo.name}
                     </p>
                   </div>
                   <div className="usage-numbers">
-                    <span className="current">{stats?.leads_this_month || 0}</span>
+                    <span className="current">{monthlyUsage.used}</span>
                     <span className="separator">/</span>
-                    <span className="limit">{user?.monthly_lead_limit === -1 ? '∞' : user?.monthly_lead_limit}</span>
+                    <span className="limit">{monthlyUsage.limit === -1 ? '∞' : monthlyUsage.limit}</span>
                   </div>
                 </div>
-                
-                {user?.monthly_lead_limit !== -1 && (
-                  <div className="usage-bar">
-                    <div 
-                      className="usage-fill"
-                      style={{ 
-                        width: `${Math.min(100, ((stats?.leads_this_month || 0) / user?.monthly_lead_limit) * 100)}%`,
-                        background: packageInfo.color
-                      }}
-                    />
-                  </div>
-                )}
-
+                <div className="usage-bar">
+                  <div 
+                    className="usage-fill" 
+                    style={{ 
+                      width: `${usagePercent}%`,
+                      background: usagePercent > 80 ? '#ef4444' : packageInfo.color
+                    }}
+                  ></div>
+                </div>
                 <div className="usage-footer">
-                  <span>
-                    {isRTL ? 'נותרו:' : 'Remaining:'} 
-                    <strong>
-                      {user?.monthly_lead_limit === -1 
-                        ? (isRTL ? 'ללא הגבלה' : 'Unlimited')
-                        : Math.max(0, user?.monthly_lead_limit - (stats?.leads_this_month || 0))
-                      }
-                    </strong>
-                  </span>
-                  <span>
-                    {isRTL ? 'קטגוריות:' : 'Categories:'} 
-                    <strong>{stats?.categories_count || 0}</strong>
-                  </span>
+                  <span>{isRTL ? 'נשארו:' : 'Remaining:'} <strong>{monthlyUsage.limit === -1 ? '∞' : Math.max(0, monthlyUsage.limit - monthlyUsage.used)}</strong></span>
+                  <span>{isRTL ? 'מתאפס ב-1 לחודש' : 'Resets on the 1st'}</span>
                 </div>
               </div>
 
               {/* Stats Grid */}
-              <div className="stats-grid client">
+              <div className="stats-grid">
                 <div className="stat-card">
                   <div className="stat-icon blue">
                     <FileText size={24} />
                   </div>
                   <div className="stat-info">
-                    <span className="stat-value">{stats?.leads_received || 0}</span>
+                    <span className="stat-value">{leads.length}</span>
                     <span className="stat-label">{isRTL ? 'סה"כ לידים' : 'Total Leads'}</span>
                   </div>
                 </div>
                 <div className="stat-card">
                   <div className="stat-icon green">
-                    <TrendingUp size={24} />
+                    <CheckCircle size={24} />
                   </div>
                   <div className="stat-info">
-                    <span className="stat-value">{stats?.leads_this_month || 0}</span>
-                    <span className="stat-label">{isRTL ? 'החודש' : 'This Month'}</span>
+                    <span className="stat-value">{leads.filter(l => l.status === 'converted').length}</span>
+                    <span className="stat-label">{isRTL ? 'הומרו' : 'Converted'}</span>
                   </div>
                 </div>
                 <div className="stat-card">
                   <div className="stat-icon gold">
-                    <Star size={24} />
+                    <TrendingUp size={24} />
                   </div>
                   <div className="stat-info">
-                    <span className="stat-value">{user?.categories?.length || stats?.categories_count || 0}</span>
-                    <span className="stat-label">{isRTL ? 'קטגוריות' : 'Categories'}</span>
+                    <span className="stat-value">
+                      {leads.length > 0 
+                        ? Math.round((leads.filter(l => l.status === 'converted').length / leads.length) * 100) 
+                        : 0}%
+                    </span>
+                    <span className="stat-label">{isRTL ? 'אחוז המרה' : 'Conversion'}</span>
                   </div>
                 </div>
               </div>
 
-              {/* VIP Manager Card */}
-              {isVIP && user?.dedicated_manager && (
-                <div className="vip-manager-card">
-                  <div className="vip-badge">
-                    <Crown size={16} />
-                    {isRTL ? 'לקוח VIP' : 'VIP Client'}
-                  </div>
-                  <h3>{isRTL ? 'המנהל האישי שלך' : 'Your Dedicated Manager'}</h3>
-                  <div className="manager-info">
-                    <div className="manager-avatar">
-                      {user.dedicated_manager.name?.charAt(0)}
-                    </div>
-                    <div className="manager-details">
-                      <span className="manager-name">{user.dedicated_manager.name}</span>
-                      <a href={`mailto:${user.dedicated_manager.email}`} className="manager-contact">
-                        <Mail size={14} />
-                        {user.dedicated_manager.email}
-                      </a>
-                      {user.dedicated_manager.phone && (
-                        <a href={`tel:${user.dedicated_manager.phone}`} className="manager-contact">
-                          <Phone size={14} />
-                          {user.dedicated_manager.phone}
-                        </a>
-                      )}
-                    </div>
+              {/* Chart */}
+              {chartData.length > 0 && (
+                <div className="chart-card">
+                  <h3>{isRTL ? 'לידים לאורך זמן' : 'Leads Over Time'}</h3>
+                  <div className="chart-container">
+                    <ResponsiveContainer width="100%" height={250}>
+                      <AreaChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#2a3f54" />
+                        <XAxis dataKey="month" stroke="#b8c5d1" />
+                        <YAxis stroke="#b8c5d1" />
+                        <Tooltip 
+                          contentStyle={{ 
+                            background: '#1e2d3d', 
+                            border: '1px solid #2a3f54',
+                            borderRadius: '8px'
+                          }}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="count" 
+                          stroke={packageInfo.color} 
+                          fill={`${packageInfo.color}30`}
+                          name={isRTL ? 'לידים' : 'Leads'}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               )}
@@ -323,86 +657,29 @@ const ClientDashboard = () => {
               <div className="recent-section">
                 <div className="section-header">
                   <h3>{isRTL ? 'לידים אחרונים' : 'Recent Leads'}</h3>
-                  <button 
-                    className="view-all-btn"
-                    onClick={() => setActiveTab('leads')}
-                  >
+                  <button className="view-all-btn" onClick={() => setActiveTab('leads')}>
                     {isRTL ? 'הצג הכל' : 'View All'}
-                    <ChevronRight size={16} />
+                    {isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
                   </button>
                 </div>
-                
-                <div className="leads-list">
+                <div className="recent-leads">
                   {leads.slice(0, 5).map(lead => (
-                    <div key={lead.id} className="lead-card">
+                    <div key={lead.id} className="recent-lead-item">
+                      <div className="lead-avatar">{lead.customer_name.charAt(0)}</div>
                       <div className="lead-info">
-                        <h4>{lead.customer_name}</h4>
-                        <p className="lead-phone">
-                          <Phone size={14} />
-                          <a href={`tel:${lead.customer_phone}`}>{lead.customer_phone}</a>
-                        </p>
-                        {lead.customer_email && (
-                          <p className="lead-email">
-                            <Mail size={14} />
-                            <a href={`mailto:${lead.customer_email}`}>{lead.customer_email}</a>
-                          </p>
-                        )}
+                        <span className="lead-name">{lead.customer_name}</span>
+                        <span className="lead-category">{isRTL ? lead.category_name_he : lead.category_name_en}</span>
                       </div>
-                      <div className="lead-meta">
-                        <span className="lead-category">
-                          {isRTL ? lead.category_name_he : lead.category_name_en}
-                        </span>
-                        <span className="lead-date">
-                          <Clock size={12} />
-                          {new Date(lead.sent_at || lead.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
+                      <span 
+                        className="status-badge small"
+                        style={{ background: `${lead.status === 'converted' ? '#22c55e' : '#3b82f6'}20`, color: lead.status === 'converted' ? '#22c55e' : '#3b82f6' }}
+                      >
+                        {lead.status}
+                      </span>
                     </div>
                   ))}
-                  
-                  {leads.length === 0 && (
-                    <div className="empty-state">
-                      <FileText size={48} />
-                      <p>{isRTL ? 'אין לידים עדיין' : 'No leads yet'}</p>
-                    </div>
-                  )}
                 </div>
               </div>
-
-              {/* Usage History Chart */}
-              {usageHistory.length > 0 && (
-                <div className="chart-section">
-                  <h3>{isRTL ? 'היסטוריית שימוש' : 'Usage History'}</h3>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <AreaChart data={usageHistory}>
-                      <defs>
-                        <linearGradient id="colorUsage" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#d4af37" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#d4af37" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#2a3f54" />
-                      <XAxis dataKey="month" stroke="#b8c5d1" />
-                      <YAxis stroke="#b8c5d1" />
-                      <Tooltip 
-                        contentStyle={{ 
-                          background: '#1e2d3d', 
-                          border: '1px solid #2a3f54',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="leads_sent" 
-                        stroke="#d4af37" 
-                        fillOpacity={1} 
-                        fill="url(#colorUsage)"
-                        name={isRTL ? 'לידים' : 'Leads'}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
             </>
           )}
 
@@ -436,12 +713,90 @@ const ClientDashboard = () => {
       </main>
 
       <style>{`
+        /* ===================================
+           Client Dashboard - Fully Responsive
+           =================================== */
+        
         .client-dashboard {
           display: flex;
           min-height: 100vh;
           background: var(--deep-blue);
         }
 
+        .client-dashboard.rtl {
+          direction: rtl;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 60px;
+          background: var(--charcoal);
+          border-bottom: 1px solid var(--slate);
+          padding: 0 var(--space-md);
+          align-items: center;
+          justify-content: space-between;
+          z-index: 200;
+        }
+
+        .mobile-header .menu-toggle {
+          padding: var(--space-sm);
+          color: var(--white);
+          background: none;
+          border: none;
+        }
+
+        .mobile-logo {
+          display: flex;
+          align-items: center;
+          gap: var(--space-sm);
+          font-weight: 700;
+          color: var(--white);
+        }
+
+        .mobile-logo .logo-icon {
+          width: 32px;
+          height: 32px;
+          background: var(--gold);
+          border-radius: var(--radius-sm);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.875rem;
+          color: var(--deep-blue);
+        }
+
+        .notification-btn {
+          position: relative;
+        }
+
+        .notification-dot {
+          position: absolute;
+          top: 4px;
+          right: 4px;
+          width: 8px;
+          height: 8px;
+          background: var(--error);
+          border-radius: 50%;
+        }
+
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 250;
+        }
+
+        /* Sidebar */
         .dashboard-sidebar {
           width: 260px;
           background: var(--charcoal);
@@ -452,7 +807,8 @@ const ClientDashboard = () => {
           top: 0;
           left: 0;
           height: 100vh;
-          z-index: 100;
+          z-index: 300;
+          transition: transform 0.3s ease;
         }
 
         .rtl .dashboard-sidebar {
@@ -462,9 +818,20 @@ const ClientDashboard = () => {
           border-left: 1px solid var(--slate);
         }
 
+        .close-sidebar {
+          display: none;
+          padding: var(--space-sm);
+          color: var(--silver);
+          background: none;
+          border: none;
+        }
+
         .sidebar-header {
           padding: var(--space-lg);
           border-bottom: 1px solid var(--slate);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
         }
 
         .sidebar-logo {
@@ -475,6 +842,18 @@ const ClientDashboard = () => {
           font-size: 1.25rem;
           font-weight: 700;
           color: var(--white);
+        }
+
+        .logo-icon {
+          width: 40px;
+          height: 40px;
+          background: var(--gold);
+          border-radius: var(--radius-md);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 800;
+          color: var(--deep-blue);
         }
 
         .sidebar-nav {
@@ -495,6 +874,10 @@ const ClientDashboard = () => {
           transition: var(--transition-base);
           text-align: left;
           width: 100%;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 0.95rem;
           position: relative;
         }
 
@@ -512,7 +895,7 @@ const ClientDashboard = () => {
           color: var(--gold);
         }
 
-        .nav-item .badge {
+        .nav-badge {
           position: absolute;
           right: 16px;
           background: var(--error);
@@ -520,9 +903,10 @@ const ClientDashboard = () => {
           font-size: 0.7rem;
           padding: 2px 6px;
           border-radius: var(--radius-full);
+          font-weight: 600;
         }
 
-        .rtl .nav-item .badge {
+        .rtl .nav-badge {
           right: auto;
           left: 16px;
         }
@@ -574,12 +958,14 @@ const ClientDashboard = () => {
 
         .user-package {
           font-size: 0.75rem;
-          font-weight: 600;
         }
 
         .logout-btn {
           padding: var(--space-sm);
           color: var(--silver);
+          background: none;
+          border: none;
+          cursor: pointer;
           transition: var(--transition-base);
         }
 
@@ -587,10 +973,12 @@ const ClientDashboard = () => {
           color: var(--error);
         }
 
+        /* Main Content */
         .dashboard-main {
           flex: 1;
           margin-left: 260px;
           padding: var(--space-xl);
+          min-height: 100vh;
         }
 
         .rtl .dashboard-main {
@@ -601,12 +989,13 @@ const ClientDashboard = () => {
         .dashboard-header {
           display: flex;
           justify-content: space-between;
-          align-items: flex-start;
+          align-items: center;
           margin-bottom: var(--space-xl);
         }
 
         .dashboard-header h1 {
           font-size: 1.75rem;
+          color: var(--white);
           display: flex;
           align-items: center;
           gap: var(--space-sm);
@@ -621,6 +1010,26 @@ const ClientDashboard = () => {
           margin-top: var(--space-xs);
         }
 
+        .mobile-tab-title {
+          display: none;
+          margin-bottom: var(--space-lg);
+        }
+
+        .mobile-tab-title h1 {
+          font-size: 1.5rem;
+          color: var(--white);
+        }
+
+        .icon-btn {
+          padding: var(--space-sm);
+          color: var(--silver);
+          background: var(--charcoal);
+          border-radius: var(--radius-md);
+          border: none;
+          cursor: pointer;
+        }
+
+        /* Usage Card */
         .usage-card {
           background: var(--charcoal);
           border: 1px solid var(--slate);
@@ -634,9 +1043,12 @@ const ClientDashboard = () => {
           justify-content: space-between;
           align-items: flex-start;
           margin-bottom: var(--space-lg);
+          flex-wrap: wrap;
+          gap: var(--space-md);
         }
 
         .usage-header h3 {
+          color: var(--white);
           margin-bottom: var(--space-xs);
         }
 
@@ -687,14 +1099,16 @@ const ClientDashboard = () => {
           justify-content: space-between;
           color: var(--silver);
           font-size: 0.9rem;
+          flex-wrap: wrap;
+          gap: var(--space-sm);
         }
 
         .usage-footer strong {
           color: var(--white);
-          margin-left: var(--space-xs);
         }
 
-        .stats-grid.client {
+        /* Stats Grid */
+        .stats-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: var(--space-lg);
@@ -718,6 +1132,7 @@ const ClientDashboard = () => {
           display: flex;
           align-items: center;
           justify-content: center;
+          flex-shrink: 0;
         }
 
         .stat-icon.blue { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
@@ -740,89 +1155,30 @@ const ClientDashboard = () => {
           color: var(--silver);
         }
 
-        .vip-manager-card {
-          background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-          border: 1px solid var(--gold);
+        /* Chart Card */
+        .chart-card {
+          background: var(--charcoal);
+          border: 1px solid var(--slate);
           border-radius: var(--radius-lg);
-          padding: var(--space-xl);
+          padding: var(--space-lg);
           margin-bottom: var(--space-xl);
-          position: relative;
         }
 
-        .vip-badge {
-          position: absolute;
-          top: -12px;
-          right: 20px;
-          background: var(--gold);
-          color: var(--deep-blue);
-          padding: var(--space-xs) var(--space-md);
-          border-radius: var(--radius-full);
-          font-size: 0.8rem;
-          font-weight: 700;
-          display: flex;
-          align-items: center;
-          gap: var(--space-xs);
-        }
-
-        .rtl .vip-badge {
-          right: auto;
-          left: 20px;
-        }
-
-        .vip-manager-card h3 {
-          margin-bottom: var(--space-lg);
-          color: var(--gold);
-        }
-
-        .manager-info {
-          display: flex;
-          align-items: center;
-          gap: var(--space-lg);
-        }
-
-        .manager-avatar {
-          width: 60px;
-          height: 60px;
-          background: var(--gold);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: var(--deep-blue);
-        }
-
-        .manager-details {
-          display: flex;
-          flex-direction: column;
-          gap: var(--space-xs);
-        }
-
-        .manager-name {
-          font-size: 1.1rem;
-          font-weight: 600;
+        .chart-card h3 {
           color: var(--white);
+          margin-bottom: var(--space-lg);
         }
 
-        .manager-contact {
-          display: flex;
-          align-items: center;
-          gap: var(--space-xs);
-          color: var(--silver);
-          font-size: 0.9rem;
+        .chart-container {
+          width: 100%;
         }
 
-        .manager-contact:hover {
-          color: var(--gold);
-        }
-
+        /* Recent Section */
         .recent-section {
           background: var(--charcoal);
           border: 1px solid var(--slate);
           border-radius: var(--radius-lg);
-          padding: var(--space-xl);
-          margin-bottom: var(--space-xl);
+          padding: var(--space-lg);
         }
 
         .section-header {
@@ -832,320 +1188,256 @@ const ClientDashboard = () => {
           margin-bottom: var(--space-lg);
         }
 
+        .section-header h3 {
+          color: var(--white);
+        }
+
         .view-all-btn {
           display: flex;
           align-items: center;
           gap: var(--space-xs);
           color: var(--gold);
-          font-size: 0.9rem;
+          font-size: 0.875rem;
+          background: none;
+          border: none;
+          cursor: pointer;
         }
 
-        .leads-list {
+        .recent-leads {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-sm);
+        }
+
+        .recent-lead-item {
+          display: flex;
+          align-items: center;
+          gap: var(--space-md);
+          padding: var(--space-md);
+          background: var(--slate);
+          border-radius: var(--radius-md);
+        }
+
+        .lead-avatar {
+          width: 36px;
+          height: 36px;
+          background: var(--gold);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          color: var(--deep-blue);
+          flex-shrink: 0;
+        }
+
+        .lead-info {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .lead-name {
+          display: block;
+          color: var(--white);
+          font-weight: 500;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .lead-category {
+          display: block;
+          color: var(--silver);
+          font-size: 0.8rem;
+        }
+
+        /* Status Badge */
+        .status-badge {
+          display: inline-block;
+          padding: var(--space-xs) var(--space-md);
+          border-radius: var(--radius-full);
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: capitalize;
+          white-space: nowrap;
+        }
+
+        .status-badge.small {
+          padding: 2px 8px;
+          font-size: 0.7rem;
+        }
+
+        /* Leads View */
+        .leads-view .view-header,
+        .notifications-view .view-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: var(--space-lg);
+          flex-wrap: wrap;
+          gap: var(--space-md);
+        }
+
+        .filter-tabs {
+          display: flex;
+          gap: var(--space-sm);
+          flex-wrap: wrap;
+        }
+
+        .filter-tab {
+          display: flex;
+          align-items: center;
+          gap: var(--space-xs);
+          padding: var(--space-sm) var(--space-md);
+          border-radius: var(--radius-full);
+          background: var(--charcoal);
+          color: var(--silver);
+          border: 1px solid var(--slate);
+          cursor: pointer;
+          transition: var(--transition-base);
+          text-transform: capitalize;
+          font-size: 0.85rem;
+        }
+
+        .filter-tab:hover {
+          border-color: var(--gold);
+        }
+
+        .filter-tab.active {
+          background: var(--gold);
+          color: var(--deep-blue);
+          border-color: var(--gold);
+        }
+
+        .filter-count {
+          background: rgba(0,0,0,0.2);
+          padding: 2px 6px;
+          border-radius: var(--radius-full);
+          font-size: 0.75rem;
+        }
+
+        .filter-tab.active .filter-count {
+          background: rgba(0,0,0,0.3);
+        }
+
+        /* Table */
+        .table-container {
+          overflow-x: auto;
+        }
+
+        .data-table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+          padding: var(--space-md);
+          text-align: left;
+          border-bottom: 1px solid var(--slate);
+        }
+
+        .rtl .data-table th,
+        .rtl .data-table td {
+          text-align: right;
+        }
+
+        .data-table th {
+          color: var(--silver);
+          font-weight: 500;
+          font-size: 0.875rem;
+          background: var(--charcoal);
+        }
+
+        .data-table td {
+          color: var(--light-silver);
+        }
+
+        .data-table a {
+          color: var(--gold);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+          display: flex;
+          gap: var(--space-sm);
+        }
+
+        .action-btn {
+          padding: var(--space-sm);
+          border-radius: var(--radius-sm);
+          color: var(--silver);
+          background: var(--slate);
+          border: none;
+          cursor: pointer;
+          transition: var(--transition-base);
+        }
+
+        .action-btn:hover {
+          color: var(--white);
+        }
+
+        .action-btn.return:hover {
+          background: #f59e0b;
+        }
+
+        /* Mobile Cards */
+        .mobile-cards {
           display: flex;
           flex-direction: column;
           gap: var(--space-md);
         }
 
         .lead-card {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: var(--space-lg);
-          background: var(--navy);
-          border-radius: var(--radius-md);
-          border: 1px solid var(--slate);
-          transition: var(--transition-base);
-        }
-
-        .lead-card:hover {
-          border-color: var(--gold);
-        }
-
-        .lead-info h4 {
-          color: var(--white);
-          margin-bottom: var(--space-xs);
-        }
-
-        .lead-phone, .lead-email {
-          display: flex;
-          align-items: center;
-          gap: var(--space-xs);
-          color: var(--silver);
-          font-size: 0.9rem;
-        }
-
-        .lead-phone a, .lead-email a {
-          color: var(--gold);
-        }
-
-        .lead-meta {
-          text-align: right;
-          display: flex;
-          flex-direction: column;
-          gap: var(--space-xs);
-        }
-
-        .lead-category {
-          background: rgba(212, 175, 55, 0.2);
-          color: var(--gold);
-          padding: var(--space-xs) var(--space-sm);
-          border-radius: var(--radius-full);
-          font-size: 0.8rem;
-        }
-
-        .lead-date {
-          display: flex;
-          align-items: center;
-          gap: var(--space-xs);
-          color: var(--silver);
-          font-size: 0.8rem;
-        }
-
-        .empty-state {
-          text-align: center;
-          padding: var(--space-2xl);
-          color: var(--silver);
-        }
-
-        .empty-state svg {
-          margin-bottom: var(--space-md);
-          opacity: 0.5;
-        }
-
-        .chart-section {
-          background: var(--charcoal);
-          border: 1px solid var(--slate);
-          border-radius: var(--radius-lg);
-          padding: var(--space-xl);
-        }
-
-        .chart-section h3 {
-          margin-bottom: var(--space-lg);
-        }
-
-        .dashboard-loading {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          min-height: 100vh;
-          gap: var(--space-lg);
-        }
-
-        .loading-spinner.large {
-          width: 50px;
-          height: 50px;
-          border: 3px solid var(--slate);
-          border-top-color: var(--gold);
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 1024px) {
-          .stats-grid.client {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .dashboard-sidebar {
-            width: 60px;
-          }
-          
-          .sidebar-logo span,
-          .nav-item span,
-          .user-details {
-            display: none;
-          }
-          
-          .dashboard-main {
-            margin-left: 60px;
-          }
-          
-          .rtl .dashboard-main {
-            margin-right: 60px;
-          }
-        }
-      `}</style>
-    </div>
-  );
-};
-
-// Sub-components
-const LeadsView = ({ leads, isRTL, onReturn, onExport }) => {
-  const [filter, setFilter] = useState({ status: '', search: '' });
-  
-  const filteredLeads = leads.filter(lead => {
-    if (filter.status && lead.status !== filter.status) return false;
-    if (filter.search) {
-      const search = filter.search.toLowerCase();
-      return lead.customer_name.toLowerCase().includes(search) ||
-             lead.customer_phone.includes(search);
-    }
-    return true;
-  });
-
-  return (
-    <div className="leads-view">
-      <div className="view-header">
-        <h2>{isRTL ? 'הלידים שלי' : 'My Leads'}</h2>
-        <button className="btn btn-secondary" onClick={onExport}>
-          <Download size={18} />
-          {isRTL ? 'ייצוא CSV' : 'Export CSV'}
-        </button>
-      </div>
-
-      <div className="filters-bar">
-        <input
-          type="text"
-          className="form-input"
-          placeholder={isRTL ? 'חיפוש...' : 'Search...'}
-          value={filter.search}
-          onChange={(e) => setFilter({ ...filter, search: e.target.value })}
-        />
-        <select
-          className="form-select"
-          value={filter.status}
-          onChange={(e) => setFilter({ ...filter, status: e.target.value })}
-        >
-          <option value="">{isRTL ? 'כל הסטטוסים' : 'All Statuses'}</option>
-          <option value="sent">{isRTL ? 'נשלח' : 'Sent'}</option>
-          <option value="converted">{isRTL ? 'הומר' : 'Converted'}</option>
-          <option value="returned">{isRTL ? 'הוחזר' : 'Returned'}</option>
-        </select>
-      </div>
-
-      <div className="leads-grid">
-        {filteredLeads.map(lead => (
-          <div key={lead.id} className="lead-detail-card">
-            <div className="lead-header">
-              <h3>{lead.customer_name}</h3>
-              <span className={`status-badge ${lead.status}`}>{lead.status}</span>
-            </div>
-            <div className="lead-body">
-              <p><Phone size={14} /> <a href={`tel:${lead.customer_phone}`}>{lead.customer_phone}</a></p>
-              {lead.customer_email && (
-                <p><Mail size={14} /> <a href={`mailto:${lead.customer_email}`}>{lead.customer_email}</a></p>
-              )}
-              <p className="lead-category-tag">
-                {isRTL ? lead.category_name_he : lead.category_name_en}
-              </p>
-              {lead.notes && <p className="lead-notes">{lead.notes}</p>}
-            </div>
-            <div className="lead-footer">
-              <span className="lead-date">
-                <Clock size={12} />
-                {new Date(lead.sent_at || lead.created_at).toLocaleDateString()}
-              </span>
-              {lead.status === 'sent' && (
-                <button 
-                  className="btn btn-sm btn-outline"
-                  onClick={() => {
-                    const reason = prompt(isRTL ? 'סיבת ההחזרה:' : 'Return reason:');
-                    if (reason) onReturn(lead.id, reason);
-                  }}
-                >
-                  {isRTL ? 'בקש החזרה' : 'Request Return'}
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <style>{`
-        .leads-view {
-          padding: var(--space-md);
-        }
-
-        .view-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: var(--space-xl);
-        }
-
-        .filters-bar {
-          display: flex;
-          gap: var(--space-md);
-          margin-bottom: var(--space-xl);
-        }
-
-        .filters-bar .form-input {
-          flex: 1;
-          max-width: 300px;
-        }
-
-        .leads-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-          gap: var(--space-lg);
-        }
-
-        .lead-detail-card {
           background: var(--charcoal);
           border: 1px solid var(--slate);
           border-radius: var(--radius-lg);
           overflow: hidden;
         }
 
-        .lead-header {
+        .lead-card-header {
           display: flex;
           justify-content: space-between;
-          align-items: center;
-          padding: var(--space-md) var(--space-lg);
-          background: var(--navy);
+          align-items: flex-start;
+          padding: var(--space-md);
           border-bottom: 1px solid var(--slate);
         }
 
-        .lead-header h3 {
+        .lead-card-header .lead-info h4 {
+          color: var(--white);
           font-size: 1rem;
+          margin-bottom: var(--space-xs);
         }
 
-        .lead-body {
-          padding: var(--space-lg);
+        .lead-card-header .lead-category {
+          color: var(--silver);
+          font-size: 0.85rem;
         }
 
-        .lead-body p {
+        .lead-card-body {
+          padding: var(--space-md);
+        }
+
+        .lead-detail {
           display: flex;
           align-items: center;
           gap: var(--space-sm);
-          margin-bottom: var(--space-sm);
           color: var(--silver);
+          font-size: 0.9rem;
+          margin-bottom: var(--space-sm);
         }
 
-        .lead-body a {
+        .lead-detail a {
           color: var(--gold);
         }
 
-        .lead-category-tag {
-          display: inline-block;
-          background: rgba(212, 175, 55, 0.2);
-          color: var(--gold) !important;
-          padding: var(--space-xs) var(--space-sm);
-          border-radius: var(--radius-full);
-          font-size: 0.85rem;
-          margin-top: var(--space-sm);
-        }
-
-        .lead-notes {
-          margin-top: var(--space-md);
-          padding: var(--space-sm);
-          background: var(--navy);
-          border-radius: var(--radius-sm);
-          font-size: 0.9rem;
-        }
-
-        .lead-footer {
+        .lead-card-footer {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: var(--space-md) var(--space-lg);
+          padding: var(--space-md);
           border-top: 1px solid var(--slate);
+          background: rgba(0, 0, 0, 0.1);
         }
 
         .lead-date {
@@ -1153,113 +1445,51 @@ const LeadsView = ({ leads, isRTL, onReturn, onExport }) => {
           align-items: center;
           gap: var(--space-xs);
           color: var(--silver);
-          font-size: 0.85rem;
+          font-size: 0.8rem;
         }
 
-        .btn-sm {
-          padding: var(--space-xs) var(--space-md);
-          font-size: 0.85rem;
+        /* Empty State */
+        .empty-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: var(--space-3xl);
+          color: var(--silver);
+          text-align: center;
         }
 
-        .btn-outline {
-          background: transparent;
-          border: 1px solid var(--gold);
-          color: var(--gold);
+        .empty-state svg {
+          margin-bottom: var(--space-lg);
+          opacity: 0.5;
         }
 
-        .btn-outline:hover {
-          background: var(--gold);
-          color: var(--deep-blue);
-        }
-
-        .status-badge {
-          padding: var(--space-xs) var(--space-sm);
-          border-radius: var(--radius-full);
-          font-size: 0.75rem;
-          font-weight: 600;
-          text-transform: uppercase;
-        }
-
-        .status-badge.sent { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
-        .status-badge.converted { background: rgba(212, 175, 55, 0.2); color: #d4af37; }
-        .status-badge.returned { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-      `}</style>
-    </div>
-  );
-};
-
-const NotificationsView = ({ notifications, isRTL, onMarkRead, isVIP }) => {
-  return (
-    <div className="notifications-view">
-      <h2>{isRTL ? 'התראות' : 'Notifications'}</h2>
-
-      <div className="notifications-list">
-        {notifications.map(notif => (
-          <div 
-            key={notif.id} 
-            className={`notification-card ${notif.is_read ? 'read' : ''} ${notif.type}`}
-            onClick={() => !notif.is_read && onMarkRead(notif.id)}
-          >
-            <div className="notification-icon">
-              {notif.type === 'success' && <CheckCircle size={20} />}
-              {notif.type === 'warning' && <AlertCircle size={20} />}
-              {notif.type === 'error' && <XCircle size={20} />}
-              {notif.type === 'vip' && <Crown size={20} />}
-              {notif.type === 'info' && <Bell size={20} />}
-            </div>
-            <div className="notification-content">
-              <h4>{notif.title}</h4>
-              <p>{notif.message}</p>
-              <span className="notification-time">
-                {new Date(notif.created_at).toLocaleString()}
-              </span>
-            </div>
-            {!notif.is_read && <div className="unread-dot" />}
-          </div>
-        ))}
-
-        {notifications.length === 0 && (
-          <div className="empty-state">
-            <Bell size={48} />
-            <p>{isRTL ? 'אין התראות' : 'No notifications'}</p>
-          </div>
-        )}
-      </div>
-
-      <style>{`
-        .notifications-view {
-          padding: var(--space-md);
-        }
-
-        .notifications-view h2 {
-          margin-bottom: var(--space-xl);
-        }
-
+        /* Notifications */
         .notifications-list {
           display: flex;
           flex-direction: column;
-          gap: var(--space-md);
+          gap: var(--space-sm);
         }
 
-        .notification-card {
+        .notification-item {
           display: flex;
           align-items: flex-start;
           gap: var(--space-md);
-          padding: var(--space-lg);
+          padding: var(--space-md);
           background: var(--charcoal);
           border: 1px solid var(--slate);
-          border-radius: var(--radius-lg);
+          border-radius: var(--radius-md);
           cursor: pointer;
           transition: var(--transition-base);
           position: relative;
         }
 
-        .notification-card:hover {
-          border-color: var(--gold);
+        .notification-item:hover {
+          background: var(--slate);
         }
 
-        .notification-card.read {
-          opacity: 0.6;
+        .notification-item.unread {
+          border-color: var(--gold);
         }
 
         .notification-icon {
@@ -1272,49 +1502,30 @@ const NotificationsView = ({ notifications, isRTL, onMarkRead, isVIP }) => {
           flex-shrink: 0;
         }
 
-        .notification-card.success .notification-icon {
-          background: rgba(34, 197, 94, 0.2);
-          color: #22c55e;
-        }
-
-        .notification-card.warning .notification-icon {
-          background: rgba(245, 158, 11, 0.2);
-          color: #f59e0b;
-        }
-
-        .notification-card.error .notification-icon {
-          background: rgba(239, 68, 68, 0.2);
-          color: #ef4444;
-        }
-
-        .notification-card.vip .notification-icon {
-          background: rgba(212, 175, 55, 0.2);
-          color: #d4af37;
-        }
-
-        .notification-card.info .notification-icon {
-          background: rgba(59, 130, 246, 0.2);
-          color: #3b82f6;
-        }
+        .notification-icon.lead { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .notification-icon.system { background: rgba(107, 114, 128, 0.2); color: #6b7280; }
+        .notification-icon.vip { background: rgba(212, 175, 55, 0.2); color: #d4af37; }
 
         .notification-content {
           flex: 1;
+          min-width: 0;
         }
 
-        .notification-content h4 {
+        .notification-title {
           color: var(--white);
+          font-weight: 500;
           margin-bottom: var(--space-xs);
         }
 
-        .notification-content p {
+        .notification-message {
           color: var(--silver);
           font-size: 0.9rem;
-          margin-bottom: var(--space-sm);
+          margin-bottom: var(--space-xs);
         }
 
         .notification-time {
           color: var(--silver);
-          font-size: 0.8rem;
+          font-size: 0.75rem;
         }
 
         .unread-dot {
@@ -1325,93 +1536,16 @@ const NotificationsView = ({ notifications, isRTL, onMarkRead, isVIP }) => {
           flex-shrink: 0;
         }
 
-        .empty-state {
-          text-align: center;
-          padding: var(--space-2xl);
-          color: var(--silver);
-        }
-      `}</style>
-    </div>
-  );
-};
-
-const ProfileView = ({ user, isRTL, isVIP, packageInfo }) => {
-  return (
-    <div className="profile-view">
-      <h2>{isRTL ? 'פרופיל' : 'Profile'}</h2>
-
-      <div className="profile-card">
-        <div className="profile-header">
-          <div className="profile-avatar">
-            {isVIP && <Crown size={16} className="vip-crown" />}
-            {user?.name?.charAt(0)}
-          </div>
-          <div className="profile-info">
-            <h3>{user?.name}</h3>
-            <p>{user?.email}</p>
-            <span className="package-tag" style={{ background: `${packageInfo.color}20`, color: packageInfo.color }}>
-              {packageInfo.name}
-            </span>
-          </div>
-        </div>
-
-        <div className="profile-details">
-          <div className="detail-row">
-            <span className="detail-label">{isRTL ? 'טלפון' : 'Phone'}</span>
-            <span className="detail-value">{user?.phone || '-'}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">{isRTL ? 'חברה' : 'Company'}</span>
-            <span className="detail-value">{user?.company_name || '-'}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">{isRTL ? 'מגבלת לידים חודשית' : 'Monthly Lead Limit'}</span>
-            <span className="detail-value">
-              {user?.monthly_lead_limit === -1 ? (isRTL ? 'ללא הגבלה' : 'Unlimited') : user?.monthly_lead_limit}
-            </span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">{isRTL ? 'קטגוריות מותרות' : 'Categories Allowed'}</span>
-            <span className="detail-value">
-              {user?.categories_allowed === -1 ? (isRTL ? 'הכל' : 'All') : user?.categories_allowed}
-            </span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">{isRTL ? 'סטטוס VIP' : 'VIP Status'}</span>
-            <span className="detail-value">
-              {isVIP ? (
-                <span className="vip-status">
-                  <Crown size={14} />
-                  {isRTL ? 'כן' : 'Yes'}
-                </span>
-              ) : (isRTL ? 'לא' : 'No')}
-            </span>
-          </div>
-        </div>
-
-        {user?.categories && user.categories.length > 0 && (
-          <div className="profile-categories">
-            <h4>{isRTL ? 'הקטגוריות שלי' : 'My Categories'}</h4>
-            <div className="categories-list">
-              {user.categories.map(cat => (
-                <span key={cat.id} className="category-tag">
-                  {isRTL ? cat.name_he : cat.name_en}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <style>{`
-        .profile-view {
-          padding: var(--space-md);
+        .unread-badge {
+          background: var(--error);
+          color: white;
+          padding: 2px 8px;
+          border-radius: var(--radius-full);
+          font-size: 0.75rem;
+          font-weight: 600;
         }
 
-        .profile-view h2 {
-          margin-bottom: var(--space-xl);
-        }
-
+        /* Profile View */
         .profile-card {
           background: var(--charcoal);
           border: 1px solid var(--slate);
@@ -1424,8 +1558,7 @@ const ProfileView = ({ user, isRTL, isVIP, packageInfo }) => {
           align-items: center;
           gap: var(--space-lg);
           padding: var(--space-xl);
-          background: var(--navy);
-          border-bottom: 1px solid var(--slate);
+          background: var(--slate);
         }
 
         .profile-avatar {
@@ -1440,6 +1573,7 @@ const ProfileView = ({ user, isRTL, isVIP, packageInfo }) => {
           font-weight: 700;
           color: var(--deep-blue);
           position: relative;
+          flex-shrink: 0;
         }
 
         .profile-avatar .vip-crown {
@@ -1447,26 +1581,31 @@ const ProfileView = ({ user, isRTL, isVIP, packageInfo }) => {
           top: -8px;
           right: -4px;
           color: var(--gold);
-          background: var(--deep-blue);
-          padding: 4px;
+          background: var(--charcoal);
           border-radius: 50%;
+          padding: 2px;
         }
 
-        .profile-info h3 {
-          font-size: 1.25rem;
+        .profile-info h2 {
+          color: var(--white);
           margin-bottom: var(--space-xs);
         }
 
         .profile-info p {
           color: var(--silver);
-          margin-bottom: var(--space-sm);
         }
 
-        .package-tag {
+        .vip-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-xs);
+          background: rgba(212, 175, 55, 0.2);
+          color: var(--gold);
           padding: var(--space-xs) var(--space-md);
           border-radius: var(--radius-full);
           font-size: 0.85rem;
           font-weight: 600;
+          margin-top: var(--space-sm);
         }
 
         .profile-details {
@@ -1493,11 +1632,18 @@ const ProfileView = ({ user, isRTL, isVIP, packageInfo }) => {
           font-weight: 500;
         }
 
-        .vip-status {
+        .status-active, .status-inactive {
           display: flex;
           align-items: center;
           gap: var(--space-xs);
-          color: var(--gold);
+        }
+
+        .status-active {
+          color: #22c55e;
+        }
+
+        .status-inactive {
+          color: #ef4444;
         }
 
         .profile-categories {
@@ -1505,8 +1651,8 @@ const ProfileView = ({ user, isRTL, isVIP, packageInfo }) => {
         }
 
         .profile-categories h4 {
-          margin-bottom: var(--space-md);
           color: var(--silver);
+          margin-bottom: var(--space-md);
         }
 
         .categories-list {
@@ -1521,6 +1667,241 @@ const ProfileView = ({ user, isRTL, isVIP, packageInfo }) => {
           padding: var(--space-xs) var(--space-md);
           border-radius: var(--radius-full);
           font-size: 0.85rem;
+        }
+
+        /* Buttons */
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-sm);
+          padding: var(--space-md) var(--space-lg);
+          border-radius: var(--radius-md);
+          font-weight: 600;
+          cursor: pointer;
+          transition: var(--transition-base);
+          border: none;
+          font-size: 0.95rem;
+        }
+
+        .btn-primary {
+          background: var(--gold);
+          color: var(--deep-blue);
+        }
+
+        .btn-secondary {
+          background: var(--slate);
+          color: var(--light-silver);
+        }
+
+        .btn-sm {
+          padding: var(--space-sm) var(--space-md);
+          font-size: 0.85rem;
+        }
+
+        /* Loading */
+        .dashboard-loading {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          gap: var(--space-lg);
+          color: var(--silver);
+        }
+
+        .loading-spinner {
+          width: 30px;
+          height: 30px;
+          border: 3px solid var(--slate);
+          border-top-color: var(--gold);
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+
+        .loading-spinner.large {
+          width: 50px;
+          height: 50px;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        /* Utilities */
+        .desktop-only {
+          display: block;
+        }
+
+        .mobile-only {
+          display: none;
+        }
+
+        /* ===================================
+           Responsive Breakpoints
+           =================================== */
+
+        @media (max-width: 1024px) {
+          .stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+
+        @media (max-width: 768px) {
+          /* Show mobile elements */
+          .mobile-header {
+            display: flex;
+          }
+
+          .sidebar-overlay {
+            display: block;
+          }
+
+          .mobile-only {
+            display: block;
+          }
+
+          .desktop-only {
+            display: none;
+          }
+
+          .mobile-tab-title {
+            display: block;
+          }
+
+          /* Hide sidebar by default, show when open */
+          .dashboard-sidebar {
+            transform: translateX(-100%);
+          }
+
+          .rtl .dashboard-sidebar {
+            transform: translateX(100%);
+          }
+
+          .dashboard-sidebar.open {
+            transform: translateX(0);
+          }
+
+          .close-sidebar {
+            display: block;
+          }
+
+          /* Adjust main content */
+          .dashboard-main {
+            margin-left: 0;
+            margin-right: 0;
+            padding: var(--space-md);
+            padding-top: calc(60px + var(--space-md));
+          }
+
+          .rtl .dashboard-main {
+            margin-right: 0;
+          }
+
+          /* Stats grid */
+          .stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-sm);
+          }
+
+          .stat-card {
+            padding: var(--space-md);
+            flex-direction: column;
+            text-align: center;
+            gap: var(--space-sm);
+          }
+
+          .stat-icon {
+            width: 40px;
+            height: 40px;
+          }
+
+          .stat-value {
+            font-size: 1.25rem;
+          }
+
+          .stat-label {
+            font-size: 0.7rem;
+          }
+
+          /* Usage card */
+          .usage-card {
+            padding: var(--space-md);
+          }
+
+          .usage-numbers .current {
+            font-size: 2rem;
+          }
+
+          .usage-numbers .limit {
+            font-size: 1.25rem;
+          }
+
+          /* Filter tabs scroll */
+          .filter-tabs {
+            overflow-x: auto;
+            padding-bottom: var(--space-sm);
+            flex-wrap: nowrap;
+          }
+
+          .filter-tab {
+            white-space: nowrap;
+            flex-shrink: 0;
+          }
+
+          /* Profile */
+          .profile-header {
+            flex-direction: column;
+            text-align: center;
+          }
+
+          .profile-avatar {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+          }
+
+          /* Button text */
+          .btn-text {
+            display: none;
+          }
+
+          .view-header .btn .btn-text {
+            display: inline;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .stats-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .stat-card {
+            flex-direction: row;
+            text-align: left;
+          }
+
+          .rtl .stat-card {
+            text-align: right;
+          }
+
+          .detail-row {
+            flex-direction: column;
+            gap: var(--space-xs);
+          }
+
+          .view-header {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .view-header .btn {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .view-header .btn .btn-text {
+            display: inline;
+          }
         }
       `}</style>
     </div>
