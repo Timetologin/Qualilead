@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import ThemeToggle from '../../components/ThemeToggle';
 import { useLanguage } from '../../context/LanguageContext';
 import {
   LayoutDashboard,
@@ -440,19 +441,22 @@ const ClientDashboard = () => {
   return (
     <div className={`client-dashboard ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Mobile Header */}
-      <header className="mobile-header">
-        <button className="menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-          <Menu size={24} />
-        </button>
-        <div className="mobile-logo">
-          <div className="logo-icon">QL</div>
-          <span>QualiLead</span>
-        </div>
-        <button className="icon-btn notification-btn" onClick={() => handleTabChange('notifications')}>
-          <Bell size={20} />
-          {unreadNotifications > 0 && <span className="notification-dot"></span>}
-        </button>
-      </header>
+<header className="mobile-header">
+  <button className="menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+    <Menu size={24} />
+  </button>
+  <div className="mobile-logo">
+    <div className="logo-icon">QL</div>
+    <span>QualiLead</span>
+  </div>
+  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <ThemeToggle size="small" />
+    <button className="icon-btn notification-btn" onClick={() => handleTabChange('notifications')}>
+      <Bell size={20} />
+      {unreadNotifications > 0 && <span className="notification-dot"></span>}
+    </button>
+  </div>
+</header>
 
       {/* Sidebar Overlay */}
       {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>}
@@ -536,11 +540,12 @@ const ClientDashboard = () => {
             </p>
           </div>
           <div className="header-right">
-            <button className="btn btn-secondary" onClick={exportLeadsCSV}>
-              <Download size={18} />
-              {isRTL ? 'ייצוא לידים' : 'Export Leads'}
-            </button>
-          </div>
+  <ThemeToggle size="medium" />
+  <button className="btn btn-secondary" onClick={exportLeads}>
+    <Download size={18} />
+    {isRTL ? 'ייצוא לידים' : 'Export Leads'}
+  </button>
+</div>
         </header>
 
         {/* Mobile Tab Title */}

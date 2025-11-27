@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import ThemeToggle from '../../components/ThemeToggle';
 import {
   LayoutDashboard,
   FileText,
@@ -646,18 +647,21 @@ const AdminDashboard = () => {
   return (
     <div className={`admin-dashboard ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Mobile Header */}
-      <header className="mobile-header">
-        <button className="menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-          <Menu size={24} />
-        </button>
-        <div className="mobile-logo">
-          <div className="logo-icon">QL</div>
-          <span>QualiLead</span>
-        </div>
-        <button className="icon-btn" onClick={fetchDashboardData}>
-          <RefreshCw size={20} />
-        </button>
-      </header>
+<header className="mobile-header">
+  <button className="menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+    <Menu size={24} />
+  </button>
+  <div className="mobile-logo">
+    <div className="logo-icon">QL</div>
+    <span>QualiLead</span>
+  </div>
+  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <ThemeToggle size="small" />
+    <button className="icon-btn" onClick={fetchDashboardData}>
+      <RefreshCw size={20} />
+    </button>
+  </div>
+</header>
 
       {/* Sidebar Overlay */}
       {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>}
@@ -733,26 +737,27 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="dashboard-main">
         {/* Desktop Header */}
-        <header className="dashboard-header desktop-only">
-          <div className="header-left">
-            <h1>
-              {activeTab === 'overview' && (isRTL ? 'סקירה כללית' : 'Dashboard Overview')}
-              {activeTab === 'leads' && (isRTL ? 'ניהול לידים' : 'Lead Management')}
-              {activeTab === 'clients' && (isRTL ? 'ניהול לקוחות' : 'Client Management')}
-              {activeTab === 'categories' && (isRTL ? 'קטגוריות שירות' : 'Service Categories')}
-              {activeTab === 'analytics' && (isRTL ? 'אנליטיקס ודוחות' : 'Analytics & Reports')}
-            </h1>
-          </div>
-          <div className="header-right">
-            <button className="icon-btn" onClick={fetchDashboardData}>
-              <RefreshCw size={20} />
-            </button>
-            <Link to="/admin/leads/new" className="btn btn-primary">
-              <Plus size={18} />
-              {isRTL ? 'הוסף ליד' : 'Add Lead'}
-            </Link>
-          </div>
-        </header>
+<header className="dashboard-header desktop-only">
+  <div className="header-left">
+    <h1>
+      {activeTab === 'overview' && (isRTL ? 'סקירה כללית' : 'Dashboard Overview')}
+      {activeTab === 'leads' && (isRTL ? 'ניהול לידים' : 'Lead Management')}
+      {activeTab === 'clients' && (isRTL ? 'ניהול לקוחות' : 'Client Management')}
+      {activeTab === 'categories' && (isRTL ? 'קטגוריות שירות' : 'Service Categories')}
+      {activeTab === 'analytics' && (isRTL ? 'אנליטיקס ודוחות' : 'Analytics & Reports')}
+    </h1>
+  </div>
+  <div className="header-right">
+    <ThemeToggle size="medium" />
+    <button className="icon-btn" onClick={fetchDashboardData}>
+      <RefreshCw size={20} />
+    </button>
+    <Link to="/admin/leads/new" className="btn btn-primary">
+      <Plus size={18} />
+      {isRTL ? 'הוסף ליד' : 'Add Lead'}
+    </Link>
+  </div>
+</header>
 
         {/* Mobile Tab Title */}
         <div className="mobile-tab-title mobile-only">

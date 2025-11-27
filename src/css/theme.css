@@ -1,0 +1,194 @@
+/* ===================================
+   DARK THEME (Default)
+   =================================== */
+:root,
+[data-theme="dark"] {
+  --deep-blue: #0a1628;
+  --navy: #152238;
+  --charcoal: #1e2d3d;
+  --slate: #2a3f54;
+  --silver: #b8c5d1;
+  --light-silver: #e8eef3;
+  --white: #ffffff;
+  --gold: #d4af37;
+  --gold-light: #f4e4a6;
+  --gold-dark: #b8960c;
+  --success: #22c55e;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  
+  --bg-primary: var(--deep-blue);
+  --bg-secondary: var(--navy);
+  --bg-tertiary: var(--charcoal);
+  --text-primary: var(--white);
+  --text-secondary: var(--light-silver);
+  --text-tertiary: var(--silver);
+  --border-primary: var(--slate);
+  --card-bg: var(--charcoal);
+  --card-border: var(--slate);
+  --input-bg: var(--slate);
+  --input-border: var(--slate);
+  --hover-bg: rgba(42, 63, 84, 0.8);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* ===================================
+   LIGHT THEME
+   =================================== */
+[data-theme="light"] {
+  --deep-blue: #f8fafc;
+  --navy: #f1f5f9;
+  --charcoal: #ffffff;
+  --slate: #e2e8f0;
+  --silver: #64748b;
+  --light-silver: #475569;
+  --white: #0f172a;
+  --gold: #b8960c;
+  --gold-light: #d4af37;
+  --gold-dark: #8b6914;
+  --success: #16a34a;
+  --error: #dc2626;
+  --warning: #d97706;
+  
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-tertiary: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-tertiary: #64748b;
+  --border-primary: #e2e8f0;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --input-bg: #ffffff;
+  --input-border: #e2e8f0;
+  --hover-bg: #f1f5f9;
+  --shadow-card: 0 2px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* ===================================
+   Theme Transitions
+   =================================== */
+body,
+.dashboard-sidebar,
+.dashboard-main,
+.stat-card,
+.data-card,
+.settings-section,
+.form-input,
+.form-select,
+.nav-item,
+.data-table th,
+.data-table td {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ===================================
+   Light Theme Overrides
+   =================================== */
+[data-theme="light"] .dashboard-sidebar {
+  background: #ffffff;
+  border-color: var(--border-primary);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .sidebar-header,
+[data-theme="light"] .sidebar-footer {
+  border-color: var(--border-primary);
+}
+
+[data-theme="light"] .logo-icon {
+  background: var(--gold);
+  color: #ffffff;
+}
+
+[data-theme="light"] .nav-item:hover {
+  background: var(--hover-bg);
+}
+
+[data-theme="light"] .nav-item.active {
+  background: rgba(184, 150, 12, 0.1);
+  color: var(--gold);
+}
+
+[data-theme="light"] .stat-card,
+[data-theme="light"] .data-card,
+[data-theme="light"] .chart-card,
+[data-theme="light"] .table-card,
+[data-theme="light"] .settings-section {
+  background: var(--card-bg);
+  border-color: var(--card-border);
+  box-shadow: var(--shadow-card);
+}
+
+[data-theme="light"] .dashboard-main {
+  background: var(--bg-primary);
+}
+
+[data-theme="light"] .dashboard-header h1 {
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .mobile-header {
+  background: var(--bg-tertiary);
+  border-color: var(--border-primary);
+}
+
+[data-theme="light"] .form-input,
+[data-theme="light"] .form-select,
+[data-theme="light"] .form-textarea {
+  background: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .data-table th {
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
+  border-color: var(--border-primary);
+}
+
+[data-theme="light"] .data-table td {
+  border-color: var(--border-primary);
+  color: var(--text-secondary);
+}
+
+[data-theme="light"] .user-name {
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .user-avatar {
+  background: var(--gold);
+  color: #ffffff;
+}
+
+[data-theme="light"] .icon-btn {
+  color: var(--text-tertiary);
+  background: var(--bg-secondary);
+}
+
+[data-theme="light"] .icon-btn:hover {
+  color: var(--gold);
+}
+
+[data-theme="light"] .loading-spinner {
+  border-color: var(--border-primary);
+  border-top-color: var(--gold);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--slate);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
