@@ -14,6 +14,7 @@ import leadRoutes from './routes/leads.mongo.js';
 import categoryRoutes from './routes/categories.mongo.js';
 import analyticsRoutes from './routes/analytics.mongo.js';
 import notificationRoutes from './routes/notifications.mongo.js';
+import contactRoutes from './routes/contact.mongo.js';
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use('/api/leads', leadRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

@@ -115,11 +115,6 @@ const LoginPage = () => {
           <Link to="/">{isRTL ? 'חזרה לאתר' : 'Back to Website'}</Link>
         </div>
 
-        <div className="demo-credentials">
-          <p><strong>{isRTL ? 'פרטי התחברות לדמו:' : 'Demo Credentials:'}</strong></p>
-          <p><small>Admin: admin@qualilead.com / admin123</small></p>
-          <p><small>Client: demo@example.com / demo123</small></p>
-        </div>
       </div>
 
       <style>{`
@@ -249,23 +244,6 @@ const LoginPage = () => {
 
         .login-footer a:hover {
           text-decoration: underline;
-        }
-
-        .demo-credentials {
-          margin-top: var(--space-xl);
-          padding: var(--space-md);
-          background: rgba(212, 175, 55, 0.1);
-          border-radius: var(--radius-md);
-          text-align: center;
-        }
-
-        .demo-credentials p {
-          margin: var(--space-xs) 0;
-          color: var(--silver);
-        }
-
-        .demo-credentials strong {
-          color: var(--gold);
         }
 
         .loading-spinner {

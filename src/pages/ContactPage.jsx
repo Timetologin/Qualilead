@@ -52,22 +52,45 @@ const ContactPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (validateForm()) {
-      // Simulate form submission
-      setSubmitted(true);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        business: '',
-        message: ''
-      });
-      
-      // Reset success message after 5 seconds
-      setTimeout(() => setSubmitted(false), 5000);
+      setIsSubmitting(true);
+
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const response = await fetch(`${API_URL}/contact`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setSubmitted(true);
+          setFormData({
+            name: '',
+            email: '',
+            phone: '',
+            business: '',
+            message: ''
+          });
+          setTimeout(() => setSubmitted(false), 5000);
+        } else {
+          setErrors({ submit: data.error || (isRTL ? 'שגיאה בשליחת הטופס' : 'Failed to submit form') });
+        }
+      } catch (error) {
+        console.error('Contact form error:', error);
+        setErrors({ submit: isRTL ? 'שגיאת רשת, נסה שוב' : 'Network error, please try again' });
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -259,9 +282,26 @@ const ContactPage = () => {
                   {errors.message && <span className="form-error">{errors.message}</span>}
                 </div>
 
-                <button type="submit" className="btn btn-primary btn-large" style={{ width: '100%' }}>
-                  <Send size={18} />
-                  {t.contact.submitButton}
+                {errors.submit && (
+                  <div className="form-error" style={{ marginBottom: 'var(--space-md)', color: 'var(--error)' }}>
+                    {errors.submit}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-large"
+                  style={{ width: '100%' }}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <span className="loading-spinner"></span>
+                  ) : (
+                    <>
+                      <Send size={18} />
+                      {t.contact.submitButton}
+                    </>
+                  )}
                 </button>
               </form>
             </AnimatedSection>
