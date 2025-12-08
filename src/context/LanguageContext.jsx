@@ -15,7 +15,7 @@ export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => {
     // Check localStorage for saved preference
     const saved = localStorage.getItem('qualilead-language');
-    return saved || 'en';
+    return saved || 'he';
   });
 
   const t = translations[language];

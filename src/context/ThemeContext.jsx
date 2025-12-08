@@ -12,14 +12,9 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('qualilead-theme');
-    if (saved) return saved;
-    
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-      return 'light';
-    }
-    return 'dark';
-  });
+  const saved = localStorage.getItem('qualilead-theme');
+  return saved || 'dark';
+});
 
   const isDark = theme === 'dark';
   const isLight = theme === 'light';
