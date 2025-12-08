@@ -1,6 +1,5 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import nodemailer from 'nodemailer';
 import { validate, schemas } from '../middleware/validation.js';
 
 const router = express.Router();
@@ -18,31 +17,16 @@ const contactMessageSchema = new mongoose.Schema({
 
 const ContactMessage = mongoose.model('ContactMessage', contactMessageSchema);
 
-// Email transporter configuration
-const createTransporter = () => {
-  // Check if email is configured
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.log('⚠️ Email not configured - messages will only be saved to database');
-    return null;
+// Send notification email using Resend API
+const sendNotificationEmail = async (contactData) => {
+  const apiKey = process.env.RESEND_API_KEY;
+  
+  if (!apiKey) {
+    console.log('⚠️ RESEND_API_KEY not configured - email not sent');
+    return false;
   }
 
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    }
-  });
-};
-
-// Send notification email to admin
-const sendNotificationEmail = async (contactData) => {
-  const transporter = createTransporter();
-  if (!transporter) return false;
-
-  const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER;
+  const adminEmail = process.env.ADMIN_EMAIL || 'newnewfifa22@gmail.com';
 
   const businessLabels = {
     beauty: 'קוסמטיקאיות ואסתטיקה',
@@ -102,14 +86,29 @@ const sendNotificationEmail = async (contactData) => {
   `;
 
   try {
-    await transporter.sendMail({
-      from: `"QualiLead" <${process.env.SMTP_USER}>`,
-      to: adminEmail,
-      subject: `🔔 פנייה חדשה מ-${contactData.name}`,
-      html: htmlContent
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'QualiLead <onboarding@resend.dev>',
+        to: adminEmail,
+        subject: `🔔 פנייה חדשה מ-${contactData.name}`,
+        html: htmlContent
+      })
     });
-    console.log('✅ Notification email sent to:', adminEmail);
-    return true;
+
+    const result = await response.json();
+
+    if (response.ok) {
+      console.log('✅ Notification email sent via Resend to:', adminEmail);
+      return true;
+    } else {
+      console.error('❌ Resend API error:', result);
+      return false;
+    }
   } catch (error) {
     console.error('❌ Failed to send email:', error.message);
     return false;
