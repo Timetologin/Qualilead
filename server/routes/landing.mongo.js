@@ -3,27 +3,30 @@ import mongoose from 'mongoose';
 
 const router = express.Router();
 
-// Lead Schema (same as in leads.mongo.js)
-const leadSchema = new mongoose.Schema({
-  customer_name: { type: String, required: true },
-  customer_email: { type: String, default: '' },
-  customer_phone: { type: String, required: true },
-  customer_address: { type: String, default: '' },
-  category_id: { type: String, default: '' },
-  category_name: { type: String, default: '' },
-  source: { type: String, default: 'landing_page' },
-  landing_page: { type: String, default: '' },
-  status: { type: String, default: 'new' },
-  priority: { type: String, default: 'normal' },
-  notes: { type: String, default: '' },
-  assigned_to: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-  assigned_at: { type: Date, default: null },
-  created_at: { type: Date, default: Date.now },
-  updated_at: { type: Date, default: Date.now }
-});
-
-// Use existing model or create new one
-const Lead = mongoose.models.Lead || mongoose.model('Lead', leadSchema);
+// Get the existing Lead model or create a compatible one
+let Lead;
+try {
+  Lead = mongoose.model('Lead');
+} catch {
+  // If Lead model doesn't exist, create one
+  const leadSchema = new mongoose.Schema({
+    customer_name: { type: String, required: true },
+    customer_email: { type: String, default: '' },
+    customer_phone: { type: String, required: true },
+    customer_address: { type: String, default: '' },
+    category_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: null },
+    source: { type: String, default: 'landing_page' },
+    landing_page: { type: String, default: '' },
+    status: { type: String, default: 'new' },
+    priority: { type: String, default: 'normal' },
+    notes: { type: String, default: '' },
+    assigned_to: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    assigned_at: { type: Date, default: null },
+    created_at: { type: Date, default: Date.now },
+    updated_at: { type: Date, default: Date.now }
+  });
+  Lead = mongoose.model('Lead', leadSchema);
+}
 
 // Send notification email via Resend
 const sendNotificationEmail = async (leadData) => {
@@ -62,9 +65,9 @@ const sendNotificationEmail = async (leadData) => {
             <strong>📍 עיר:</strong> ${leadData.customer_address}
           </p>
           ` : ''}
-          ${leadData.category_name ? `
+          ${leadData.landing_page ? `
           <p style="color: #fff; margin: 8px 0;">
-            <strong>📂 קטגוריה:</strong> ${leadData.category_name}
+            <strong>📂 קטגוריה:</strong> ${leadData.landing_page}
           </p>
           ` : ''}
           ${leadData.notes ? `
@@ -129,8 +132,6 @@ router.post('/submit', async (req, res) => {
       phone, 
       email, 
       city,
-      category,
-      category_name,
       landing_page,
       notes 
     } = req.body;
@@ -150,14 +151,12 @@ router.post('/submit', async (req, res) => {
       });
     }
 
-    // Create the lead
+    // Create the lead - NOT setting category_id to avoid ObjectId casting error
     const lead = await Lead.create({
       customer_name: name,
       customer_phone: phone,
       customer_email: email || '',
       customer_address: city || '',
-      category_id: category || '',
-      category_name: category_name || '',
       source: 'landing_page',
       landing_page: landing_page || '',
       notes: notes || '',
@@ -178,7 +177,6 @@ router.post('/submit', async (req, res) => {
       customer_phone: phone,
       customer_email: email,
       customer_address: city,
-      category_name: category_name,
       landing_page: landing_page,
       notes: notes
     });

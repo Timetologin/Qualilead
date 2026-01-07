@@ -1089,13 +1089,11 @@
 
       // Build lead data for backend
       const leadData = {
-        name: data.name,
-        phone: data.phone,
-        email: data.email || '',
-        city: data.city || '',
-        category: 'tattoo',
-        category_name: 'קעקועים',
-        landing_page: 'tattoo',
+      name: data.name,
+      phone: data.phone,
+      email: data.email || '',
+      city: data.city || '',
+      landing_page: 'קעקועים',
         notes: `סוג קעקוע: ${getTypeLabel(data.tattoo_type)}
 גודל: ${getSizeLabel(data.size)}
 מיקום: ${data.placement}
