@@ -31,7 +31,8 @@ import {
   ChevronLeft,
   Home,
   Menu,
-  ChevronDown
+  ChevronDown,
+  MessageSquare
 } from 'lucide-react';
 import {
   AreaChart,
@@ -55,6 +56,7 @@ const LeadsManagement = ({ api, isRTL }) => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const [viewLead, setViewLead] = useState(null);
   const [selectedLead, setSelectedLead] = useState(null);
   const [clients, setClients] = useState([]);
   const [selectedClient, setSelectedClient] = useState('');
@@ -174,7 +176,7 @@ const LeadsManagement = ({ api, isRTL }) => {
               </thead>
               <tbody>
                 {leads.map(lead => (
-                  <tr key={lead.id}>
+                  <tr key={lead.id} onClick={() => setViewLead(lead)} style={{ cursor: 'pointer' }}>
                     <td>{lead.customer_name}</td>
                     <td dir="ltr">{lead.customer_phone}</td>
                     <td>{isRTL ? lead.category_name_he : lead.category_name_en}</td>
@@ -208,7 +210,7 @@ const LeadsManagement = ({ api, isRTL }) => {
           {/* Mobile Cards */}
           <div className="mobile-cards mobile-only">
             {leads.map(lead => (
-              <div key={lead.id} className="lead-card">
+              <div key={lead.id} className="lead-card" onClick={() => setViewLead(lead)} style={{ cursor: 'pointer' }}>
                 <div className="lead-card-header">
                   <div className="lead-info">
                     <h4>{lead.customer_name}</h4>
@@ -329,6 +331,97 @@ const LeadsManagement = ({ api, isRTL }) => {
                 <Send size={18} />
                 {isRTL ? 'הקצה ושלח' : 'Assign & Send'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Lead Details Modal */}
+      {viewLead && (
+        <div className="modal-overlay" onClick={() => setViewLead(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px', width: '95%' }}>
+            <div className="modal-header">
+              <h3>{isRTL ? 'פרטי ליד' : 'Lead Details'}</h3>
+              <button className="close-btn" onClick={() => setViewLead(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ padding: '20px' }}>
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ color: 'var(--gold)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Users size={18} /> {isRTL ? 'פרטי לקוח' : 'Customer Info'}
+                </h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <div style={{ color: 'var(--silver)', fontSize: '12px' }}>{isRTL ? 'שם' : 'Name'}</div>
+                    <div style={{ color: 'var(--white)' }}>{viewLead.customer_name}</div>
+                  </div>
+                  <div>
+                    <div style={{ color: 'var(--silver)', fontSize: '12px' }}>{isRTL ? 'טלפון' : 'Phone'}</div>
+                    <a href={`tel:${viewLead.customer_phone}`} style={{ color: 'var(--gold)' }} dir="ltr">{viewLead.customer_phone}</a>
+                  </div>
+                  <div>
+                    <div style={{ color: 'var(--silver)', fontSize: '12px' }}>{isRTL ? 'אימייל' : 'Email'}</div>
+                    <div style={{ color: 'var(--white)' }}>{viewLead.customer_email || '-'}</div>
+                  </div>
+                  <div>
+                    <div style={{ color: 'var(--silver)', fontSize: '12px' }}>{isRTL ? 'עיר' : 'City'}</div>
+                    <div style={{ color: 'var(--white)' }}>{viewLead.customer_address || '-'}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ color: 'var(--gold)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FileText size={18} /> {isRTL ? 'פרטי ליד' : 'Lead Info'}
+                </h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <div style={{ color: 'var(--silver)', fontSize: '12px' }}>{isRTL ? 'קטגוריה / דף נחיתה' : 'Category / Landing'}</div>
+                    <div style={{ color: 'var(--white)' }}>{viewLead.landing_page || viewLead.category_name_he || viewLead.category_name_en || '-'}</div>
+                  </div>
+                  <div>
+                    <div style={{ color: 'var(--silver)', fontSize: '12px' }}>{isRTL ? 'מקור' : 'Source'}</div>
+                    <div style={{ color: 'var(--white)' }}>{viewLead.source || 'direct'}</div>
+                  </div>
+                  <div>
+                    <div style={{ color: 'var(--silver)', fontSize: '12px' }}>{isRTL ? 'סטטוס' : 'Status'}</div>
+                    <span className={`status-badge ${viewLead.status}`} style={{ background: `${getStatusColor(viewLead.status)}20`, color: getStatusColor(viewLead.status) }}>{viewLead.status}</span>
+                  </div>
+                  <div>
+                    <div style={{ color: 'var(--silver)', fontSize: '12px' }}>{isRTL ? 'תאריך' : 'Date'}</div>
+                    <div style={{ color: 'var(--white)' }}>{viewLead.created_at ? new Date(viewLead.created_at).toLocaleDateString('he-IL') : '-'}</div>
+                  </div>
+                </div>
+              </div>
+
+              {viewLead.notes && (
+                <div>
+                  <h4 style={{ color: 'var(--gold)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <MessageSquare size={18} /> {isRTL ? 'הערות' : 'Notes'}
+                  </h4>
+                  <div style={{ 
+                    background: 'var(--deep-blue)', 
+                    border: '1px solid var(--slate)', 
+                    borderRadius: '8px', 
+                    padding: '12px',
+                    color: 'var(--light-silver)',
+                    whiteSpace: 'pre-line',
+                    maxHeight: '200px',
+                    overflowY: 'auto'
+                  }}>
+                    {viewLead.notes}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-secondary" onClick={() => setViewLead(null)}>
+                {isRTL ? 'סגור' : 'Close'}
+              </button>
+              <Link to={`/admin/leads/${viewLead.id || viewLead._id}/edit`} className="btn btn-primary">
+                <Edit size={16} />
+                {isRTL ? 'ערוך' : 'Edit'}
+              </Link>
             </div>
           </div>
         </div>

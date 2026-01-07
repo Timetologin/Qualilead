@@ -130,7 +130,12 @@ router.post('/submit', async (req, res) => {
     const db = mongoose.connection.db;
     const leadsCollection = db.collection('leads');
     
+    // Generate ObjectId for both _id and id field
+    const objectId = new mongoose.Types.ObjectId();
+    
     const leadDoc = {
+      _id: objectId,
+      id: objectId.toString(), // Add id field for frontend compatibility
       customer_name: name,
       customer_phone: phone,
       customer_email: email || '',
@@ -168,7 +173,7 @@ router.post('/submit', async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'תודה! נחזור אליך בהקדם.',
-      leadId: result.insertedId
+      leadId: objectId.toString()
     });
 
   } catch (error) {
