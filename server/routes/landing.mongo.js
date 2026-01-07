@@ -3,31 +3,6 @@ import mongoose from 'mongoose';
 
 const router = express.Router();
 
-// Get the existing Lead model or create a compatible one
-let Lead;
-try {
-  Lead = mongoose.model('Lead');
-} catch {
-  // If Lead model doesn't exist, create one
-  const leadSchema = new mongoose.Schema({
-    customer_name: { type: String, required: true },
-    customer_email: { type: String, default: '' },
-    customer_phone: { type: String, required: true },
-    customer_address: { type: String, default: '' },
-    category_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: null },
-    source: { type: String, default: 'landing_page' },
-    landing_page: { type: String, default: '' },
-    status: { type: String, default: 'new' },
-    priority: { type: String, default: 'normal' },
-    notes: { type: String, default: '' },
-    assigned_to: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-    assigned_at: { type: Date, default: null },
-    created_at: { type: Date, default: Date.now },
-    updated_at: { type: Date, default: Date.now }
-  });
-  Lead = mongoose.model('Lead', leadSchema);
-}
-
 // Send notification email via Resend
 const sendNotificationEmail = async (leadData) => {
   const apiKey = process.env.RESEND_API_KEY;
@@ -151,8 +126,11 @@ router.post('/submit', async (req, res) => {
       });
     }
 
-    // Create the lead - NOT setting category_id to avoid ObjectId casting error
-    const lead = await Lead.create({
+    // Insert directly to MongoDB to bypass Mongoose schema validation
+    const db = mongoose.connection.db;
+    const leadsCollection = db.collection('leads');
+    
+    const leadDoc = {
       customer_name: name,
       customer_phone: phone,
       customer_email: email || '',
@@ -161,14 +139,20 @@ router.post('/submit', async (req, res) => {
       landing_page: landing_page || '',
       notes: notes || '',
       status: 'new',
-      priority: 'normal'
-    });
+      priority: 'normal',
+      assigned_to: null,
+      assigned_at: null,
+      created_at: new Date(),
+      updated_at: new Date()
+    };
+
+    const result = await leadsCollection.insertOne(leadDoc);
 
     console.log('🎯 New lead from landing page:', {
-      id: lead._id,
-      name: lead.customer_name,
-      phone: lead.customer_phone,
-      landing_page: lead.landing_page
+      id: result.insertedId,
+      name: leadDoc.customer_name,
+      phone: leadDoc.customer_phone,
+      landing_page: leadDoc.landing_page
     });
 
     // Send email notification (non-blocking)
@@ -184,7 +168,7 @@ router.post('/submit', async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'תודה! נחזור אליך בהקדם.',
-      leadId: lead._id
+      leadId: result.insertedId
     });
 
   } catch (error) {
