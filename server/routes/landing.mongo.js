@@ -13,60 +13,111 @@ const sendNotificationEmail = async (leadData) => {
     return false;
   }
 
+  // Light theme - works perfectly in Gmail dark mode
   const htmlContent = `
-    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; direction: rtl;">
-      <div style="background: linear-gradient(135deg, #0a1929 0%, #1a365d 100%); padding: 30px; border-radius: 12px;">
-        <h1 style="color: #c9a227; margin: 0 0 10px 0; font-size: 24px;">🎯 ליד חדש מדף נחיתה!</h1>
-        <p style="color: #a0aec0; margin: 0; font-size: 14px;">התקבל ליד חדש מ: ${leadData.landing_page || 'לא ידוע'}</p>
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f5f5f5;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto;">
+    <tr>
+      <td style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
         
-        <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 20px; margin: 20px 0;">
-          <h3 style="color: #c9a227; margin: 0 0 15px 0; font-size: 16px;">פרטי הליד:</h3>
-          
-          <p style="color: #fff; margin: 8px 0;">
-            <strong>👤 שם:</strong> ${leadData.customer_name}
-          </p>
-          <p style="color: #fff; margin: 8px 0;">
-            <strong>📱 טלפון:</strong> 
-            <a href="tel:${leadData.customer_phone}" style="color: #c9a227;">${leadData.customer_phone}</a>
-          </p>
-          ${leadData.customer_email ? `
-          <p style="color: #fff; margin: 8px 0;">
-            <strong>📧 אימייל:</strong> 
-            <a href="mailto:${leadData.customer_email}" style="color: #c9a227;">${leadData.customer_email}</a>
-          </p>
-          ` : ''}
-          ${leadData.customer_address ? `
-          <p style="color: #fff; margin: 8px 0;">
-            <strong>📍 עיר:</strong> ${leadData.customer_address}
-          </p>
-          ` : ''}
-          ${leadData.landing_page ? `
-          <p style="color: #fff; margin: 8px 0;">
-            <strong>📂 קטגוריה:</strong> ${leadData.landing_page}
-          </p>
-          ` : ''}
-          ${leadData.notes ? `
-          <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2);">
-            <p style="color: #c9a227; margin: 0 0 8px 0;"><strong>📝 פרטים נוספים:</strong></p>
-            <p style="color: #e2e8f0; margin: 0; white-space: pre-line;">${leadData.notes}</p>
-          </div>
-          ` : ''}
-        </div>
+        <!-- Header -->
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #1a365d; border-radius: 12px 12px 0 0;">
+          <tr>
+            <td style="padding: 25px; text-align: center;">
+              <h1 style="color: #ffd700; margin: 0; font-size: 22px;">🎯 ליד חדש מדף נחיתה!</h1>
+              <p style="color: #ffffff; margin: 8px 0 0 0; font-size: 14px;">התקבל ליד חדש מ: <strong>${leadData.landing_page || 'לא ידוע'}</strong></p>
+            </td>
+          </tr>
+        </table>
 
-        <div style="text-align: center; margin-top: 20px;">
-          <a href="https://qualilead-five.vercel.app/admin/dashboard" 
-             style="display: inline-block; background: linear-gradient(135deg, #c9a227 0%, #a68420 100%); 
-                    color: #0a1929; padding: 12px 30px; border-radius: 8px; text-decoration: none; 
-                    font-weight: bold; font-size: 14px;">
-            צפה בלידים בדשבורד
-          </a>
-        </div>
+        <!-- Content -->
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding: 25px;">
+              <h3 style="color: #1a365d; margin: 0 0 20px 0; font-size: 18px; border-bottom: 2px solid #ffd700; padding-bottom: 10px;">פרטי הליד:</h3>
+              
+              <table width="100%" cellpadding="8" cellspacing="0">
+                <tr>
+                  <td style="color: #666666; font-size: 14px; width: 100px;">👤 שם:</td>
+                  <td style="color: #333333; font-size: 16px; font-weight: bold;">${leadData.customer_name}</td>
+                </tr>
+                <tr>
+                  <td style="color: #666666; font-size: 14px;">📱 טלפון:</td>
+                  <td style="font-size: 16px;"><a href="tel:${leadData.customer_phone}" style="color: #2563eb; font-weight: bold; text-decoration: none;">${leadData.customer_phone}</a></td>
+                </tr>
+                ${leadData.customer_email ? `
+                <tr>
+                  <td style="color: #666666; font-size: 14px;">📧 אימייל:</td>
+                  <td style="font-size: 15px;"><a href="mailto:${leadData.customer_email}" style="color: #2563eb; text-decoration: none;">${leadData.customer_email}</a></td>
+                </tr>
+                ` : ''}
+                ${leadData.customer_address ? `
+                <tr>
+                  <td style="color: #666666; font-size: 14px;">📍 עיר:</td>
+                  <td style="color: #333333; font-size: 15px;">${leadData.customer_address}</td>
+                </tr>
+                ` : ''}
+                ${leadData.landing_page ? `
+                <tr>
+                  <td style="color: #666666; font-size: 14px;">📂 קטגוריה:</td>
+                  <td><span style="background-color: #ffd700; color: #1a365d; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 14px;">${leadData.landing_page}</span></td>
+                </tr>
+                ` : ''}
+              </table>
+            </td>
+          </tr>
+        </table>
 
-        <p style="color: #718096; text-align: center; margin-top: 20px; font-size: 12px;">
-          נשלח מ-QualiLead • ${new Date().toLocaleString('he-IL')}
-        </p>
-      </div>
-    </div>
+        ${leadData.notes ? `
+        <!-- Notes -->
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding: 0 25px 25px 25px;">
+              <h3 style="color: #1a365d; margin: 0 0 12px 0; font-size: 16px;">📝 פרטים נוספים:</h3>
+              <div style="background-color: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px;">
+                <p style="color: #333333; margin: 0; white-space: pre-line; line-height: 1.7; font-size: 14px;">${leadData.notes}</p>
+              </div>
+            </td>
+          </tr>
+        </table>
+        ` : ''}
+
+        <!-- Button -->
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding: 10px 25px 30px 25px; text-align: center;">
+              <a href="https://qualilead-five.vercel.app/admin/dashboard" 
+                 style="display: inline-block; background-color: #1a365d; color: #ffffff; 
+                        padding: 14px 32px; border-radius: 8px; text-decoration: none; 
+                        font-weight: bold; font-size: 16px;">
+                📊 צפה בדשבורד
+              </a>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Footer -->
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8f9fa; border-radius: 0 0 12px 12px;">
+          <tr>
+            <td style="padding: 15px; text-align: center;">
+              <p style="color: #888888; margin: 0; font-size: 12px;">
+                נשלח מ-QualiLead • ${new Date().toLocaleString('he-IL')}
+              </p>
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
   `;
 
   try {
@@ -135,7 +186,7 @@ router.post('/submit', async (req, res) => {
     
     const leadDoc = {
       _id: objectId,
-      id: objectId.toString(), // Add id field for frontend compatibility
+      id: objectId.toString(),
       customer_name: name,
       customer_phone: phone,
       customer_email: email || '',

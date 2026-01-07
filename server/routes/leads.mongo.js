@@ -130,18 +130,29 @@ router.put('/:id', authenticateToken, async (req, res) => {
     const updates = { ...req.body };
     const oldStatus = lead.status;
 
-    // Handle category_id - convert to ObjectId or set to null
+    // Handle category_id - must be valid 24-char HEX string
     if (updates.category_id !== undefined) {
-      if (updates.category_id && updates.category_id.length === 24) {
+      if (updates.category_id && /^[0-9a-fA-F]{24}$/.test(updates.category_id)) {
+        // Valid ObjectId - convert it
         const mongoose = await import('mongoose');
         updates.category_id = new mongoose.default.Types.ObjectId(updates.category_id);
-      } else if (!updates.category_id || updates.category_id === '') {
-        updates.category_id = null;
+      } else {
+        // Not a valid ObjectId - remove from updates
+        delete updates.category_id;
       }
     }
 
-    // Use updateOne to bypass Mongoose validation issues for landing page leads
+    // Remove fields that might cause issues
+    delete updates._id;
+    delete updates.id;
+    delete updates.createdAt;
+    delete updates.category_name_he;
+    delete updates.category_name_en;
+
+    // Add updated timestamp
     updates.updated_at = new Date();
+
+    // Use updateOne to bypass Mongoose validation
     await Lead.updateOne({ _id: req.params.id }, { $set: updates });
 
     // Log status change
