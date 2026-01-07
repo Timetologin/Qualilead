@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>קעקועים | השאר פרטים לייעוץ חינם</title>
+  <meta name="description" content="קעקועים מקצועיים באיכות גבוהה. השאר פרטים ונחזור אליך תוך 24 שעות.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #0a0a0a;
+      --bg-card: #141414;
+      --bg-input: #1a1a1a;
+      --gold: #c9a227;
+      --gold-light: #e8c547;
+      --gold-dark: #a68420;
+      --text-white: #ffffff;
+      --text-gray: #a0a0a0;
+      --text-muted: #666666;
+      --border: #2a2a2a;
+      --error: #e74c3c;
+      --success: #27ae60;
+      --radius: 12px;
+      --radius-lg: 20px;
+      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-white);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Background Effects */
+    .bg-effects {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-gradient {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+    }
+
+    .bg-gradient-1 {
+      top: -200px;
+      right: -100px;
+      background: var(--gold);
+    }
+
+    .bg-gradient-2 {
+      bottom: -200px;
+      left: -100px;
+      background: var(--gold-dark);
+    }
+
+    .noise-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      opacity: 0.03;
+    }
+
+    /* Main Container */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(201, 162, 39, 0.15);
+      border: 1px solid rgba(201, 162, 39, 0.3);
+      padding: 8px 20px;
+      border-radius: 50px;
+      font-size: 14px;
+      color: var(--gold-light);
+      margin-bottom: 24px;
+      animation: fadeInDown 0.6s ease;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--gold);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    .title {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      animation: fadeInUp 0.6s ease 0.1s both;
+    }
+
+    .title-highlight {
+      background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: var(--text-gray);
+      max-width: 500px;
+      margin: 0 auto;
+      animation: fadeInUp 0.6s ease 0.2s both;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Form Card */
+    .form-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow);
+      animation: fadeInUp 0.6s ease 0.3s both;
+    }
+
+    /* Progress Steps */
+    .progress-container {
+      margin-bottom: 40px;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .progress-step {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.3s;
+    }
+
+    .progress-step.active {
+      color: var(--gold);
+    }
+
+    .progress-step.completed {
+      color: var(--success);
+    }
+
+    .step-number {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+      transition: all 0.3s;
+    }
+
+    .progress-step.active .step-number {
+      background: var(--gold);
+      color: var(--bg-dark);
+    }
+
+    .progress-step.completed .step-number {
+      background: var(--success);
+      color: white;
+    }
+
+    /* Form Steps */
+    .form-step {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .form-step.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .step-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-white);
+    }
+
+    .step-description {
+      color: var(--text-gray);
+      margin-bottom: 32px;
+      font-size: 15px;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-white);
+      margin-bottom: 8px;
+    }
+
+    .form-label .required {
+      color: var(--gold);
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 14px 18px;
+      background: var(--bg-input);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-white);
+      font-family: inherit;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.1);
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 14px center;
+      background-size: 20px;
+      padding-left: 44px;
+    }
+
+    .form-select option {
+      background: var(--bg-card);
+      color: var(--text-white);
+    }
+
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .form-error {
+      color: var(--error);
+      font-size: 13px;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .form-group.error .form-input,
+    .form-group.error .form-select {
+      border-color: var(--error);
+    }
+
+    .form-group.error .form-error {
+      display: block;
+    }
+
+    /* Radio/Checkbox Options */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .option-card {
+      position: relative;
+    }
+
+    .option-card input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .option-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 20px 16px;
+      background: var(--bg-input);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .option-label:hover {
+      border-color: var(--gold);
+      background: rgba(201, 162, 39, 0.05);
+    }
+
+    .option-card input:checked + .option-label {
+      border-color: var(--gold);
+      background: rgba(201, 162, 39, 0.1);
+    }
+
+    .option-icon {
+      font-size: 28px;
+    }
+
+    .option-text {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .option-subtext {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Two Column Layout */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 500px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 16px 32px;
+      border: none;
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+      color: var(--bg-dark);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(201, 162, 39, 0.3);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: var(--bg-input);
+      color: var(--text-white);
+      border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--text-muted);
+    }
+
+    /* Success Message */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .success-screen.active {
+      display: block;
+    }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--success) 0%, #219a52 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      animation: scaleIn 0.5s ease;
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0); }
+      to { transform: scale(1); }
+    }
+
+    .success-icon svg {
+      width: 40px;
+      height: 40px;
+      color: white;
+    }
+
+    .success-title {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--text-white);
+    }
+
+    .success-text {
+      color: var(--text-gray);
+      font-size: 1.1rem;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid transparent;
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Trust Badges */
+    .trust-section {
+      margin-top: 40px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .trust-badges {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .trust-icon {
+      width: 20px;
+      height: 20px;
+      color: var(--gold);
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: auto;
+      padding-top: 40px;
+      text-align: center;
+    }
+
+    .footer-text {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .footer-link {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    .footer-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Mobile Adjustments */
+    @media (max-width: 600px) {
+      .container {
+        padding: 24px 16px;
+      }
+
+      .form-card {
+        padding: 24px;
+      }
+
+      .progress-steps {
+        font-size: 11px;
+      }
+
+      .step-text {
+        display: none;
+      }
+
+      .options-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .trust-badges {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-effects">
+    <div class="bg-gradient bg-gradient-1"></div>
+    <div class="bg-gradient bg-gradient-2"></div>
+    <div class="noise-overlay"></div>
+  </div>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="badge">
+        <span class="badge-dot"></span>
+        <span>ייעוץ ראשוני חינם</span>
+      </div>
+      <h1 class="title">
+        הקעקוע <span class="title-highlight">שתמיד חלמת</span> עליו
+      </h1>
+      <p class="subtitle">
+        מלא את הטופס ונחזור אליך תוך 24 שעות עם הצעה מותאמת אישית
+      </p>
+    </header>
+
+    <!-- Form Card -->
+    <div class="form-card">
+      <!-- Progress Bar -->
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 25%"></div>
+        </div>
+        <div class="progress-steps">
+          <div class="progress-step active" data-step="1">
+            <span class="step-number">1</span>
+            <span class="step-text">סוג הקעקוע</span>
+          </div>
+          <div class="progress-step" data-step="2">
+            <span class="step-number">2</span>
+            <span class="step-text">פרטים</span>
+          </div>
+          <div class="progress-step" data-step="3">
+            <span class="step-number">3</span>
+            <span class="step-text">תקציב וזמנים</span>
+          </div>
+          <div class="progress-step" data-step="4">
+            <span class="step-number">4</span>
+            <span class="step-text">יצירת קשר</span>
+          </div>
+        </div>
+      </div>
+
+      <form id="leadForm">
+        <!-- Step 1: Type of Tattoo -->
+        <div class="form-step active" data-step="1">
+          <h2 class="step-title">מה אתה מחפש?</h2>
+          <p class="step-description">בחר את סוג העבודה שמעניינת אותך</p>
+          
+          <div class="form-group">
+            <div class="options-grid">
+              <div class="option-card">
+                <input type="radio" name="tattoo_type" value="first" id="type_first" required>
+                <label class="option-label" for="type_first">
+                  <span class="option-icon">✨</span>
+                  <span class="option-text">קעקוע ראשון</span>
+                  <span class="option-subtext">חדש לעולם הקעקועים</span>
+                </label>
+              </div>
+              <div class="option-card">
+                <input type="radio" name="tattoo_type" value="new" id="type_new">
+                <label class="option-label" for="type_new">
+                  <span class="option-icon">🎨</span>
+                  <span class="option-text">עיצוב חדש</span>
+                  <span class="option-subtext">יש לי כבר קעקועים</span>
+                </label>
+              </div>
+              <div class="option-card">
+                <input type="radio" name="tattoo_type" value="coverup" id="type_coverup">
+                <label class="option-label" for="type_coverup">
+                  <span class="option-icon">🔄</span>
+                  <span class="option-text">כיסוי קעקוע</span>
+                  <span class="option-subtext">רוצה לכסות קעקוע קיים</span>
+                </label>
+              </div>
+              <div class="option-card">
+                <input type="radio" name="tattoo_type" value="touchup" id="type_touchup">
+                <label class="option-label" for="type_touchup">
+                  <span class="option-icon">🔧</span>
+                  <span class="option-text">תיקון / ריטאץ׳</span>
+                  <span class="option-subtext">רענון קעקוע קיים</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button type="button" class="btn btn-primary" onclick="nextStep()">
+              המשך
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: Details -->
+        <div class="form-step" data-step="2">
+          <h2 class="step-title">ספר לנו על הקעקוע</h2>
+          <p class="step-description">ככל שנדע יותר, נוכל להתאים לך הצעה טובה יותר</p>
+          
+          <div class="form-group">
+            <label class="form-label">גודל משוער <span class="required">*</span></label>
+            <div class="options-grid">
+              <div class="option-card">
+                <input type="radio" name="size" value="small" id="size_small" required>
+                <label class="option-label" for="size_small">
+                  <span class="option-icon">🔹</span>
+                  <span class="option-text">קטן</span>
+                  <span class="option-subtext">עד 5 ס״מ</span>
+                </label>
+              </div>
+              <div class="option-card">
+                <input type="radio" name="size" value="medium" id="size_medium">
+                <label class="option-label" for="size_medium">
+                  <span class="option-icon">🔸</span>
+                  <span class="option-text">בינוני</span>
+                  <span class="option-subtext">5-15 ס״מ</span>
+                </label>
+              </div>
+              <div class="option-card">
+                <input type="radio" name="size" value="large" id="size_large">
+                <label class="option-label" for="size_large">
+                  <span class="option-icon">🔶</span>
+                  <span class="option-text">גדול</span>
+                  <span class="option-subtext">15-30 ס״מ</span>
+                </label>
+              </div>
+              <div class="option-card">
+                <input type="radio" name="size" value="sleeve" id="size_sleeve">
+                <label class="option-label" for="size_sleeve">
+                  <span class="option-icon">💪</span>
+                  <span class="option-text">שרוול / גב</span>
+                  <span class="option-subtext">עבודה גדולה</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="placement">מיקום בגוף <span class="required">*</span></label>
+            <select class="form-select" id="placement" name="placement" required>
+              <option value="">בחר מיקום...</option>
+              <option value="arm">זרוע</option>
+              <option value="forearm">אמה</option>
+              <option value="wrist">פרק כף יד</option>
+              <option value="shoulder">כתף</option>
+              <option value="back">גב</option>
+              <option value="chest">חזה</option>
+              <option value="leg">רגל</option>
+              <option value="ankle">קרסול</option>
+              <option value="neck">צוואר</option>
+              <option value="ribs">צלעות</option>
+              <option value="other">אחר</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="description">תאר את הרעיון שלך</label>
+            <textarea 
+              class="form-textarea" 
+              id="description" 
+              name="description" 
+              placeholder="ספר לנו על הסגנון, הנושא, או הרעיון שיש לך בראש..."
+            ></textarea>
+          </div>
+
+          <div class="btn-group">
+            <button type="button" class="btn btn-secondary" onclick="prevStep()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              חזור
+            </button>
+            <button type="button" class="btn btn-primary" onclick="nextStep()">
+              המשך
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3: Budget & Timeline -->
+        <div class="form-step" data-step="3">
+          <h2 class="step-title">תקציב וזמנים</h2>
+          <p class="step-description">נתאים לך את ההצעה הטובה ביותר לפי התקציב והזמינות שלך</p>
+          
+          <div class="form-group">
+            <label class="form-label">טווח תקציב <span class="required">*</span></label>
+            <div class="options-grid">
+              <div class="option-card">
+                <input type="radio" name="budget" value="500-1000" id="budget_1" required>
+                <label class="option-label" for="budget_1">
+                  <span class="option-text">₪500 - ₪1,000</span>
+                  <span class="option-subtext">קעקוע קטן</span>
+                </label>
+              </div>
+              <div class="option-card">
+                <input type="radio" name="budget" value="1000-2000" id="budget_2">
+                <label class="option-label" for="budget_2">
+                  <span class="option-text">₪1,000 - ₪2,000</span>
+                  <span class="option-subtext">קעקוע בינוני</span>
+                </label>
+              </div>
+              <div class="option-card">
+                <input type="radio" name="budget" value="2000-4000" id="budget_3">
+                <label class="option-label" for="budget_3">
+                  <span class="option-text">₪2,000 - ₪4,000</span>
+                  <span class="option-subtext">קעקוע גדול</span>
+                </label>
+              </div>
+              <div class="option-card">
+                <input type="radio" name="budget" value="4000+" id="budget_4">
+                <label class="option-label" for="budget_4">
+                  <span class="option-text">₪4,000+</span>
+                  <span class="option-subtext">פרויקט גדול</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">מתי תרצה לעשות את הקעקוע? <span class="required">*</span></label>
+            <div class="options-grid">
+              <div class="option-card">
+                <input type="radio" name="timeline" value="asap" id="time_asap" required>
+                <label class="option-label" for="time_asap">
+                  <span class="option-icon">⚡</span>
+                  <span class="option-text">בהקדם האפשרי</span>
+                </label>
+              </div>
+              <div class="option-card">
+                <input type="radio" name="timeline" value="month" id="time_month">
+                <label class="option-label" for="time_month">
+                  <span class="option-icon">📅</span>
+                  <span class="option-text">בחודש הקרוב</span>
+                </label>
+              </div>
+              <div class="option-card">
+                <input type="radio" name="timeline" value="flexible" id="time_flexible">
+                <label class="option-label" for="time_flexible">
+                  <span class="option-icon">🕐</span>
+                  <span class="option-text">גמיש</span>
+                </label>
+              </div>
+              <div class="option-card">
+                <input type="radio" name="timeline" value="exploring" id="time_exploring">
+                <label class="option-label" for="time_exploring">
+                  <span class="option-icon">🔍</span>
+                  <span class="option-text">רק בודק מחירים</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button type="button" class="btn btn-secondary" onclick="prevStep()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              חזור
+            </button>
+            <button type="button" class="btn btn-primary" onclick="nextStep()">
+              המשך
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 4: Contact Info -->
+        <div class="form-step" data-step="4">
+          <h2 class="step-title">פרטי יצירת קשר</h2>
+          <p class="step-description">השאר פרטים ונחזור אליך עם הצעה מותאמת</p>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="name">שם מלא <span class="required">*</span></label>
+              <input 
+                type="text" 
+                class="form-input" 
+                id="name" 
+                name="name" 
+                placeholder="השם שלך"
+                required
+              >
+              <span class="form-error">נא להזין שם</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="phone">טלפון <span class="required">*</span></label>
+              <input 
+                type="tel" 
+                class="form-input" 
+                id="phone" 
+                name="phone" 
+                placeholder="050-0000000"
+                required
+              >
+              <span class="form-error">נא להזין מספר טלפון תקין</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="email">אימייל</label>
+            <input 
+              type="email" 
+              class="form-input" 
+              id="email" 
+              name="email" 
+              placeholder="your@email.com"
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="city">עיר / אזור</label>
+            <input 
+              type="text" 
+              class="form-input" 
+              id="city" 
+              name="city" 
+              placeholder="למשל: תל אביב"
+            >
+          </div>
+
+          <div class="btn-group">
+            <button type="button" class="btn btn-secondary" onclick="prevStep()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              חזור
+            </button>
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              <span id="submitText">שלח פרטים</span>
+              <span id="submitSpinner" class="spinner" style="display: none;"></span>
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Success Screen -->
+      <div class="success-screen" id="successScreen">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h2 class="success-title">קיבלנו את הפרטים! 🎉</h2>
+        <p class="success-text">
+          תודה שפנית אלינו. ניצור איתך קשר תוך 24 שעות עם הצעה מותאמת אישית.
+        </p>
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="trust-section" id="trustSection">
+        <div class="trust-badges">
+          <div class="trust-item">
+            <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span>100% דיסקרטיות</span>
+          </div>
+          <div class="trust-item">
+            <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>תגובה תוך 24 שעות</span>
+          </div>
+          <div class="trust-item">
+            <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <span>ללא התחייבות</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p class="footer-text">
+        מופעל על ידי <a href="https://qualilead-five.vercel.app" class="footer-link" target="_blank">QualiLead</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    // ============================================
+    // CONFIGURATION - שנה את הכתובת לAPI שלך
+    // ============================================
+    const API_URL = 'https://qualilead-api.onrender.com/api'; // ← הכתובת של ה-Backend שלך
+    
+    // ============================================
+    // Form Logic
+    // ============================================
+    let currentStep = 1;
+    const totalSteps = 4;
+
+    function updateProgress() {
+      const progress = (currentStep / totalSteps) * 100;
+      document.getElementById('progressFill').style.width = progress + '%';
+
+      document.querySelectorAll('.progress-step').forEach((step, index) => {
+        const stepNum = index + 1;
+        step.classList.remove('active', 'completed');
+        if (stepNum === currentStep) {
+          step.classList.add('active');
+        } else if (stepNum < currentStep) {
+          step.classList.add('completed');
+        }
+      });
+    }
+
+    function showStep(step) {
+      document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+      document.querySelector(`.form-step[data-step="${step}"]`).classList.add('active');
+      updateProgress();
+    }
+
+    function validateCurrentStep() {
+      const currentStepEl = document.querySelector(`.form-step[data-step="${currentStep}"]`);
+      const requiredInputs = currentStepEl.querySelectorAll('[required]');
+      let isValid = true;
+
+      requiredInputs.forEach(input => {
+        if (input.type === 'radio') {
+          const radioGroup = currentStepEl.querySelectorAll(`[name="${input.name}"]`);
+          const checked = Array.from(radioGroup).some(r => r.checked);
+          if (!checked) isValid = false;
+        } else if (!input.value.trim()) {
+          input.closest('.form-group')?.classList.add('error');
+          isValid = false;
+        } else {
+          input.closest('.form-group')?.classList.remove('error');
+        }
+      });
+
+      return isValid;
+    }
+
+    function nextStep() {
+      if (!validateCurrentStep()) {
+        return;
+      }
+
+      if (currentStep < totalSteps) {
+        currentStep++;
+        showStep(currentStep);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 1) {
+        currentStep--;
+        showStep(currentStep);
+      }
+    }
+
+    // Form submission
+    document.getElementById('leadForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      if (!validateCurrentStep()) return;
+
+      // Validate phone
+      const phone = document.getElementById('phone').value;
+      if (!/^[\d\-+() ]{9,}$/.test(phone)) {
+        document.getElementById('phone').closest('.form-group').classList.add('error');
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitBtn');
+      const submitText = document.getElementById('submitText');
+      const submitSpinner = document.getElementById('submitSpinner');
+
+      submitBtn.disabled = true;
+      submitText.style.display = 'none';
+      submitSpinner.style.display = 'block';
+
+      // Collect form data
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData);
+
+      // Build message for backend
+      const leadData = {
+        name: data.name,
+        email: data.email || '',
+        phone: data.phone,
+        business: 'tattoo', // Category identifier
+        message: `
+סוג קעקוע: ${getTypeLabel(data.tattoo_type)}
+גודל: ${getSizeLabel(data.size)}
+מיקום: ${data.placement}
+תקציב: ${data.budget}
+זמן: ${getTimelineLabel(data.timeline)}
+עיר: ${data.city || 'לא צוין'}
+
+תיאור: ${data.description || 'לא צוין'}
+        `.trim()
+      };
+
+      try {
+        const response = await fetch(`${API_URL}/contact`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(leadData)
+        });
+
+        if (response.ok) {
+          // Show success
+          document.getElementById('leadForm').style.display = 'none';
+          document.getElementById('trustSection').style.display = 'none';
+          document.querySelector('.progress-container').style.display = 'none';
+          document.getElementById('successScreen').classList.add('active');
+        } else {
+          throw new Error('Server error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('אירעה שגיאה. נסה שוב.');
+      } finally {
+        submitBtn.disabled = false;
+        submitText.style.display = 'inline';
+        submitSpinner.style.display = 'none';
+      }
+    });
+
+    // Helper functions for labels
+    function getTypeLabel(value) {
+      const labels = {
+        'first': 'קעקוע ראשון',
+        'new': 'עיצוב חדש',
+        'coverup': 'כיסוי קעקוע',
+        'touchup': 'תיקון / ריטאץ׳'
+      };
+      return labels[value] || value;
+    }
+
+    function getSizeLabel(value) {
+      const labels = {
+        'small': 'קטן (עד 5 ס״מ)',
+        'medium': 'בינוני (5-15 ס״מ)',
+        'large': 'גדול (15-30 ס״מ)',
+        'sleeve': 'שרוול / גב'
+      };
+      return labels[value] || value;
+    }
+
+    function getTimelineLabel(value) {
+      const labels = {
+        'asap': 'בהקדם האפשרי',
+        'month': 'בחודש הקרוב',
+        'flexible': 'גמיש',
+        'exploring': 'רק בודק מחירים'
+      };
+      return labels[value] || value;
+    }
+
+    // Remove error class on input
+    document.querySelectorAll('.form-input, .form-select').forEach(input => {
+      input.addEventListener('input', () => {
+        input.closest('.form-group')?.classList.remove('error');
+      });
+    });
+  </script>
+</body>
+</html>
