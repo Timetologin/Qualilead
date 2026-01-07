@@ -4,6 +4,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import './css/theme.css';
+import './css/mobile-fixes.css';
 
 // Error handling
 import ErrorBoundary from './components/ErrorBoundary';
