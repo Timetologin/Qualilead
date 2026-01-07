@@ -1087,26 +1087,26 @@
       const formData = new FormData(this);
       const data = Object.fromEntries(formData);
 
-      // Build message for backend
+      // Build lead data for backend
       const leadData = {
         name: data.name,
-        email: data.email || '',
         phone: data.phone,
-        business: 'tattoo', // Category identifier
-        message: `
-סוג קעקוע: ${getTypeLabel(data.tattoo_type)}
+        email: data.email || '',
+        city: data.city || '',
+        category: 'tattoo',
+        category_name: 'קעקועים',
+        landing_page: 'tattoo',
+        notes: `סוג קעקוע: ${getTypeLabel(data.tattoo_type)}
 גודל: ${getSizeLabel(data.size)}
 מיקום: ${data.placement}
 תקציב: ${data.budget}
 זמן: ${getTimelineLabel(data.timeline)}
-עיר: ${data.city || 'לא צוין'}
 
-תיאור: ${data.description || 'לא צוין'}
-        `.trim()
+תיאור: ${data.description || 'לא צוין'}`
       };
 
       try {
-        const response = await fetch(`${API_URL}/contact`, {
+        const response = await fetch(`${API_URL}/landing/submit`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

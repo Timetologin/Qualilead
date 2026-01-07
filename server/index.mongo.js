@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 
 // Import database connection
 import { connectDB } from './db.js';
+import landingRoutes from './routes/landing.mongo.js';
 
 // Import routes
 import authRoutes from './routes/auth.mongo.js';
@@ -37,6 +38,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/landing', landingRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
