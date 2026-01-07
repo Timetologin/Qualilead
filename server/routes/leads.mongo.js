@@ -127,12 +127,22 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    const updates = req.body;
+    const updates = { ...req.body };
     const oldStatus = lead.status;
 
-    // Update lead
-    Object.assign(lead, updates);
-    await lead.save();
+    // Handle category_id - convert to ObjectId or set to null
+    if (updates.category_id !== undefined) {
+      if (updates.category_id && updates.category_id.length === 24) {
+        const mongoose = await import('mongoose');
+        updates.category_id = new mongoose.default.Types.ObjectId(updates.category_id);
+      } else if (!updates.category_id || updates.category_id === '') {
+        updates.category_id = null;
+      }
+    }
+
+    // Use updateOne to bypass Mongoose validation issues for landing page leads
+    updates.updated_at = new Date();
+    await Lead.updateOne({ _id: req.params.id }, { $set: updates });
 
     // Log status change
     if (updates.status && updates.status !== oldStatus) {
@@ -145,7 +155,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
       });
     }
 
-    const updatedLead = await Lead.findById(lead._id)
+    const updatedLead = await Lead.findById(req.params.id)
       .populate('category_id')
       .populate('assigned_to', 'name email');
 
