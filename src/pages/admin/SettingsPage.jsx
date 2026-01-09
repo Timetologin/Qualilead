@@ -75,11 +75,81 @@ const SettingsPage = () => {
       id: 'security',
       name_he: 'מצלמות אבטחה',
       name_en: 'Security Cameras',
-      url: '/security-landing.html',
-      description_he: 'דף נחיתה להתקנת מצלמות אבטחה - עיצוב טכנולוגי',
-      description_en: 'Landing page for security cameras installation - tech design',
+      url: '/security-cameras-landing.html',
+      description_he: 'דף נחיתה להתקנת מצלמות אבטחה - עיצוב טכנולוגי כחול',
+      description_en: 'Landing page for security cameras - tech blue design',
       is_active: true,
       color: '#00b4d8'
+    },
+    {
+      id: 'pest',
+      name_he: 'הדברה',
+      name_en: 'Pest Control',
+      url: '/pest-control-landing.html',
+      description_he: 'דף נחיתה לשירותי הדברה - עיצוב ירוק טבעי',
+      description_en: 'Landing page for pest control - natural green design',
+      is_active: true,
+      color: '#4ade80'
+    },
+    {
+      id: 'plumber',
+      name_he: 'אינסטלטור',
+      name_en: 'Plumber',
+      url: '/plumber-landing.html',
+      description_he: 'דף נחיתה לשירותי אינסטלציה - עיצוב כחול עם טיפות מים',
+      description_en: 'Landing page for plumbing services - blue water drops design',
+      is_active: true,
+      color: '#3b82f6'
+    },
+    {
+      id: 'electrician',
+      name_he: 'חשמלאי',
+      name_en: 'Electrician',
+      url: '/electrician-landing.html',
+      description_he: 'דף נחיתה לחשמלאי מוסמך - עיצוב כתום עם ברקים',
+      description_en: 'Landing page for licensed electrician - orange lightning design',
+      is_active: true,
+      color: '#f59e0b'
+    },
+    {
+      id: 'moving',
+      name_he: 'הובלות',
+      name_en: 'Moving',
+      url: '/moving-landing.html',
+      description_he: 'דף נחיתה להובלות דירות ומשרדים - עיצוב סגול',
+      description_en: 'Landing page for moving services - purple design',
+      is_active: true,
+      color: '#a78bfa'
+    },
+    {
+      id: 'cleaning',
+      name_he: 'ניקיון',
+      name_en: 'Cleaning',
+      url: '/cleaning-landing.html',
+      description_he: 'דף נחיתה לשירותי ניקיון - עיצוב תכלת נקי',
+      description_en: 'Landing page for cleaning services - clean cyan design',
+      is_active: true,
+      color: '#06b6d4'
+    },
+    {
+      id: 'locksmith',
+      name_he: 'מנעולן',
+      name_en: 'Locksmith',
+      url: '/locksmith-landing.html',
+      description_he: 'דף נחיתה למנעולן 24/7 - עיצוב אדום דחוף',
+      description_en: 'Landing page for 24/7 locksmith - urgent red design',
+      is_active: true,
+      color: '#ef4444'
+    },
+    {
+      id: 'ac',
+      name_he: 'מיזוג אוויר',
+      name_en: 'AC Services',
+      url: '/ac-landing.html',
+      description_he: 'דף נחיתה להתקנת מזגנים - עיצוב כחול קריר',
+      description_en: 'Landing page for AC installation - cool blue design',
+      is_active: true,
+      color: '#38bdf8'
     }
   ]);
 
