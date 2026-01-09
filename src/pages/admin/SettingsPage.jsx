@@ -17,12 +17,19 @@ import {
   Globe,
   Smartphone,
   User,
-  Building
+  Building,
+  Layout,
+  Eye,
+  EyeOff,
+  ExternalLink
 } from 'lucide-react';
 
 const SettingsPage = () => {
   const { user, api } = useAuth();
   const { isRTL } = useLanguage();
+
+  // Check if super admin (only admin@qualilead.com)
+  const isSuperAdmin = user?.email === 'admin@qualilead.com';
 
   const [activeSection, setActiveSection] = useState('profile');
   const [loading, setLoading] = useState(false);
@@ -52,6 +59,30 @@ const SettingsPage = () => {
     auto_assign: false
   });
 
+  // Landing Pages (super admin only)
+  const [landingPages, setLandingPages] = useState([
+    {
+      id: 'tattoo',
+      name_he: 'קעקועים',
+      name_en: 'Tattoo',
+      url: '/tattoo-landing.html',
+      description_he: 'דף נחיתה לסטודיו קעקועים - עיצוב כהה עם אפקט ציור דיו',
+      description_en: 'Landing page for tattoo studio - dark design with ink drawing effect',
+      is_active: true,
+      color: '#c9a227'
+    },
+    {
+      id: 'security',
+      name_he: 'מצלמות אבטחה',
+      name_en: 'Security Cameras',
+      url: '/security-landing.html',
+      description_he: 'דף נחיתה להתקנת מצלמות אבטחה - עיצוב טכנולוגי',
+      description_en: 'Landing page for security cameras installation - tech design',
+      is_active: true,
+      color: '#00b4d8'
+    }
+  ]);
+
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
     setProfileData(prev => ({ ...prev, [name]: value }));
@@ -67,6 +98,17 @@ const SettingsPage = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+  };
+
+  const toggleLandingPage = (pageId) => {
+    setLandingPages(prev => prev.map(page => 
+      page.id === pageId ? { ...page, is_active: !page.is_active } : page
+    ));
+    setMessage({
+      type: 'success',
+      text: isRTL ? 'סטטוס דף הנחיתה עודכן!' : 'Landing page status updated!'
+    });
+    setTimeout(() => setMessage({ type: '', text: '' }), 3000);
   };
 
   const handleSave = async () => {
@@ -91,11 +133,13 @@ const SettingsPage = () => {
     }
   };
 
+  // Build sections array - include landing pages only for super admin
   const sections = [
     { id: 'profile', icon: User, label: isRTL ? 'פרופיל' : 'Profile' },
     { id: 'notifications', icon: Bell, label: isRTL ? 'התראות' : 'Notifications' },
     { id: 'security', icon: Shield, label: isRTL ? 'אבטחה' : 'Security' },
-    { id: 'system', icon: Database, label: isRTL ? 'מערכת' : 'System' }
+    { id: 'system', icon: Database, label: isRTL ? 'מערכת' : 'System' },
+    ...(isSuperAdmin ? [{ id: 'landing-pages', icon: Layout, label: isRTL ? 'דפי נחיתה' : 'Landing Pages' }] : [])
   ];
 
   return (
@@ -406,6 +450,79 @@ const SettingsPage = () => {
             </div>
           )}
 
+          {/* Landing Pages Section - SUPER ADMIN ONLY */}
+          {activeSection === 'landing-pages' && isSuperAdmin && (
+            <div className="settings-section">
+              <div className="section-header">
+                <Layout size={24} />
+                <div>
+                  <h2>{isRTL ? 'ניהול דפי נחיתה' : 'Landing Pages Management'}</h2>
+                  <p>{isRTL ? 'צפה, הפעל או כבה דפי נחיתה' : 'View, enable or disable landing pages'}</p>
+                </div>
+              </div>
+
+              <div className="landing-pages-grid">
+                {landingPages.map(page => (
+                  <div key={page.id} className={`landing-page-card ${!page.is_active ? 'disabled' : ''}`}>
+                    <div className="landing-page-header" style={{ borderBottomColor: page.color }}>
+                      <div className="landing-page-status">
+                        <span 
+                          className={`status-dot ${page.is_active ? 'active' : 'inactive'}`}
+                          style={{ background: page.is_active ? '#22c55e' : '#ef4444' }}
+                        ></span>
+                        <span className="status-text">
+                          {page.is_active 
+                            ? (isRTL ? 'פעיל' : 'Active') 
+                            : (isRTL ? 'כבוי' : 'Disabled')
+                          }
+                        </span>
+                      </div>
+                      <button 
+                        className="landing-toggle-btn"
+                        onClick={() => toggleLandingPage(page.id)}
+                        title={page.is_active ? 'Disable' : 'Enable'}
+                      >
+                        {page.is_active ? <Eye size={18} /> : <EyeOff size={18} />}
+                      </button>
+                    </div>
+
+                    <div className="landing-page-body">
+                      <h3 style={{ color: page.color }}>{isRTL ? page.name_he : page.name_en}</h3>
+                      <p>{isRTL ? page.description_he : page.description_en}</p>
+                      <div className="landing-page-url">
+                        <Globe size={14} />
+                        <code>{page.url}</code>
+                      </div>
+                    </div>
+
+                    <div className="landing-page-actions">
+                      <a 
+                        href={page.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="preview-btn"
+                        style={{ background: page.color }}
+                      >
+                        <ExternalLink size={16} />
+                        {isRTL ? 'תצוגה מקדימה' : 'Preview'}
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="landing-pages-info">
+                <AlertCircle size={18} />
+                <span>
+                  {isRTL 
+                    ? 'דפי נחיתה מכובים לא יקבלו לידים חדשים. הלידים יועברו לדף שגיאה.' 
+                    : 'Disabled landing pages will not receive new leads. Leads will be redirected to an error page.'
+                  }
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Save Button */}
           <div className="settings-actions">
             <button 
@@ -504,7 +621,6 @@ const SettingsPage = () => {
         /* Sidebar */
         .settings-sidebar {
           background: var(--charcoal);
-          border: 1px solid var(--slate);
           border-radius: var(--radius-lg);
           padding: var(--space-lg);
           height: fit-content;
@@ -523,19 +639,14 @@ const SettingsPage = () => {
           align-items: center;
           gap: var(--space-md);
           padding: var(--space-md) var(--space-lg);
-          border-radius: var(--radius-md);
           color: var(--silver);
-          background: none;
+          background: transparent;
           border: none;
+          border-radius: var(--radius-md);
           cursor: pointer;
           transition: var(--transition-base);
-          text-align: left;
-          width: 100%;
           font-size: 0.95rem;
-        }
-
-        .rtl .settings-nav .nav-item {
-          text-align: right;
+          text-align: inherit;
         }
 
         .settings-nav .nav-item:hover {
@@ -544,22 +655,19 @@ const SettingsPage = () => {
         }
 
         .settings-nav .nav-item.active {
-          background: rgba(212, 175, 55, 0.1);
-          color: var(--gold);
+          background: var(--gold);
+          color: var(--deep-blue);
         }
 
         /* Content */
         .settings-content {
-          display: flex;
-          flex-direction: column;
-          gap: var(--space-xl);
+          background: var(--charcoal);
+          border-radius: var(--radius-lg);
+          padding: var(--space-xl);
         }
 
         .settings-section {
-          background: var(--charcoal);
-          border: 1px solid var(--slate);
-          border-radius: var(--radius-lg);
-          padding: var(--space-xl);
+          margin-bottom: var(--space-xl);
         }
 
         .section-header {
@@ -597,6 +705,7 @@ const SettingsPage = () => {
         .form-group {
           display: flex;
           flex-direction: column;
+          gap: var(--space-sm);
         }
 
         .form-group.full-width {
@@ -606,7 +715,6 @@ const SettingsPage = () => {
         .form-label {
           color: var(--light-silver);
           font-size: 0.9rem;
-          margin-bottom: var(--space-sm);
           font-weight: 500;
         }
 
@@ -616,38 +724,42 @@ const SettingsPage = () => {
 
         .input-icon {
           position: absolute;
-          left: var(--space-md);
           top: 50%;
           transform: translateY(-50%);
           color: var(--silver);
-          pointer-events: none;
         }
 
         .rtl .input-icon {
-          left: auto;
           right: var(--space-md);
+        }
+
+        .ltr .input-icon {
+          left: var(--space-md);
         }
 
         .form-input {
           width: 100%;
           padding: var(--space-md);
-          padding-left: calc(var(--space-md) * 2 + 18px);
           background: var(--slate);
-          border: 1px solid var(--slate);
+          border: 2px solid transparent;
           border-radius: var(--radius-md);
           color: var(--white);
-          font-size: 1rem;
+          font-size: 0.95rem;
           transition: var(--transition-base);
         }
 
-        .rtl .form-input {
-          padding-left: var(--space-md);
+        .rtl .input-wrapper .form-input {
           padding-right: calc(var(--space-md) * 2 + 18px);
+        }
+
+        .ltr .input-wrapper .form-input {
+          padding-left: calc(var(--space-md) * 2 + 18px);
         }
 
         .form-input:focus {
           outline: none;
           border-color: var(--gold);
+          background: var(--charcoal);
         }
 
         /* Notification Groups */
@@ -665,21 +777,24 @@ const SettingsPage = () => {
           gap: var(--space-sm);
           color: var(--white);
           font-size: 1rem;
-          margin-bottom: var(--space-lg);
+          margin-bottom: var(--space-md);
+        }
+
+        .notification-group h3 svg {
+          color: var(--gold);
         }
 
         /* Toggle Items */
         .toggle-list {
           display: flex;
           flex-direction: column;
-          gap: var(--space-md);
+          gap: var(--space-sm);
         }
 
         .toggle-item {
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: var(--space-lg);
+          gap: var(--space-md);
           padding: var(--space-md);
           background: var(--slate);
           border-radius: var(--radius-md);
@@ -786,6 +901,154 @@ const SettingsPage = () => {
 
         .security-info p {
           color: var(--silver);
+          font-size: 0.9rem;
+        }
+
+        /* ===================================
+           Landing Pages Section
+           =================================== */
+        
+        .landing-pages-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: var(--space-lg);
+          margin-bottom: var(--space-lg);
+        }
+
+        .landing-page-card {
+          background: var(--slate);
+          border-radius: var(--radius-lg);
+          overflow: hidden;
+          transition: var(--transition-base);
+        }
+
+        .landing-page-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .landing-page-card.disabled {
+          opacity: 0.6;
+        }
+
+        .landing-page-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: var(--space-md);
+          background: rgba(0, 0, 0, 0.2);
+          border-bottom: 3px solid;
+        }
+
+        .landing-page-status {
+          display: flex;
+          align-items: center;
+          gap: var(--space-sm);
+        }
+
+        .status-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+        }
+
+        .status-dot.active {
+          animation: statusPulse 2s infinite;
+        }
+
+        @keyframes statusPulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+
+        .status-text {
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: var(--silver);
+        }
+
+        .landing-toggle-btn {
+          background: rgba(255, 255, 255, 0.1);
+          border: none;
+          border-radius: var(--radius-md);
+          padding: var(--space-sm);
+          cursor: pointer;
+          color: var(--silver);
+          transition: var(--transition-base);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .landing-toggle-btn:hover {
+          background: rgba(255, 255, 255, 0.2);
+          color: var(--white);
+        }
+
+        .landing-page-body {
+          padding: var(--space-lg);
+        }
+
+        .landing-page-body h3 {
+          font-size: 1.1rem;
+          font-weight: 700;
+          margin-bottom: var(--space-sm);
+        }
+
+        .landing-page-body p {
+          font-size: 0.9rem;
+          color: var(--silver);
+          line-height: 1.5;
+          margin-bottom: var(--space-md);
+        }
+
+        .landing-page-url {
+          display: flex;
+          align-items: center;
+          gap: var(--space-sm);
+          font-size: 0.8rem;
+          color: var(--text-muted, #64748b);
+        }
+
+        .landing-page-url code {
+          background: rgba(0, 0, 0, 0.3);
+          padding: 2px 8px;
+          border-radius: var(--radius-sm);
+          font-family: monospace;
+        }
+
+        .landing-page-actions {
+          padding: 0 var(--space-lg) var(--space-lg);
+        }
+
+        .preview-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-sm);
+          padding: var(--space-sm) var(--space-lg);
+          border-radius: var(--radius-md);
+          color: white;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 0.9rem;
+          transition: var(--transition-base);
+        }
+
+        .preview-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+          filter: brightness(1.1);
+        }
+
+        .landing-pages-info {
+          display: flex;
+          align-items: center;
+          gap: var(--space-md);
+          padding: var(--space-md) var(--space-lg);
+          background: rgba(234, 179, 8, 0.1);
+          border: 1px solid rgba(234, 179, 8, 0.3);
+          border-radius: var(--radius-md);
+          color: #eab308;
           font-size: 0.9rem;
         }
 
@@ -937,6 +1200,15 @@ const SettingsPage = () => {
 
           .settings-actions .btn {
             width: 100%;
+          }
+
+          .landing-pages-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .landing-pages-info {
+            flex-direction: column;
+            text-align: center;
           }
         }
 
