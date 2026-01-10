@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useInView } from '../hooks/useAnimations';
@@ -9,57 +9,6 @@ import {
   Users, TrendingUp, Clock, CheckCircle, ChevronDown, ChevronLeft, ChevronRight,
   Star, Package, Award, Rocket
 } from 'lucide-react';
-
-// Lottie Animation Component for Hero
-const HeroLottieAnimation = () => {
-  const containerRef = useRef(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    // Load dotlottie player script dynamically
-    const existingScript = document.querySelector('script[src*="dotlottie-player"]');
-    
-    if (!existingScript) {
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs';
-      script.type = 'module';
-      script.onload = () => setIsLoaded(true);
-      document.head.appendChild(script);
-    } else {
-      setIsLoaded(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isLoaded && containerRef.current) {
-      containerRef.current.innerHTML = `
-        <dotlottie-player
-          src="https://lottie.host/719cc542-fb72-4649-86f4-c04fbc22d58b/wkTgTDBEko.lottie"
-          background="transparent"
-          speed="1"
-          style="width: 100%; height: 100%; max-width: 500px; max-height: 500px;"
-          loop
-          autoplay
-        ></dotlottie-player>
-      `;
-    }
-  }, [isLoaded]);
-
-  return (
-    <div 
-      ref={containerRef} 
-      className="hero-lottie-container"
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '400px'
-      }}
-    />
-  );
-};
 
 const HomePage = () => {
   const { t, isRTL } = useLanguage();
@@ -149,9 +98,58 @@ const HomePage = () => {
               </div>
             </AnimatedSection>
 
-            {/* Hero Visual - Lottie Animation */}
             <AnimatedSection className="hero-visual" animation="fade-in-right" delay={200}>
-              <HeroLottieAnimation />
+              <div className="hero-card">
+                <div className="hero-card-header">
+                  <div className="hero-card-icon">
+                    <Zap size={24} />
+                  </div>
+                  <h3 className="hero-card-title">{t.hero.cardTitle}</h3>
+                </div>
+
+                <div className="hero-card-leads">
+                  <div className="lead-item">
+                    <div className="lead-avatar">SC</div>
+                    <div className="lead-info">
+                      <div className="lead-name">{t.hero.lead1Name}</div>
+                      <div className="lead-type">{t.hero.lead1Type}</div>
+                    </div>
+                    <span className="lead-status new">{t.hero.lead1Status}</span>
+                  </div>
+
+                  <div className="lead-item">
+                    <div className="lead-avatar">DL</div>
+                    <div className="lead-info">
+                      <div className="lead-name">{t.hero.lead2Name}</div>
+                      <div className="lead-type">{t.hero.lead2Type}</div>
+                    </div>
+                    <span className="lead-status hot">{t.hero.lead2Status}</span>
+                  </div>
+
+                  <div className="lead-item">
+                    <div className="lead-avatar">MB</div>
+                    <div className="lead-info">
+                      <div className="lead-name">{t.hero.lead3Name}</div>
+                      <div className="lead-type">{t.hero.lead3Type}</div>
+                    </div>
+                    <span className="lead-status warm">{t.hero.lead3Status}</span>
+                  </div>
+                </div>
+
+                <div className="floating-badge top-right">
+                  <div className="floating-badge-icon">
+                    <Clock size={16} />
+                  </div>
+                  <span className="floating-badge-text">{t.hero.floatingBadge1}</span>
+                </div>
+
+                <div className="floating-badge bottom-left">
+                  <div className="floating-badge-icon">
+                    <CheckCircle size={16} />
+                  </div>
+                  <span className="floating-badge-text">{t.hero.floatingBadge2}</span>
+                </div>
+              </div>
             </AnimatedSection>
           </div>
         </div>
