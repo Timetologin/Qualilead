@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useInView } from '../hooks/useAnimations';
@@ -9,6 +9,57 @@ import {
   Users, TrendingUp, Clock, CheckCircle, ChevronDown, ChevronLeft, ChevronRight,
   Star, Package, Award, Rocket
 } from 'lucide-react';
+
+// Lottie Animation Component for Hero
+const HeroLottieAnimation = () => {
+  const containerRef = useRef(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    // Load dotlottie player script dynamically
+    const existingScript = document.querySelector('script[src*="dotlottie-player"]');
+    
+    if (!existingScript) {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs';
+      script.type = 'module';
+      script.onload = () => setIsLoaded(true);
+      document.head.appendChild(script);
+    } else {
+      setIsLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded && containerRef.current) {
+      containerRef.current.innerHTML = `
+        <dotlottie-player
+          src="https://lottie.host/719cc542-fb72-4649-86f4-c04fbc22d58b/wkTgTDBEko.lottie"
+          background="transparent"
+          speed="1"
+          style="width: 100%; height: 100%; max-width: 500px; max-height: 500px;"
+          loop
+          autoplay
+        ></dotlottie-player>
+      `;
+    }
+  }, [isLoaded]);
+
+  return (
+    <div 
+      ref={containerRef} 
+      className="hero-lottie-container"
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '400px'
+      }}
+    />
+  );
+};
 
 const HomePage = () => {
   const { t, isRTL } = useLanguage();
@@ -98,58 +149,9 @@ const HomePage = () => {
               </div>
             </AnimatedSection>
 
+            {/* Hero Visual - Lottie Animation */}
             <AnimatedSection className="hero-visual" animation="fade-in-right" delay={200}>
-              <div className="hero-card">
-                <div className="hero-card-header">
-                  <div className="hero-card-icon">
-                    <Zap size={24} />
-                  </div>
-                  <h3 className="hero-card-title">{t.hero.cardTitle}</h3>
-                </div>
-
-                <div className="hero-card-leads">
-                  <div className="lead-item">
-                    <div className="lead-avatar">SC</div>
-                    <div className="lead-info">
-                      <div className="lead-name">{t.hero.lead1Name}</div>
-                      <div className="lead-type">{t.hero.lead1Type}</div>
-                    </div>
-                    <span className="lead-status new">{t.hero.lead1Status}</span>
-                  </div>
-
-                  <div className="lead-item">
-                    <div className="lead-avatar">DL</div>
-                    <div className="lead-info">
-                      <div className="lead-name">{t.hero.lead2Name}</div>
-                      <div className="lead-type">{t.hero.lead2Type}</div>
-                    </div>
-                    <span className="lead-status hot">{t.hero.lead2Status}</span>
-                  </div>
-
-                  <div className="lead-item">
-                    <div className="lead-avatar">MB</div>
-                    <div className="lead-info">
-                      <div className="lead-name">{t.hero.lead3Name}</div>
-                      <div className="lead-type">{t.hero.lead3Type}</div>
-                    </div>
-                    <span className="lead-status warm">{t.hero.lead3Status}</span>
-                  </div>
-                </div>
-
-                <div className="floating-badge top-right">
-                  <div className="floating-badge-icon">
-                    <Clock size={16} />
-                  </div>
-                  <span className="floating-badge-text">{t.hero.floatingBadge1}</span>
-                </div>
-
-                <div className="floating-badge bottom-left">
-                  <div className="floating-badge-icon">
-                    <CheckCircle size={16} />
-                  </div>
-                  <span className="floating-badge-text">{t.hero.floatingBadge2}</span>
-                </div>
-              </div>
+              <HeroLottieAnimation />
             </AnimatedSection>
           </div>
         </div>
@@ -196,15 +198,15 @@ const HomePage = () => {
           <div className="features-grid">
             {[
               { icon: Target, title: t.whyChoose.feature1Title, desc: t.whyChoose.feature1Desc },
-              { icon: Zap, title: t.whyChoose.feature2Title, desc: t.whyChoose.feature2Desc },
-              { icon: Shield, title: t.whyChoose.feature3Title, desc: t.whyChoose.feature3Desc },
-              { icon: MapPin, title: t.whyChoose.feature4Title, desc: t.whyChoose.feature4Desc },
+              { icon: Shield, title: t.whyChoose.feature2Title, desc: t.whyChoose.feature2Desc },
+              { icon: Zap, title: t.whyChoose.feature3Title, desc: t.whyChoose.feature3Desc },
+              { icon: HeadphonesIcon, title: t.whyChoose.feature4Title, desc: t.whyChoose.feature4Desc },
               { icon: FileCheck, title: t.whyChoose.feature5Title, desc: t.whyChoose.feature5Desc },
-              { icon: HeadphonesIcon, title: t.whyChoose.feature6Title, desc: t.whyChoose.feature6Desc },
+              { icon: TrendingUp, title: t.whyChoose.feature6Title, desc: t.whyChoose.feature6Desc },
             ].map((feature, index) => (
               <AnimatedCard key={index} className="feature-card" delay={index * 100}>
                 <div className="feature-icon">
-                  <feature.icon size={28} />
+                  <feature.icon size={32} />
                 </div>
                 <h3 className="feature-title">{feature.title}</h3>
                 <p className="feature-description">{feature.desc}</p>
@@ -214,32 +216,32 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Lead Categories Section */}
-      <section className="section" style={{ background: 'var(--navy)' }}>
+      {/* Categories Section */}
+      <section className="section categories">
         <div className="container">
           <SectionHeader
-            badge={t.leadCategories.badge}
-            title={t.leadCategories.title}
-            description={t.leadCategories.description}
+            badge={t.categories.badge}
+            title={t.categories.title}
+            description={t.categories.description}
           />
 
-          <div className="services-grid">
+          <div className="categories-grid">
             {[
-              { icon: Sparkles, title: t.leadCategories.cat1, desc: t.leadCategories.cat1Desc },
-              { icon: Scissors, title: t.leadCategories.cat2, desc: t.leadCategories.cat2Desc },
-              { icon: Wind, title: t.leadCategories.cat3, desc: t.leadCategories.cat3Desc },
-              { icon: Hammer, title: t.leadCategories.cat4, desc: t.leadCategories.cat4Desc },
-              { icon: Plug, title: t.leadCategories.cat5, desc: t.leadCategories.cat5Desc },
-              { icon: Droplet, title: t.leadCategories.cat6, desc: t.leadCategories.cat6Desc },
-              { icon: Store, title: t.leadCategories.cat7, desc: t.leadCategories.cat7Desc },
-              { icon: Building, title: t.leadCategories.cat8, desc: t.leadCategories.cat8Desc },
+              { icon: Sparkles, name: t.categories.cat1, count: '150+' },
+              { icon: Scissors, name: t.categories.cat2, count: '120+' },
+              { icon: Wind, name: t.categories.cat3, count: '200+' },
+              { icon: Hammer, name: t.categories.cat4, count: '180+' },
+              { icon: Plug, name: t.categories.cat5, count: '90+' },
+              { icon: Droplet, name: t.categories.cat6, count: '110+' },
+              { icon: Store, name: t.categories.cat7, count: '80+' },
+              { icon: Building, name: t.categories.cat8, count: '60+' },
             ].map((category, index) => (
-              <AnimatedCard key={index} className="service-card" delay={index * 50}>
-                <div className="service-icon">
-                  <category.icon size={28} />
+              <AnimatedCard key={index} className="category-card" delay={index * 50}>
+                <div className="category-icon">
+                  <category.icon size={40} />
                 </div>
-                <h3 className="service-title">{category.title}</h3>
-                <p className="service-description">{category.desc}</p>
+                <h4 className="category-name">{category.name}</h4>
+                <p className="category-count">{category.count} {t.categories.leadsPerMonth}</p>
               </AnimatedCard>
             ))}
           </div>

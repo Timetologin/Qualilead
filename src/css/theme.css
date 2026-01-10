@@ -1481,3 +1481,119 @@ body,
 [data-theme="light"] .demo-credentials strong {
   color: #b8960c;
 }
+/* ===================================
+   LOTTIE ANIMATION IN HERO SECTION
+   =================================== */
+
+.hero-lottie-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.hero-lottie-container dotlottie-player {
+  width: 100%;
+  height: 100%;
+  max-width: 500px;
+  max-height: 500px;
+}
+
+/* Hero visual adjustments for Lottie */
+.hero-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Optional: Add subtle glow effect behind animation - Dark mode */
+[data-theme="dark"] .hero-visual .hero-lottie-container {
+  position: relative;
+}
+
+[data-theme="dark"] .hero-visual .hero-lottie-container::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Light mode glow */
+[data-theme="light"] .hero-visual .hero-lottie-container {
+  position: relative;
+}
+
+[data-theme="light"] .hero-visual .hero-lottie-container::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(184, 150, 12, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Responsive adjustments for Lottie */
+@media (max-width: 992px) {
+  .hero-lottie-container {
+    min-height: 350px;
+  }
+  
+  .hero-lottie-container dotlottie-player {
+    max-width: 400px;
+    max-height: 400px;
+  }
+  
+  [data-theme="dark"] .hero-visual .hero-lottie-container::before,
+  [data-theme="light"] .hero-visual .hero-lottie-container::before {
+    width: 300px;
+    height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-lottie-container {
+    min-height: 280px;
+  }
+  
+  .hero-lottie-container dotlottie-player {
+    max-width: 300px;
+    max-height: 300px;
+  }
+  
+  [data-theme="dark"] .hero-visual .hero-lottie-container::before,
+  [data-theme="light"] .hero-visual .hero-lottie-container::before {
+    width: 250px;
+    height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-lottie-container {
+    min-height: 220px;
+  }
+  
+  .hero-lottie-container dotlottie-player {
+    max-width: 250px;
+    max-height: 250px;
+  }
+  
+  [data-theme="dark"] .hero-visual .hero-lottie-container::before,
+  [data-theme="light"] .hero-visual .hero-lottie-container::before {
+    width: 200px;
+    height: 200px;
+  }
+}
