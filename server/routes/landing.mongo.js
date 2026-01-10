@@ -3,13 +3,23 @@ import mongoose from 'mongoose';
 
 const router = express.Router();
 
-// Send notification email via Resend
+// Send notification email via Resend to MULTIPLE recipients
 const sendNotificationEmail = async (leadData) => {
   const apiKey = process.env.RESEND_API_KEY;
-  const adminEmail = process.env.ADMIN_EMAIL;
-
-  if (!apiKey || !adminEmail) {
+  
+  // Support multiple emails: ADMIN_EMAILS (comma-separated) or fallback to ADMIN_EMAIL
+  const emailsString = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL;
+  
+  if (!apiKey || !emailsString) {
     console.log('⚠️ Email not configured - skipping notification');
+    return false;
+  }
+
+  // Parse comma-separated emails into array
+  const adminEmails = emailsString.split(',').map(email => email.trim()).filter(email => email);
+
+  if (adminEmails.length === 0) {
+    console.log('⚠️ No admin emails configured');
     return false;
   }
 
@@ -63,41 +73,24 @@ const sendNotificationEmail = async (leadData) => {
                   <td style="color: #333333; font-size: 15px;">${leadData.customer_address}</td>
                 </tr>
                 ` : ''}
-                ${leadData.landing_page ? `
+                ${leadData.notes ? `
                 <tr>
-                  <td style="color: #666666; font-size: 14px;">📂 קטגוריה:</td>
-                  <td><span style="background-color: #ffd700; color: #1a365d; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 14px;">${leadData.landing_page}</span></td>
+                  <td style="color: #666666; font-size: 14px; vertical-align: top;">📝 פרטים:</td>
+                  <td style="color: #333333; font-size: 14px; white-space: pre-line;">${leadData.notes}</td>
                 </tr>
                 ` : ''}
               </table>
-            </td>
-          </tr>
-        </table>
 
-        ${leadData.notes ? `
-        <!-- Notes -->
-        <table width="100%" cellpadding="0" cellspacing="0">
-          <tr>
-            <td style="padding: 0 25px 25px 25px;">
-              <h3 style="color: #1a365d; margin: 0 0 12px 0; font-size: 16px;">📝 פרטים נוספים:</h3>
-              <div style="background-color: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px;">
-                <p style="color: #333333; margin: 0; white-space: pre-line; line-height: 1.7; font-size: 14px;">${leadData.notes}</p>
-              </div>
-            </td>
-          </tr>
-        </table>
-        ` : ''}
-
-        <!-- Button -->
-        <table width="100%" cellpadding="0" cellspacing="0">
-          <tr>
-            <td style="padding: 10px 25px 30px 25px; text-align: center;">
-              <a href="https://qualilead-five.vercel.app/admin/dashboard" 
-                 style="display: inline-block; background-color: #1a365d; color: #ffffff; 
-                        padding: 14px 32px; border-radius: 8px; text-decoration: none; 
-                        font-weight: bold; font-size: 16px;">
-                📊 צפה בדשבורד
-              </a>
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 25px;">
+                <tr>
+                  <td style="text-align: center;">
+                    <a href="tel:${leadData.customer_phone}" style="display: inline-block; background-color: #22c55e; color: #ffffff; padding: 14px 35px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                      📞 התקשר עכשיו
+                    </a>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
         </table>
@@ -106,7 +99,7 @@ const sendNotificationEmail = async (leadData) => {
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8f9fa; border-radius: 0 0 12px 12px;">
           <tr>
             <td style="padding: 15px; text-align: center;">
-              <p style="color: #888888; margin: 0; font-size: 12px;">
+              <p style="color: #999999; margin: 0; font-size: 12px;">
                 נשלח מ-QualiLead • ${new Date().toLocaleString('he-IL')}
               </p>
             </td>
@@ -129,7 +122,7 @@ const sendNotificationEmail = async (leadData) => {
       },
       body: JSON.stringify({
         from: 'QualiLead <onboarding@resend.dev>',
-        to: adminEmail,
+        to: adminEmails, // Array of emails!
         subject: `🎯 ליד חדש: ${leadData.customer_name} | ${leadData.landing_page || 'דף נחיתה'}`,
         html: htmlContent
       })
@@ -138,7 +131,7 @@ const sendNotificationEmail = async (leadData) => {
     const result = await response.json();
 
     if (response.ok) {
-      console.log('✅ Lead notification email sent to:', adminEmail);
+      console.log('✅ Lead notification email sent to:', adminEmails.join(', '));
       return true;
     } else {
       console.error('❌ Resend API error:', result);
@@ -224,15 +217,19 @@ router.post('/submit', async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'תודה! נחזור אליך בהקדם.',
-      leadId: objectId.toString()
+      id: result.insertedId
     });
-
   } catch (error) {
     console.error('Landing page submission error:', error);
     res.status(500).json({ 
       error: 'שגיאה בשליחת הטופס. נסה שוב.' 
     });
   }
+});
+
+// Health check for landing routes
+router.get('/health', (req, res) => {
+  res.json({ status: 'ok', service: 'landing' });
 });
 
 export default router;

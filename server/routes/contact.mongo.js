@@ -17,16 +17,25 @@ const contactMessageSchema = new mongoose.Schema({
 
 const ContactMessage = mongoose.model('ContactMessage', contactMessageSchema);
 
-// Send notification email using Resend API
+// Send notification email using Resend API to MULTIPLE recipients
 const sendNotificationEmail = async (contactData) => {
   const apiKey = process.env.RESEND_API_KEY;
+  
+  // Support multiple emails: ADMIN_EMAILS (comma-separated) or fallback to ADMIN_EMAIL
+  const emailsString = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || 'newnewfifa22@gmail.com';
   
   if (!apiKey) {
     console.log('⚠️ RESEND_API_KEY not configured - email not sent');
     return false;
   }
 
-  const adminEmail = process.env.ADMIN_EMAIL || 'newnewfifa22@gmail.com';
+  // Parse comma-separated emails into array
+  const adminEmails = emailsString.split(',').map(email => email.trim()).filter(email => email);
+
+  if (adminEmails.length === 0) {
+    console.log('⚠️ No admin emails configured');
+    return false;
+  }
 
   const businessLabels = {
     beauty: 'קוסמטיקאיות ואסתטיקה',
@@ -44,37 +53,22 @@ const sendNotificationEmail = async (contactData) => {
         <h1 style="color: #d4af37; margin: 0 0 20px 0; text-align: center;">📧 פנייה חדשה מהאתר</h1>
         
         <div style="background: #152238; padding: 20px; border-radius: 8px; margin-bottom: 15px;">
-          <h3 style="color: #d4af37; margin: 0 0 15px 0;">פרטי הפונה:</h3>
-          <table style="width: 100%; color: #ffffff;">
-            <tr>
-              <td style="padding: 8px 0; color: #b8c5d1;"><strong>שם:</strong></td>
-              <td style="padding: 8px 0;">${contactData.name}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #b8c5d1;"><strong>אימייל:</strong></td>
-              <td style="padding: 8px 0;"><a href="mailto:${contactData.email}" style="color: #d4af37;">${contactData.email}</a></td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #b8c5d1;"><strong>טלפון:</strong></td>
-              <td style="padding: 8px 0;"><a href="tel:${contactData.phone}" style="color: #d4af37;">${contactData.phone}</a></td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #b8c5d1;"><strong>סוג עסק:</strong></td>
-              <td style="padding: 8px 0;">${businessLabels[contactData.business] || contactData.business || 'לא צוין'}</td>
-            </tr>
-          </table>
+          <p style="margin: 0 0 10px 0;"><strong style="color: #d4af37;">👤 שם:</strong> <span style="color: #e8f1f8;">${contactData.name}</span></p>
+          <p style="margin: 0 0 10px 0;"><strong style="color: #d4af37;">📧 אימייל:</strong> <a href="mailto:${contactData.email}" style="color: #60a5fa;">${contactData.email}</a></p>
+          <p style="margin: 0 0 10px 0;"><strong style="color: #d4af37;">📱 טלפון:</strong> <a href="tel:${contactData.phone}" style="color: #60a5fa;">${contactData.phone}</a></p>
+          ${contactData.business ? `<p style="margin: 0 0 10px 0;"><strong style="color: #d4af37;">🏢 תחום:</strong> <span style="color: #e8f1f8;">${businessLabels[contactData.business] || contactData.business}</span></p>` : ''}
         </div>
 
         <div style="background: #152238; padding: 20px; border-radius: 8px;">
-          <h3 style="color: #d4af37; margin: 0 0 15px 0;">ההודעה:</h3>
-          <p style="color: #ffffff; line-height: 1.6; margin: 0; white-space: pre-wrap;">${contactData.message}</p>
+          <p style="margin: 0 0 10px 0;"><strong style="color: #d4af37;">💬 הודעה:</strong></p>
+          <p style="color: #e8f1f8; margin: 0; white-space: pre-wrap;">${contactData.message}</p>
         </div>
 
         <div style="text-align: center; margin-top: 20px;">
-          <a href="mailto:${contactData.email}?subject=תודה על פנייתך ל-QualiLead" 
+          <a href="mailto:${contactData.email}?subject=תגובה לפנייתך ל-QualiLead" 
              style="display: inline-block; background: #d4af37; color: #0a1628; padding: 12px 30px; 
-                    border-radius: 5px; text-decoration: none; font-weight: bold;">
-            השב לפונה
+                    text-decoration: none; border-radius: 6px; font-weight: bold;">
+          השב לפונה
           </a>
         </div>
 
@@ -94,7 +88,7 @@ const sendNotificationEmail = async (contactData) => {
       },
       body: JSON.stringify({
         from: 'QualiLead <onboarding@resend.dev>',
-        to: adminEmail,
+        to: adminEmails, // Array of emails!
         subject: `🔔 פנייה חדשה מ-${contactData.name}`,
         html: htmlContent
       })
@@ -103,7 +97,7 @@ const sendNotificationEmail = async (contactData) => {
     const result = await response.json();
 
     if (response.ok) {
-      console.log('✅ Notification email sent via Resend to:', adminEmail);
+      console.log('✅ Notification email sent via Resend to:', adminEmails.join(', '));
       return true;
     } else {
       console.error('❌ Resend API error:', result);
@@ -153,50 +147,31 @@ router.post('/', validate(schemas.contact), async (req, res) => {
 // Get all contact messages (admin only)
 router.get('/', async (req, res) => {
   try {
-    const { status, page = 1, limit = 20 } = req.query;
-    
-    let query = {};
-    if (status) query.status = status;
-
-    const total = await ContactMessage.countDocuments(query);
-    const messages = await ContactMessage.find(query)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit));
-
-    res.json({
-      messages,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    });
+    const messages = await ContactMessage.find().sort({ createdAt: -1 });
+    res.json(messages);
   } catch (error) {
     console.error('Get contact messages error:', error);
-    res.status(500).json({ error: 'Failed to get messages' });
+    res.status(500).json({ error: 'Failed to fetch messages' });
   }
 });
 
 // Update message status (admin only)
-router.patch('/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const { status, notes } = req.body;
-    
     const message = await ContactMessage.findByIdAndUpdate(
       req.params.id,
       { status, notes },
       { new: true }
     );
-
+    
     if (!message) {
       return res.status(404).json({ error: 'Message not found' });
     }
-
+    
     res.json(message);
   } catch (error) {
-    console.error('Update message error:', error);
+    console.error('Update contact message error:', error);
     res.status(500).json({ error: 'Failed to update message' });
   }
 });
@@ -209,10 +184,10 @@ router.delete('/:id', async (req, res) => {
     if (!message) {
       return res.status(404).json({ error: 'Message not found' });
     }
-
-    res.json({ message: 'Message deleted successfully' });
+    
+    res.json({ success: true });
   } catch (error) {
-    console.error('Delete message error:', error);
+    console.error('Delete contact message error:', error);
     res.status(500).json({ error: 'Failed to delete message' });
   }
 });
