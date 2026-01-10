@@ -87,7 +87,7 @@ const sendNotificationEmail = async (contactData) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'QualiLead <onboarding@resend.dev>',
+        from: 'QualiLead <noreply@qualilead.online>',
         to: adminEmails, // Array of emails!
         subject: `🔔 פנייה חדשה מ-${contactData.name}`,
         html: htmlContent

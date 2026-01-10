@@ -121,7 +121,7 @@ const sendNotificationEmail = async (leadData) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'QualiLead <onboarding@resend.dev>',
+        from: 'QualiLead <noreply@qualilead.online>',
         to: adminEmails, // Array of emails!
         subject: `🎯 ליד חדש: ${leadData.customer_name} | ${leadData.landing_page || 'דף נחיתה'}`,
         html: htmlContent
